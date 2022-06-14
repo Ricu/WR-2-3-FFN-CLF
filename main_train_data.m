@@ -54,12 +54,14 @@ for edgeID = 1:numEdges
     % Pruefe ob eines der beteiligten TG einen Dirichletknoten enthaelt.
     % Falls ja ist eins der TG kein floating TG und wird daher nicht
     % beruecksichtigt
-    if (nnz(cDirichlet{edgesSD(edgeID,1)}) > 0) || (nnz(cDirichlet{edgesSD(edgeID,2)}) > 0)
+    if (nnz(cDirichlet{edgesSD(edgeID,1)}) > 0) || (nnz(cDirichlet{edgesSD(edgeID,2)}) > 0)   
         label(edgeID) = 2;
         continue
     else
         input{edgeID} = generate_input(edgeID,edgesSD,maxRhoVert,l2g__sd);
         label(edgeID) = generate_label(edgeID,edgesPrimalGlobal,cGamma,edgesSD,cLocalPrimal,cB,cBskal,cInner,cK,TOL);
     end
-    
+    fprintf("Kante %2i bzgl. der TG (%2i,%2i) erhaelt das Label %i\n",edgeID,edgesSD(edgeID,1),edgesSD(edgeID,2),label(edgeID))
 end
+skipped_edges = nnz(label == 2);
+fprintf("Fuer das gegebene Gitter wurden %i (%4.1f%%) Kanten uebersprungen\n",skipped_edges,skipped_edges/numEdges*100)
