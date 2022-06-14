@@ -7,8 +7,8 @@ fprintf("Startzeit %s\n", datestr(datetime))
 f = @(vert,y) ones(size(vert));   % Rechte Seite der DGL
 
 %% Erstelle das Gitter
-n = 10;         % 2*n^2 Elemente pro Teilgebiet
-N = 5;          % Partition in NxN quadratische Teilgebiete
+n = 40;         % 2*n^2 Elemente pro Teilgebiet
+N = 4;          % Partition in NxN quadratische Teilgebiete
 H = 1/N;
 h = 1/(N*n);
 fprintf("Das Verhaeltnis H/h betraegt %f\n",H/h);
@@ -36,7 +36,29 @@ rhoMin = 1;
 plot_grid = true;   % Auswahl: Plotten der Triangulierung mit Kanal-Koeffizientenfunktion
 % Definiere Koeffizient auf den Elementen (und teilgebietsweise);
 % maximalen Koeffizienten pro Knoten (und teilgebietsweise)
-[rhoTri,rhoTriSD,maxRhoVert,maxRhoVertSD] = coefficient_3(rhoMax,rhoMin,vert,tri,logicalTri__sd,0.25,0,plot_grid);
+
+%Parameter fuer die Kanalstruktur
+position = -2:2;
+width = -2:2;
+number = 1:5;
+
+%Parameter fuer die Blockstruktur
+dif = -4:2:4;
+prop1 = 0:0.25:1;
+prop2 = 0:0.25:1;
+
+%Beispielparameter zum Testen
+positionC = position(1);
+widthC = width(4);
+numberC = number(1);
+propB1 = prop1(2);
+propB2 = prop2(2);
+difB = dif(2);
+
+
+[rhoTri,rhoTriSD,maxRhoVert,maxRhoVertSD] = coefficient_Block(propB1,propB2,difB,positionC,widthC,numberC,h,rhoMax,rhoMin,vert,tri,logicalTri__sd,plot_grid);
+
+[rhoTri,rhoTriSD,maxRhoVert,maxRhoVertSD] = coefficient_Canal(positionC,widthC,numberC,h,rhoMax,rhoMin,vert,tri,logicalTri__sd,plot_grid);
 % Structure fuer rho-Variablen
 rho_struct = struct('rhoTriSD',{rhoTriSD},'maxRhoVert',{maxRhoVert},'maxRhoVertSD',{maxRhoVertSD});
   
