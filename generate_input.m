@@ -27,6 +27,6 @@ end
 % der Kante sind. Danach nähert man sich reihenweise an. Erreicht man das
 % 2. Teilgebiet so entfernt man sich schrittweise von der Kante.
 
-input = [input1(:) ; input2(:)];
+input = [input1(:) ; input2(:)]';
 end
 
