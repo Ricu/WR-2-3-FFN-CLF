@@ -2,7 +2,7 @@ clear; clc;
 addpath('libs')
 
 fprintf("############ Erstelle Testdaten Start ############\n")
-fprintf("Startzeit %s\n", datestr(datetime(now,'ConvertFrom','datenum')))
+fprintf("Startzeit %s\n", datestr(datetime))
 %% Funktion rechte Seite
 f = @(vert,y) ones(size(vert));   % Rechte Seite der DGL
 
