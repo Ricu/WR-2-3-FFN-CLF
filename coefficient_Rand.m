@@ -1,4 +1,4 @@
-function [rhoTri,rhoTriSD,maxRhoVert,maxRhoVertSD] = coefficient_Rand(numRand,widthR,heightR,h,rhoMax,rhoMin,vert,tri,logicalTri__sd,plot)
+function [rhoTri,rhoTriSD,maxRhoVert,maxRhoVertSD] = coefficient_Rand(numRand,h,rhoMax,rhoMin,vert,tri,logicalTri__sd,plot)
 % Input: xCanalLim,yCanalLim: Grenzen des Kanalgebiets in x- und y-Richtung
 % Input: rhoMax,rhoMin: rho im Kanal und außerhalb des Kanals
 % Input: vert,tri: Knoten- und Elementliste
@@ -24,17 +24,22 @@ numVert = length(vert);
 numCor = sqrt(numVert);
 corVec = vert(1:numCor,2);
 
-indy = false(numVert,1);    %initialisiere mit logical false fuer y-Koordinate
-indx = false(numVert,1);    %initialisiere mit logical false fuer x-Koordinate
 indRand = false(numVert,1); %initialisiere mit logical false fuer Punkt
+width = 1:5;
+height = 1:5;
 for r = 1:numRand
     randx = randi([1 numCor]);
     randy = randi([1 numCor]);
+    randwidth = randi([1 length(width)]);
+    randheight = randi([1 length(height)]);
+
     vertx = corVec(randx);
     verty = corVec(randy);
+    widthR = width(randwidth);
+    heightR = height(randheight);
 
-    indx = indx | (vertx - widthR*h <= vert(:,1)) & (vert(:,1) <= vertx + widthR*h);
-    indy = indy | (verty - heightR*h <= vert(:,2)) & (vert(:,2) <= verty + heightR*h);
+    indx = (vertx - widthR*h <= vert(:,1)) & (vert(:,1) <= vertx + widthR*h);
+    indy = (verty - heightR*h <= vert(:,2)) & (vert(:,2) <= verty + heightR*h);
 
     indRand = indRand | (indx & indy);
 end
