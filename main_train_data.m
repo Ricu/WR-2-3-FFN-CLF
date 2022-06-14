@@ -1,8 +1,10 @@
 clear; clc;
 addpath('libs')
+export = 0;
+plot_grid = true;   % Auswahl: Plotten der Triangulierung mit Kanal-Koeffizientenfunktion
 
 fprintf("############ Erstelle Testdaten Start ############\n")
-fprintf("Startzeit %s\n", datestr(datetime(now,'ConvertFrom','datenum')))
+fprintf("Startzeit %s\n", datestr(datetime))
 %% Funktion rechte Seite
 f = @(vert,y) ones(size(vert));   % Rechte Seite der DGL
 
@@ -33,7 +35,7 @@ grid_struct = struct('vert__sd',{vert__sd},'tri__sd',{tri__sd},'l2g__sd',{l2g__s
 rhoMax = 10^6;
 rhoMin = 1;
 
-plot_grid = true;   % Auswahl: Plotten der Triangulierung mit Kanal-Koeffizientenfunktion
+
 % Definiere Koeffizient auf den Elementen (und teilgebietsweise);
 % maximalen Koeffizienten pro Knoten (und teilgebietsweise)
 
@@ -98,3 +100,12 @@ for edgeID = 1:numEdges
 end
 skipped_edges = nnz(label == 2);
 fprintf("Fuer das gegebene Gitter wurden %i (%4.1f%%) Kanten uebersprungen\n",skipped_edges,skipped_edges/numEdges*100)
+
+%% Daten exportieren
+if export
+    file_name = sprintf("%s-train_data_dump.csv",datestr(datetime,'yyyy-mm-dd-HH-MM-SS'));
+    fprintf("Speichere Traininsdaten als %s...",file_name)
+    output_mat = [cell2mat(input),label(label ~= 2)];
+    writematrix(output_mat,file_name);
+    fprintf("Fertig!\n")
+end
