@@ -21,11 +21,13 @@ indVertCanal =  indx & indy;  % Logischer Vektor, welche Knoten im Kanal liegen
 numVertCanal = find(indVertCanal); % Knotennummern der Knoten, die im Kanal liegen
 
 rhoTri = rhoMin*ones(numTri,1); % Koeffizient (zuerst) auf allen Elementen = Koeffizient (gleich) auf Elementen außerhalb des Kanals
-for i=1:numTri % Iteriere ueber die Elemente
-    if ismember(tri(i,:),numVertCanal) % Alle Knoten des Elements liegen im Kanal und damit das Element selber
-        rhoTri(i)=rhoMax;    % Koeffizient auf Elementen innerhalb des Kanals
-    end
-end
+rhoTri((sum(ismember(tri,numVertCanal),1)==3)) = rhoMax;
+
+% for i=1:numTri % Iteriere ueber die Elemente
+%     if ismember(tri(i,:),numVertCanal) % Alle Knoten des Elements liegen im Kanal und damit das Element selber
+%         rhoTri(i)=rhoMax;    % Koeffizient auf Elementen innerhalb des Kanals
+%     end
+% end
 indElementsCanal = rhoTri > 1; % Logischer Vektor, welche Elemente im Kanal liegen
 
 %% Definiere Koeffizientenfunktion auf den Elementen eines TG
