@@ -92,7 +92,7 @@ fprintf("Fuer das gegebene Gitter wurden %i (%4.1f%%) Kanten uebersprungen\n",sk
 
 %% Daten exportieren
 if export
-    file_name = sprintf("%s-train_data_dump.csv",datestr(datetime,'yyyy-mm-dd'));
+    file_name = sprintf("%s-train_data_dump.csv",datestr(datetime,'yyyy-mm-dd-HH-MM-SS'));
     fprintf("Speichere Traininsdaten als %s...",file_name)
     output_mat = [cell2mat(input),label(label ~= 2)];
     writematrix(output_mat,file_name);
