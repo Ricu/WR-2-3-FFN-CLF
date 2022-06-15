@@ -50,9 +50,7 @@ prop1 = 0:0.25:1;
 prop2 = 0:0.25:1;
 
 %Parameter fuer Randomstruktur
-widthr = 1:4;
-height = 1:4;
-numrand = 0:5:20;
+numrand = 0:5:100;
 
 %Beispielparameter zum Testen
 positionC = position(1);
@@ -62,11 +60,9 @@ propB1 = prop1(2);
 propB2 = prop2(2);
 difB = dif(2);
 
-widthR = widthr(2);
-heightR = height(2);
-numRand = numrand(4);
+numRand = numrand(15);
 
-[rhoTri,rhoTriSD,maxRhoVert,maxRhoVertSD] = coefficient_Rand(numRand,widthR,heightR,h,rhoMax,rhoMin,vert,tri,logicalTri__sd,plot_grid);
+[rhoTri,rhoTriSD,maxRhoVert,maxRhoVertSD] = coefficient_Rand(numRand,h,rhoMax,rhoMin,vert,tri,logicalTri__sd,plot_grid);
 
 
 [rhoTri,rhoTriSD,maxRhoVert,maxRhoVertSD] = coefficient_Block(propB1,propB2,difB,positionC,widthC,numberC,h,rhoMax,rhoMin,vert,tri,logicalTri__sd,plot_grid);
