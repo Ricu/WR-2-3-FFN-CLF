@@ -47,7 +47,7 @@ rhoTri((sum(ismember(tri,numVertCanal),2)==3)) = rhoMax;
 %         rhoTri(i)=rhoMax;    % Koeffizient auf Elementen innerhalb des Kanals
 %     end
 % end
-indElementsCanal = rhoTri > 1; % Logischer Vektor, welche Elemente im Kanal liegen
+indElementsCanal = rhoTri == rhoMax; % Logischer Vektor, welche Elemente im Kanal liegen
 
 %% Definiere Koeffizientenfunktion auf den Elementen eines TG
 rhoTriSD = cell(numSD,1);
