@@ -1,6 +1,6 @@
 clear; clc;
 addpath('libs')
-export = 0;
+export = 1;
 plot_grid = true;   % Auswahl: Plotten der Triangulierung mit Kanal-Koeffizientenfunktion
 
 fprintf("############ Erstelle Testdaten Start ############\n")
@@ -48,7 +48,7 @@ rhoMin = 1;
 
 TOL = 100;  % Toleranz zur Auswahl der Eigenwerte
 rng(0);
-nRandSamples = 5;
+nRandSamples = 20;
 output_cell = cell(nRandSamples*5,1);
 output_counter = 1;
 rhoBound = 10.^(0:7);
