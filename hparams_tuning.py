@@ -9,9 +9,10 @@ Hyperparameter Tuning
 """
 
 import tensorflow as tf
+import keras_tuner
 import pandas as pd
 import datetime
-from tensorboard.plugins.hparams import api as hp
+# from tensorboard.plugins.hparams import api as hp
 from sklearn.model_selection import train_test_split
 from tensorflow.keras import layers
 
@@ -45,6 +46,14 @@ def build_model(hp):
     model.compile(loss = tf.keras.losses.MeanSquaredError(),
                   ptimizer = tf.keras.optimizers.Adam(),
                   metrics = ["accuracy"])
+    return model
+
+
+hp = keras_tuner.HyperParameters()
+
+
+
+
 
 clf.fit(X_train,
         y_train,
@@ -53,6 +62,30 @@ clf.fit(X_train,
         verbose = 0,
         validation_split = 0.2)
 accuracy = clf.evaluate(X_test,y_test)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
