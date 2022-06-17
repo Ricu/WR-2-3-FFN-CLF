@@ -52,6 +52,9 @@ prop2 = 0:0.25:1;
 %Parameter fuer Randomstruktur
 numrand = 0:5:100;
 
+%Parameter fuer Randomstruktur
+numsub = 0:2:N^2;
+
 %Beispielparameter zum Testen
 positionC = position(1);
 widthC = width(4);
@@ -61,6 +64,10 @@ propB2 = prop2(2);
 difB = dif(2);
 
 numRand = numrand(15);
+numSub = numsub(5);
+
+[rhoTri,rhoTriSD,maxRhoVert,maxRhoVertSD] = coefficient_Constant(numSub,vert,tri,logicalTri__sd,plot_grid);
+
 
 [rhoTri,rhoTriSD,maxRhoVert,maxRhoVertSD] = coefficient_Rand(numRand,h,rhoMax,rhoMin,vert,tri,logicalTri__sd,plot_grid);
 
