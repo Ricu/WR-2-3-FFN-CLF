@@ -1,7 +1,7 @@
 clear; clc;
 addpath('libs')
-export = 1;
-plot_grid = true;   % Auswahl: Plotten der Triangulierung mit Kanal-Koeffizientenfunktion
+export = 0;
+plot_grid = 0;   % Auswahl: Plotten der Triangulierung mit Kanal-Koeffizientenfunktion
 
 fprintf("############ Erstelle Testdaten Start ############\n")
 fprintf("Startzeit %s\n", datestr(datetime))
@@ -48,7 +48,7 @@ rhoMin = 1;
 
 TOL = 100;  % Toleranz zur Auswahl der Eigenwerte
 rng(0);
-nRandSamples = 20;
+nRandSamples = 2;
 output_cell = cell(nRandSamples*5,1);
 output_counter = 1;
 rhoBound = 10.^(0:7);
@@ -155,6 +155,69 @@ for sampleID = 1:length(position_vec)
     fprintf("#### Starte Durchlauf: Koeffizientenfunktion Block mit position=%2i, width=%2i, number=%2i, rhoMin=%7i, rhoMax=%7i\n",position,width,number,rhoMin,rhoMax)
     tic
     [rhoTri,rhoTriSD,maxRhoVert,maxRhoVertSD] = coefficient_Block(prop1,prop2,dif,position,width,number,h,rhoMax,rhoMin,vert,tri,logicalTri__sd,plot_grid);
+    fprintf("Benoetigte Zeit: Aufstellen der Koeffizientenmatrizen: %5fs ",toc)
+    rho_struct = struct('rhoTriSD',{rhoTriSD},'maxRhoVert',{maxRhoVert},'maxRhoVertSD',{maxRhoVertSD});
+    tic
+    [edgesPrimalGlobal,cGamma,edgesSD,cLocalPrimal,cB,cBskal,cInner,cK,cDirichlet] = setup_matrices(rho_struct,grid_struct,f);
+    fprintf(", Aufstellen des Sprungoperators/Steifigkeitsmatrix: %5fs\n", toc)
+    numEdges = length(edgesSD);
+
+    input = cell(numEdges,1);
+    label = zeros(numEdges,1);
+
+    for edgeID = 1:numEdges
+        % Pruefe ob eines der beteiligten TG einen Dirichletknoten enthaelt.
+        % Falls ja ist eins der TG kein floating TG und wird daher nicht
+        % beruecksichtigt
+        if (nnz(cDirichlet{edgesSD(edgeID,1)}) > 0) || (nnz(cDirichlet{edgesSD(edgeID,2)}) > 0)
+            label(edgeID) = 2;
+            continue
+        else
+            input{edgeID} = generate_input(edgeID,edgesSD,maxRhoVert,l2g__sd);
+            label(edgeID) = generate_label(edgeID,edgesPrimalGlobal,cGamma,edgesSD,cLocalPrimal,cB,cBskal,cInner,cK,TOL);
+        end
+        fprintf("Kante %2i bzgl. der TG (%2i,%2i) erhaelt das Label %i\n",edgeID,edgesSD(edgeID,1),edgesSD(edgeID,2),label(edgeID))
+    end
+    skipped_edges = nnz(label == 2);
+    fprintf("Fuer das gegebene Gitter wurden %i (%4.1f%%) Kanten uebersprungen\n",skipped_edges,skipped_edges/numEdges*100)
+    % Fuege neue Daten an den trainingsdatensatz an
+    output_cell{output_counter} = [cell2mat(input),label(label ~= 2)];
+    output_counter = output_counter + 1;
+end
+
+
+%% Zufalls Koeffizientenfunktion
+% Test verschiedene parameter fuer die Kanalfunktion
+widthBound = 1:5; % Noch unbenutzt
+heightBound = 1:5; % Noch unbenutzt
+numberBound = 10:10:70;
+
+% Erstelle eine zufaellige Auswahl an Parametern
+parameter_cell = {heightBound,widthBound,numberBound,rhoBound,rhoBound};
+parameter_grid = cell(numel(parameter_cell),1);
+[parameter_grid{:}] = ndgrid(parameter_cell{:});
+parameter_grid = cellfun(@(X) reshape(X,1,[]),parameter_grid,'UniformOutput',false);
+parameter_grid = cell2mat(parameter_grid);
+random_permutation = randperm(size(parameter_grid,2));
+sample_parameters = parameter_grid(:,random_permutation(1:nRandSamples));
+
+% Erstelle die Parametervektoren
+height_vec = [-2, sample_parameters(1,:)];
+width_vec = [1, sample_parameters(2,:)];
+number_vec = [16, sample_parameters(3,:)];
+rhoMin_vec = [1, sample_parameters(4,:)];
+rhoMax_vec = [10^6, sample_parameters(5,:)];
+
+for sampleID = 1:length(height_vec)
+    height = height_vec(sampleID);
+    width = width_vec(sampleID);
+    number = number_vec(sampleID);
+    rhoMin = rhoMin_vec(sampleID);
+    rhoMax = rhoMax_vec(sampleID);
+
+    fprintf("#### Starte Durchlauf: Koeffizientenfunktion Zufall mit position=%2i, width=%2i, number=%2i, rhoMin=%7i, rhoMax=%7i\n",position,width,number,rhoMin,rhoMax)
+    tic
+    [rhoTri,rhoTriSD,maxRhoVert,maxRhoVertSD] = coefficient_Rand(number,h,rhoMax,rhoMin,vert,tri,logicalTri__sd,plot_grid);
     fprintf("Benoetigte Zeit: Aufstellen der Koeffizientenmatrizen: %5fs ",toc)
     rho_struct = struct('rhoTriSD',{rhoTriSD},'maxRhoVert',{maxRhoVert},'maxRhoVertSD',{maxRhoVertSD});
     tic
