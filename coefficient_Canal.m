@@ -51,6 +51,7 @@ end
 maxRhoVert = zeros(numVert,1);
 vertTris = cell(numVert,1); 
 maxRhoVertSD = cell(numVert,1);
+vertTris2 = cellfun(@(x) find(x==tri),num2cell(1:numVert),'UniformOutput',false)';
 for i = 1:numVert % Iteriere ueber Knoten
     [vertTris{i},~,~] = find(i == tri);
     maxRhoVert(i) = max(rhoTri(vertTris{i})); % Maximaler Koeffizient pro Knoten

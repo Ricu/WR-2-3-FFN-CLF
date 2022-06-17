@@ -1,4 +1,4 @@
-function [K,M,b] = assemble(tri,x,order,f,rhoTri)
+function [K,M,b,storedMatrices] = assemble(tri,x,order,f,rhoTri,store,storedMatrices)
 % Input: tri, x: Element- und Knotenliste
 % Input: order: Ordnung der Elementdiskretisierung
 % Input: f: rechte Seite der DGL
@@ -34,12 +34,32 @@ elseif order == 2
     quad_high = load("ueb10_programm_daten.mat").quadratur_P5;
 end
 
+if store
+    K_T_storage = cell(size(tri,1),1);
+    M_T_storage = cell(size(tri,1),1);
+    b_T_storage = cell(size(tri,1),1);
+else 
+    K_T_storage = storedMatrices.K;
+    M_T_storage = storedMatrices.M;
+    b_T_storage = storedMatrices.b;
+end
+
+
 %% Assemblierung
 for i = 1:size(tri,1)
-    [B,d] = aff_map(x,tri(i,:)); % Bestimme affin-lineare Abbildung
-    
-    % Stelle Elementsteifigekitsmatrix, -massenmatrix und -lastvektor auf
-    [K_T,M_T,b_T] = getMatrices(B,d,f,phi,d_phi,quad_low,quad_high);
+    if store
+        [B,d] = aff_map(x,tri(i,:)); % Bestimme affin-lineare Abbildung
+        % Stelle Elementsteifigekitsmatrix, -massenmatrix und -lastvektor auf
+        [K_T,M_T,b_T] = getMatrices(B,d,f,phi,d_phi,quad_low,quad_high);
+        K_T_storage{i} = K_T;
+        M_T_storage{i} = M_T;
+        b_T_storage{i} = b_T;
+    else
+        K_T = storedMatrices(i).K;
+        M_T = storedMatrices(i).M;
+        b_T = storedMatrices(i).b;
+    end
+
     K_T = rhoTri(i)*K_T; % Koeffizienten in Elementsteifigkeitsmatrix einbinden
     
     % sparse()-Indizierung
@@ -52,6 +72,10 @@ end
 n = size(x,1);
 K = sparse(iIndex,jIndex,K_val,n,n);
 M = sparse(iIndex,jIndex,M_val,n,n);
+
+if store
+    storedMatrices = struct('K',K_T_storage,'M',M_T_storage,'b',b_T_storage);
+end
 end
 
 %% Hilfsfunktion

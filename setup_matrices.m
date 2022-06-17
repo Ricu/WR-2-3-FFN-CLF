@@ -110,9 +110,21 @@ end
 %% Assembliere die lokalen Steifigkeitsmatrizen und die lokalen Lastvektoren
 cK = cell(numSD,1); % Steifigkeitsmatrizen
 cb = cell(numSD,1); % Lastvektoren
-for i = 1:numSD
-    [cK{i},~,cb{i}] = assemble(tri__sd{i}, vert__sd{i},1,f,rhoTriSD{i});
+store = 0;
+if store 
+    storedMatrices = cell(numSD,1);
+    for i = 1:numSD
+        [cK{i},~,cb{i},storedMatrices{i}] = assemble(tri__sd{i}, vert__sd{i},1,f,rhoTriSD{i},store);
+    end
+    save("./libs/localMatrices_N4n40.mat",'storedMatrices')
+else
+    storedMatrices = load("./libs/localMatrices_N4n40.mat").storedMatrices;
+    for i = 1:numSD
+        [cK{i},~,cb{i}] = assemble(tri__sd{i}, vert__sd{i},1,f,rhoTriSD{i},store,storedMatrices{i});
+    end
 end
+
+
 
 %% Assembliere globale Steifigkeitsmatrix in primalen Variablen
 K_PiPiTilde = sparse(sum(primal),sum(primal));
