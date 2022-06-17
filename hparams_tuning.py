@@ -32,20 +32,31 @@ log_dir = "logs/hparam_tuning/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%
 normalize = layers.Normalization().adapt(X_train)
 
 
+def build_model(hp):
 # Simples Modell
-clf = tf.keras.Sequential([
-    normalize,
-    layers.Dense(64,input_shape = (3362,)),
-    layers.Dense(1)
-])
+    inputs = layers.Input(shape = (3362,), name = 'input_layer')
+    model = tf.keras.Sequential(inputs)
+    for i in range(hp.Int("n_layers", 1, 3)):
+        model.add(layers.dense(units=hp.Int(f"units_{i}", 32, 128, step=32),
+                               activation = 'sigmoid'
+            ))
+    model.add(layers.dense(1, activation = 'sigmoid'))
+        
+    model.compile(loss = tf.keras.losses.MeanSquaredError(),
+                  ptimizer = tf.keras.optimizers.Adam(),
+                  metrics = ["accuracy"])
+
+clf.fit(X_train,
+        y_train,
+        epochs = 10,
+        callbacks = tf.keras.callbacks.TensorBoard(log_dir),
+        verbose = 0,
+        validation_split = 0.2)
+accuracy = clf.evaluate(X_test,y_test)
 
 
-clf.compile(loss = tf.keras.losses.MeanSquaredError(),
-            optimizer = tf.keras.optimizers.Adam())
 
-clf.fit(X_train,y_train, epochs = 5)
-
-
+##### HParam Tuning
 # Hyperparametr Grid
 HP_NUM_UNITS = hp.HParam('num_units', hp.Discrete([16, 32]))
 HP_DROPOUT = hp.HParam('dropout', hp.RealInterval(0.1, 0.2))
@@ -72,14 +83,14 @@ def train_test_model(hparams):
       metrics=['accuracy'],
   )
 
-  model.fit(x_train,
+  model.fit(X_train,
             y_train,
             epochs=1,
             callbacks=[tf.keras.callbacks.TensorBoard(log_dir),  # log metrics
                        hp.KerasCallback(log_dir, hparams),  # log hparams
                        ]
             )
-  _, accuracy = model.evaluate(x_test, y_test)
+  accuracy = model.evaluate(X_test, y_test)
   return accuracy
 
 def run(run_dir, hparams):
