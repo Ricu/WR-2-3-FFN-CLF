@@ -1,4 +1,4 @@
-function [logicalVerticesInBlocks] = coeffFun_block(x,y,N,n,propB1,propB2,difB,position,canal_width,n_canals)
+function [markedVertices] = coeffFun_block(x,y,N,n,propB1,propB2,difB,position,canal_width,n_canals)
 assert(all(size(x) == size(y)),'Die Vektoren x und y haben unterschiedliche Groesse')
 SD_size = 1/N;
 h = 1/(N*n);
@@ -20,6 +20,6 @@ for j = 0:N-1
         indy = indy | (top_bound <= y) & (y <= bottom_bound); 
     end
 end
-logicalVerticesInBlocks = indx & indy;
+markedVertices = indx & indy;
 end
 
