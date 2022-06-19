@@ -222,8 +222,8 @@ for sampleID = 1:length(height_vec)
     fprintf("#### Starte Durchlauf: Koeffizientenfunktion Zufall mit position=%2i, width=%2i, number=%2i, rhoMin=%7i, rhoMax=%7i\n",position,width,number,rhoMin,rhoMax)
     tic
 %     [rhoTri,rhoTriSD,maxRhoVert,maxRhoVertSD] = coefficient_Rand(number,h,rhoMax,rhoMin,vert,tri,logicalTri__sd,plot_grid);
-    
-    [rhoTri,rhoTriSD,maxRhoVert,maxRhoVertSD] = getCoefficientMatrices(f_block,rhoMax,rhoMin,vert,tri,logicalTri__sd,plot_grid);
+    f_randomBlocks = @(vertices) coeffFun_randomBlocks(vertices(:,1),vertices(:,2),N,n,number);
+    [rhoTri,rhoTriSD,maxRhoVert,maxRhoVertSD] = getCoefficientMatrices(f_randomBlocks,rhoMax,rhoMin,vert,tri,logicalTri__sd,plot_grid);
     fprintf("Benoetigte Zeit: Aufstellen der Koeffizientenmatrizen: %5fs ",toc)
     rho_struct = struct('rhoTriSD',{rhoTriSD},'maxRhoVert',{maxRhoVert},'maxRhoVertSD',{maxRhoVertSD});
     tic
