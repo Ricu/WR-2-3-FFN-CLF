@@ -1,7 +1,7 @@
 clear; clc;
 addpath('libs')
 export = 0;
-plot_grid = 0;   % Auswahl: Plotten der Triangulierung mit Kanal-Koeffizientenfunktion
+plot_grid = 1;   % Auswahl: Plotten der Triangulierung mit Kanal-Koeffizientenfunktion
 
 fprintf("############ Erstelle Testdaten Start ############\n")
 fprintf("Startzeit %s\n", datestr(datetime))
@@ -48,7 +48,7 @@ rhoMin = 1;
 
 TOL = 100;  % Toleranz zur Auswahl der Eigenwerte
 rng(0);
-nRandSamples = 2;
+nRandSamples = 0;
 output_cell = cell(nRandSamples*5,1);
 output_counter = 1;
 rhoBound = 10.^(0:7);
@@ -86,7 +86,9 @@ for sampleID = 1:length(position_vec)
 
     fprintf("#### Starte Durchlauf: Koeffizientenfunktion Kanal mit position=%2i, width=%2i, number=%2i, rhoMin=%7i, rhoMax=%7i\n",position,width,number,rhoMin,rhoMax)
     tic
-    [rhoTri,rhoTriSD,maxRhoVert,maxRhoVertSD] = coefficient_Canal(position,width,number,h,rhoMax,rhoMin,vert,tri,logicalTri__sd,plot_grid);
+%     [rhoTri,rhoTriSD,maxRhoVert,maxRhoVertSD] = coefficient_Canal(position,width,number,h,rhoMax,rhoMin,vert,tri,logicalTri__sd,plot_grid);
+    f_canal = @(vertices) coeffFun_canal(vertices(:,2),N,n,position,width,number);
+    [rhoTri,rhoTriSD,maxRhoVert,maxRhoVertSD] = getCoefficientMatrices(f_canal,rhoMax,rhoMin,vert,tri,logicalTri__sd,plot_grid);
     fprintf("Benoetigte Zeit: Aufstellen der Koeffizientenmatrizen: %5fs ",toc)
     rho_struct = struct('rhoTriSD',{rhoTriSD},'maxRhoVert',{maxRhoVert},'maxRhoVertSD',{maxRhoVertSD});
     tic
@@ -154,7 +156,9 @@ for sampleID = 1:length(position_vec)
 
     fprintf("#### Starte Durchlauf: Koeffizientenfunktion Block mit position=%2i, width=%2i, number=%2i, rhoMin=%7i, rhoMax=%7i\n",position,width,number,rhoMin,rhoMax)
     tic
-    [rhoTri,rhoTriSD,maxRhoVert,maxRhoVertSD] = coefficient_Block(prop1,prop2,dif,position,width,number,h,rhoMax,rhoMin,vert,tri,logicalTri__sd,plot_grid);
+%     [rhoTri,rhoTriSD,maxRhoVert,maxRhoVertSD] = coefficient_Block(prop1,prop2,dif,position,width,number,h,rhoMax,rhoMin,vert,tri,logicalTri__sd,plot_grid);
+    f_block = @(vertices) coeffFun_block(vertices(:,1), vertices(:,2), N, n, prop1, prop2, dif, position, width, number);
+    [rhoTri,rhoTriSD,maxRhoVert,maxRhoVertSD] = getCoefficientMatrices(f_block,rhoMax,rhoMin,vert,tri,logicalTri__sd,plot_grid);
     fprintf("Benoetigte Zeit: Aufstellen der Koeffizientenmatrizen: %5fs ",toc)
     rho_struct = struct('rhoTriSD',{rhoTriSD},'maxRhoVert',{maxRhoVert},'maxRhoVertSD',{maxRhoVertSD});
     tic
@@ -217,7 +221,9 @@ for sampleID = 1:length(height_vec)
 
     fprintf("#### Starte Durchlauf: Koeffizientenfunktion Zufall mit position=%2i, width=%2i, number=%2i, rhoMin=%7i, rhoMax=%7i\n",position,width,number,rhoMin,rhoMax)
     tic
-    [rhoTri,rhoTriSD,maxRhoVert,maxRhoVertSD] = coefficient_Rand(number,h,rhoMax,rhoMin,vert,tri,logicalTri__sd,plot_grid);
+%     [rhoTri,rhoTriSD,maxRhoVert,maxRhoVertSD] = coefficient_Rand(number,h,rhoMax,rhoMin,vert,tri,logicalTri__sd,plot_grid);
+    
+    [rhoTri,rhoTriSD,maxRhoVert,maxRhoVertSD] = getCoefficientMatrices(f_block,rhoMax,rhoMin,vert,tri,logicalTri__sd,plot_grid);
     fprintf("Benoetigte Zeit: Aufstellen der Koeffizientenmatrizen: %5fs ",toc)
     rho_struct = struct('rhoTriSD',{rhoTriSD},'maxRhoVert',{maxRhoVert},'maxRhoVertSD',{maxRhoVertSD});
     tic
@@ -254,7 +260,7 @@ end
 
 %% Daten exportieren
 if export
-    file_name = sprintf("%s-train_data_dump.csv",datestr(datetime,'yyyy-mm-dd-HH-MM-SS'));
+    file_name = sprintf("./resources/train_data/%s-train_data_dump.csv",datestr(datetime,'yyyy-mm-dd-HH-MM-SS'));
     fprintf("Speichere Traininsdaten als %s...",file_name)
     output_mat = cell2mat(output_cell);
     writematrix(output_mat,file_name);
