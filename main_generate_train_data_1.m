@@ -48,9 +48,11 @@ rhoMin = 1;
 
 TOL = 100;  % Toleranz zur Auswahl der Eigenwerte
 rng(0);
-nRandSamples = 0;
-output_cell = cell(nRandSamples*5,1);
-output_counter = 1;
+nRandSamples = 1;
+coeffFun_cell = cell(nRandSamples*5,1);
+coeffFun_counter = 1;
+parameter_cell = cell(nRandSamples*5,1);
+
 rhoBound = 10.^(0:7);
 
 %% Kanal Koeffizientenfunktion
@@ -59,23 +61,13 @@ positionBound = -2:2;
 widthBound = -2:2;
 numberBound = 1:5;
 
-% Erstelle eine zufaellige Auswahl an Parametern
-parameter_cell = {positionBound,widthBound,numberBound,rhoBound,rhoBound};
-parameter_grid = cell(numel(parameter_cell),1);
-[parameter_grid{:}] = ndgrid(parameter_cell{:});
-parameter_grid = cellfun(@(X) reshape(X,1,[]),parameter_grid,'UniformOutput',false);
-parameter_grid = cell2mat(parameter_grid);
-random_permutation = randperm(size(parameter_grid,2));
-sample_parameters = parameter_grid(:,random_permutation(1:nRandSamples));
-
 % Erstelle die Parametervektoren
+sample_parameters = generateSampleParameters(nRandSamples,positionBound,widthBound,numberBound,rhoBound,rhoBound);
 position_vec = [-2, sample_parameters(1,:)];
 width_vec = [1, sample_parameters(2,:)];
 number_vec = [1, sample_parameters(3,:)];
 rhoMin_vec = [1, sample_parameters(4,:)];
 rhoMax_vec = [10^6, sample_parameters(5,:)];
-
-
 
 for sampleID = 1:length(position_vec)
     position = position_vec(sampleID);
@@ -84,39 +76,10 @@ for sampleID = 1:length(position_vec)
     rhoMin = rhoMin_vec(sampleID);
     rhoMax = rhoMax_vec(sampleID);
 
-    fprintf("#### Starte Durchlauf: Koeffizientenfunktion Kanal mit position=%2i, width=%2i, number=%2i, rhoMin=%7i, rhoMax=%7i\n",position,width,number,rhoMin,rhoMax)
-    tic
-%     [rhoTri,rhoTriSD,maxRhoVert,maxRhoVertSD] = coefficient_Canal(position,width,number,h,rhoMax,rhoMin,vert,tri,logicalTri__sd,plot_grid);
-    f_canal = @(vertices) coeffFun_canal(vertices(:,2),N,n,position,width,number);
-    [rhoTri,rhoTriSD,maxRhoVert,maxRhoVertSD] = getCoefficientMatrices(f_canal,rhoMax,rhoMin,vert,tri,logicalTri__sd,plot_grid);
-    fprintf("Benoetigte Zeit: Aufstellen der Koeffizientenmatrizen: %5fs ",toc)
-    rho_struct = struct('rhoTriSD',{rhoTriSD},'maxRhoVert',{maxRhoVert},'maxRhoVertSD',{maxRhoVertSD});
-    tic
-    [edgesPrimalGlobal,cGamma,edgesSD,cLocalPrimal,cB,cBskal,cInner,cK,cDirichlet] = setup_matrices(rho_struct,grid_struct,f);
-    fprintf(", Aufstellen des Sprungoperators/Steifigkeitsmatrix: %5fs\n", toc)
-    numEdges = length(edgesSD);
-
-    input = cell(numEdges,1);
-    label = zeros(numEdges,1);
-
-    for edgeID = 1:numEdges
-        % Pruefe ob eines der beteiligten TG einen Dirichletknoten enthaelt.
-        % Falls ja ist eins der TG kein floating TG und wird daher nicht
-        % beruecksichtigt
-        if (nnz(cDirichlet{edgesSD(edgeID,1)}) > 0) || (nnz(cDirichlet{edgesSD(edgeID,2)}) > 0)
-            label(edgeID) = 2;
-            continue
-        else
-            input{edgeID} = generate_input(edgeID,edgesSD,maxRhoVert,l2g__sd);
-            label(edgeID) = generate_label(edgeID,edgesPrimalGlobal,cGamma,edgesSD,cLocalPrimal,cB,cBskal,cInner,cK,TOL);
-        end
-        fprintf("Kante %2i bzgl. der TG (%2i,%2i) erhaelt das Label %i\n",edgeID,edgesSD(edgeID,1),edgesSD(edgeID,2),label(edgeID))
-    end
-    skipped_edges = nnz(label == 2);
-    fprintf("Fuer das gegebene Gitter wurden %i (%4.1f%%) Kanten uebersprungen\n",skipped_edges,skipped_edges/numEdges*100)
-    % Fuege neue Daten an den trainingsdatensatz an
-    output_cell{output_counter} = [cell2mat(input),label(label ~= 2)];
-    output_counter = output_counter + 1;
+    
+    coeffFun_cell{coeffFun_counter} = @(vertices) coeffFun_canal(vertices(:,2),N,n,position,width,number);
+    parameter_cell{coeffFun_counter} = "Canal";
+    coeffFun_counter = coeffFun_counter + 1;
 end
 
 %% Blockstruktur Koeffizientenfunktion
@@ -125,16 +88,8 @@ difBound = -4:2:4;
 prop1Bound = 0:0.25:1;
 prop2Bound = 0:0.25:1;
 
-% Erstelle eine zufaellige Auswahl an Parametern
-parameter_cell = {positionBound,widthBound,numberBound,rhoBound,rhoBound,difBound,prop1Bound,prop2Bound};
-parameter_grid = cell(numel(parameter_cell),1);
-[parameter_grid{:}] = ndgrid(parameter_cell{:});
-parameter_grid = cellfun(@(X) reshape(X,1,[]),parameter_grid,'UniformOutput',false);
-parameter_grid = cell2mat(parameter_grid);
-random_permutation = randperm(size(parameter_grid,2));
-sample_parameters = parameter_grid(:,random_permutation(1:nRandSamples));
-
 % Erstelle die Parametervektoren
+sample_parameters = generateSampleParameters(nRandSamples,positionBound,widthBound,numberBound,rhoBound,rhoBound,difBound,prop1Bound,prop2Bound);
 position_vec = [-2, sample_parameters(1,:)];
 width_vec = [1, sample_parameters(2,:)];
 number_vec = [1, sample_parameters(3,:)];
@@ -154,58 +109,19 @@ for sampleID = 1:length(position_vec)
     prop1 = prop1_vec(sampleID);
     prop2 = prop2_vec(sampleID);
 
-    fprintf("#### Starte Durchlauf: Koeffizientenfunktion Block mit position=%2i, width=%2i, number=%2i, rhoMin=%7i, rhoMax=%7i\n",position,width,number,rhoMin,rhoMax)
-    tic
-%     [rhoTri,rhoTriSD,maxRhoVert,maxRhoVertSD] = coefficient_Block(prop1,prop2,dif,position,width,number,h,rhoMax,rhoMin,vert,tri,logicalTri__sd,plot_grid);
-    f_block = @(vertices) coeffFun_block(vertices(:,1), vertices(:,2), N, n, prop1, prop2, dif, position, width, number);
-    [rhoTri,rhoTriSD,maxRhoVert,maxRhoVertSD] = getCoefficientMatrices(f_block,rhoMax,rhoMin,vert,tri,logicalTri__sd,plot_grid);
-    fprintf("Benoetigte Zeit: Aufstellen der Koeffizientenmatrizen: %5fs ",toc)
-    rho_struct = struct('rhoTriSD',{rhoTriSD},'maxRhoVert',{maxRhoVert},'maxRhoVertSD',{maxRhoVertSD});
-    tic
-    [edgesPrimalGlobal,cGamma,edgesSD,cLocalPrimal,cB,cBskal,cInner,cK,cDirichlet] = setup_matrices(rho_struct,grid_struct,f);
-    fprintf(", Aufstellen des Sprungoperators/Steifigkeitsmatrix: %5fs\n", toc)
-    numEdges = length(edgesSD);
-
-    input = cell(numEdges,1);
-    label = zeros(numEdges,1);
-
-    for edgeID = 1:numEdges
-        % Pruefe ob eines der beteiligten TG einen Dirichletknoten enthaelt.
-        % Falls ja ist eins der TG kein floating TG und wird daher nicht
-        % beruecksichtigt
-        if (nnz(cDirichlet{edgesSD(edgeID,1)}) > 0) || (nnz(cDirichlet{edgesSD(edgeID,2)}) > 0)
-            label(edgeID) = 2;
-            continue
-        else
-            input{edgeID} = generate_input(edgeID,edgesSD,maxRhoVert,l2g__sd);
-            label(edgeID) = generate_label(edgeID,edgesPrimalGlobal,cGamma,edgesSD,cLocalPrimal,cB,cBskal,cInner,cK,TOL);
-        end
-        fprintf("Kante %2i bzgl. der TG (%2i,%2i) erhaelt das Label %i\n",edgeID,edgesSD(edgeID,1),edgesSD(edgeID,2),label(edgeID))
-    end
-    skipped_edges = nnz(label == 2);
-    fprintf("Fuer das gegebene Gitter wurden %i (%4.1f%%) Kanten uebersprungen\n",skipped_edges,skipped_edges/numEdges*100)
-    % Fuege neue Daten an den trainingsdatensatz an
-    output_cell{output_counter} = [cell2mat(input),label(label ~= 2)];
-    output_counter = output_counter + 1;
+    coeffFun_cell{coeffFun_counter} = @(vertices) coeffFun_block(vertices(:,1), vertices(:,2), N, n, prop1, prop2, dif, position, width, number);
+    parameter_cell{coeffFun_counter} = "Blocks";
+    coeffFun_counter = coeffFun_counter + 1;
 end
 
-
-%% Zufalls Koeffizientenfunktion
+%% Zufall - Block Koeffizientenfunktion
 % Test verschiedene parameter fuer die Kanalfunktion
 widthBound = 1:5; % Noch unbenutzt
 heightBound = 1:5; % Noch unbenutzt
 numberBound = 10:10:70;
 
-% Erstelle eine zufaellige Auswahl an Parametern
-parameter_cell = {heightBound,widthBound,numberBound,rhoBound,rhoBound};
-parameter_grid = cell(numel(parameter_cell),1);
-[parameter_grid{:}] = ndgrid(parameter_cell{:});
-parameter_grid = cellfun(@(X) reshape(X,1,[]),parameter_grid,'UniformOutput',false);
-parameter_grid = cell2mat(parameter_grid);
-random_permutation = randperm(size(parameter_grid,2));
-sample_parameters = parameter_grid(:,random_permutation(1:nRandSamples));
-
 % Erstelle die Parametervektoren
+sample_parameters = generateSampleParameters(nRandSamples,heightBound,widthBound,numberBound,rhoBound,rhoBound);
 height_vec = [-2, sample_parameters(1,:)];
 width_vec = [1, sample_parameters(2,:)];
 number_vec = [16, sample_parameters(3,:)];
@@ -219,18 +135,31 @@ for sampleID = 1:length(height_vec)
     rhoMin = rhoMin_vec(sampleID);
     rhoMax = rhoMax_vec(sampleID);
 
-    fprintf("#### Starte Durchlauf: Koeffizientenfunktion Zufall mit position=%2i, width=%2i, number=%2i, rhoMin=%7i, rhoMax=%7i\n",position,width,number,rhoMin,rhoMax)
+    coeffFun_cell{coeffFun_counter} = @(vertices) coeffFun_randomBlocks(vertices(:,1),vertices(:,2),N,n,number);
+    parameter_cell{coeffFun_counter} = "Blocks";
+    coeffFun_counter = coeffFun_counter + 1;
+end
+
+
+%% Faelle 
+empty_cells_ind = cellfun('isempty',coeffFun_cell);
+coeffFun_cell = coeffFun_cell(~empty_cells_ind);
+parameter_cell = parameter_cell(~empty_cells_ind);
+n_cases = length(coeffFun_cell);
+output_cell = cell(n_cases,1);
+
+for case_id = 1:n_cases
+    fprintf("#### Starte Fall: Koeffizientenfunktion %s ####\n",parameter_cell{case_id})
     tic
-%     [rhoTri,rhoTriSD,maxRhoVert,maxRhoVertSD] = coefficient_Rand(number,h,rhoMax,rhoMin,vert,tri,logicalTri__sd,plot_grid);
-    f_randomBlocks = @(vertices) coeffFun_randomBlocks(vertices(:,1),vertices(:,2),N,n,number);
-    [rhoTri,rhoTriSD,maxRhoVert,maxRhoVertSD] = getCoefficientMatrices(f_randomBlocks,rhoMax,rhoMin,vert,tri,logicalTri__sd,plot_grid);
+    [rhoTri,rhoTriSD,maxRhoVert,maxRhoVertSD] = getCoefficientMatrices(coeffFun_cell{case_id},rhoMax,rhoMin,vert,tri,logicalTri__sd,plot_grid);
     fprintf("Benoetigte Zeit: Aufstellen der Koeffizientenmatrizen: %5fs ",toc)
     rho_struct = struct('rhoTriSD',{rhoTriSD},'maxRhoVert',{maxRhoVert},'maxRhoVertSD',{maxRhoVertSD});
+
     tic
     [edgesPrimalGlobal,cGamma,edgesSD,cLocalPrimal,cB,cBskal,cInner,cK,cDirichlet] = setup_matrices(rho_struct,grid_struct,f);
     fprintf(", Aufstellen des Sprungoperators/Steifigkeitsmatrix: %5fs\n", toc)
-    numEdges = length(edgesSD);
 
+    numEdges = length(edgesSD);
     input = cell(numEdges,1);
     label = zeros(numEdges,1);
 
@@ -250,9 +179,184 @@ for sampleID = 1:length(height_vec)
     skipped_edges = nnz(label == 2);
     fprintf("Fuer das gegebene Gitter wurden %i (%4.1f%%) Kanten uebersprungen\n",skipped_edges,skipped_edges/numEdges*100)
     % Fuege neue Daten an den trainingsdatensatz an
-    output_cell{output_counter} = [cell2mat(input),label(label ~= 2)];
-    output_counter = output_counter + 1;
+    output_cell{case_id} = [cell2mat(input),label(label ~= 2)];
 end
+
+
+% %% Kanal Koeffizientenfunktion
+% % Test verschiedene parameter fuer die Kanalfunktion
+% positionBound = -2:2;
+% widthBound = -2:2;
+% numberBound = 1:5;
+% 
+% % Erstelle die Parametervektoren
+% sample_parameters = generateSampleParameters(nRandSamples,positionBound,widthBound,numberBound,rhoBound,rhoBound);
+% position_vec = [-2, sample_parameters(1,:)];
+% width_vec = [1, sample_parameters(2,:)];
+% number_vec = [1, sample_parameters(3,:)];
+% rhoMin_vec = [1, sample_parameters(4,:)];
+% rhoMax_vec = [10^6, sample_parameters(5,:)];
+% 
+% for sampleID = 1:length(position_vec)
+%     position = position_vec(sampleID);
+%     width = width_vec(sampleID);
+%     number = number_vec(sampleID);
+%     rhoMin = rhoMin_vec(sampleID);
+%     rhoMax = rhoMax_vec(sampleID);
+% 
+%     fprintf("#### Starte Durchlauf: Koeffizientenfunktion Kanal mit position=%2i, width=%2i, number=%2i, rhoMin=%7i, rhoMax=%7i\n",position,width,number,rhoMin,rhoMax)
+%     tic
+%     %     [rhoTri,rhoTriSD,maxRhoVert,maxRhoVertSD] = coefficient_Canal(position,width,number,h,rhoMax,rhoMin,vert,tri,logicalTri__sd,plot_grid);
+%     f_canal = @(vertices) coeffFun_canal(vertices(:,2),N,n,position,width,number);
+%     [rhoTri,rhoTriSD,maxRhoVert,maxRhoVertSD] = getCoefficientMatrices(f_canal,rhoMax,rhoMin,vert,tri,logicalTri__sd,plot_grid);
+%     fprintf("Benoetigte Zeit: Aufstellen der Koeffizientenmatrizen: %5fs ",toc)
+%     rho_struct = struct('rhoTriSD',{rhoTriSD},'maxRhoVert',{maxRhoVert},'maxRhoVertSD',{maxRhoVertSD});
+%     tic
+%     [edgesPrimalGlobal,cGamma,edgesSD,cLocalPrimal,cB,cBskal,cInner,cK,cDirichlet] = setup_matrices(rho_struct,grid_struct,f);
+%     fprintf(", Aufstellen des Sprungoperators/Steifigkeitsmatrix: %5fs\n", toc)
+%     numEdges = length(edgesSD);
+% 
+%     input = cell(numEdges,1);
+%     label = zeros(numEdges,1);
+% 
+%     for edgeID = 1:numEdges
+%         % Pruefe ob eines der beteiligten TG einen Dirichletknoten enthaelt.
+%         % Falls ja ist eins der TG kein floating TG und wird daher nicht
+%         % beruecksichtigt
+%         if (nnz(cDirichlet{edgesSD(edgeID,1)}) > 0) || (nnz(cDirichlet{edgesSD(edgeID,2)}) > 0)
+%             label(edgeID) = 2;
+%             continue
+%         else
+%             input{edgeID} = generate_input(edgeID,edgesSD,maxRhoVert,l2g__sd);
+%             label(edgeID) = generate_label(edgeID,edgesPrimalGlobal,cGamma,edgesSD,cLocalPrimal,cB,cBskal,cInner,cK,TOL);
+%         end
+%         fprintf("Kante %2i bzgl. der TG (%2i,%2i) erhaelt das Label %i\n",edgeID,edgesSD(edgeID,1),edgesSD(edgeID,2),label(edgeID))
+%     end
+%     skipped_edges = nnz(label == 2);
+%     fprintf("Fuer das gegebene Gitter wurden %i (%4.1f%%) Kanten uebersprungen\n",skipped_edges,skipped_edges/numEdges*100)
+%     % Fuege neue Daten an den trainingsdatensatz an
+%     output_cell{output_counter} = [cell2mat(input),label(label ~= 2)];
+%     output_counter = output_counter + 1;
+% end
+% 
+% %% Blockstruktur Koeffizientenfunktion
+% % Test verschiedene parameter fuer die Kanalfunktion
+% difBound = -4:2:4;
+% prop1Bound = 0:0.25:1;
+% prop2Bound = 0:0.25:1;
+% 
+% % Erstelle die Parametervektoren
+% sample_parameters = generateSampleParameters(nRandSamples,positionBound,widthBound,numberBound,rhoBound,rhoBound,difBound,prop1Bound,prop2Bound);
+% position_vec = [-2, sample_parameters(1,:)];
+% width_vec = [1, sample_parameters(2,:)];
+% number_vec = [1, sample_parameters(3,:)];
+% rhoMin_vec = [1, sample_parameters(4,:)];
+% rhoMax_vec = [10^6, sample_parameters(5,:)];
+% dif_vec = [-3, sample_parameters(6,:)];
+% prop1_vec = [0.25, sample_parameters(7,:)];
+% prop2_vec = [0.25, sample_parameters(8,:)];
+% 
+% for sampleID = 1:length(position_vec)
+%     position = position_vec(sampleID);
+%     width = width_vec(sampleID);
+%     number = number_vec(sampleID);
+%     rhoMin = rhoMin_vec(sampleID);
+%     rhoMax = rhoMax_vec(sampleID);
+%     dif = dif_vec(sampleID);
+%     prop1 = prop1_vec(sampleID);
+%     prop2 = prop2_vec(sampleID);
+% 
+%     fprintf("#### Starte Durchlauf: Koeffizientenfunktion Block mit position=%2i, width=%2i, number=%2i, rhoMin=%7i, rhoMax=%7i\n",position,width,number,rhoMin,rhoMax)
+%     tic
+%     %     [rhoTri,rhoTriSD,maxRhoVert,maxRhoVertSD] = coefficient_Block(prop1,prop2,dif,position,width,number,h,rhoMax,rhoMin,vert,tri,logicalTri__sd,plot_grid);
+%     f_block = @(vertices) coeffFun_block(vertices(:,1), vertices(:,2), N, n, prop1, prop2, dif, position, width, number);
+%     [rhoTri,rhoTriSD,maxRhoVert,maxRhoVertSD] = getCoefficientMatrices(f_block,rhoMax,rhoMin,vert,tri,logicalTri__sd,plot_grid);
+%     fprintf("Benoetigte Zeit: Aufstellen der Koeffizientenmatrizen: %5fs ",toc)
+%     rho_struct = struct('rhoTriSD',{rhoTriSD},'maxRhoVert',{maxRhoVert},'maxRhoVertSD',{maxRhoVertSD});
+%     tic
+%     [edgesPrimalGlobal,cGamma,edgesSD,cLocalPrimal,cB,cBskal,cInner,cK,cDirichlet] = setup_matrices(rho_struct,grid_struct,f);
+%     fprintf(", Aufstellen des Sprungoperators/Steifigkeitsmatrix: %5fs\n", toc)
+%     numEdges = length(edgesSD);
+% 
+%     input = cell(numEdges,1);
+%     label = zeros(numEdges,1);
+% 
+%     for edgeID = 1:numEdges
+%         % Pruefe ob eines der beteiligten TG einen Dirichletknoten enthaelt.
+%         % Falls ja ist eins der TG kein floating TG und wird daher nicht
+%         % beruecksichtigt
+%         if (nnz(cDirichlet{edgesSD(edgeID,1)}) > 0) || (nnz(cDirichlet{edgesSD(edgeID,2)}) > 0)
+%             label(edgeID) = 2;
+%             continue
+%         else
+%             input{edgeID} = generate_input(edgeID,edgesSD,maxRhoVert,l2g__sd);
+%             label(edgeID) = generate_label(edgeID,edgesPrimalGlobal,cGamma,edgesSD,cLocalPrimal,cB,cBskal,cInner,cK,TOL);
+%         end
+%         fprintf("Kante %2i bzgl. der TG (%2i,%2i) erhaelt das Label %i\n",edgeID,edgesSD(edgeID,1),edgesSD(edgeID,2),label(edgeID))
+%     end
+%     skipped_edges = nnz(label == 2);
+%     fprintf("Fuer das gegebene Gitter wurden %i (%4.1f%%) Kanten uebersprungen\n",skipped_edges,skipped_edges/numEdges*100)
+%     % Fuege neue Daten an den trainingsdatensatz an
+%     output_cell{output_counter} = [cell2mat(input),label(label ~= 2)];
+%     output_counter = output_counter + 1;
+% end
+% 
+% 
+% %% Zufall - Block Koeffizientenfunktion
+% % Test verschiedene parameter fuer die Kanalfunktion
+% widthBound = 1:5; % Noch unbenutzt
+% heightBound = 1:5; % Noch unbenutzt
+% numberBound = 10:10:70;
+% 
+% % Erstelle die Parametervektoren
+% sample_parameters = generateSampleParameters(nRandSamples,heightBound,widthBound,numberBound,rhoBound,rhoBound);
+% height_vec = [-2, sample_parameters(1,:)];
+% width_vec = [1, sample_parameters(2,:)];
+% number_vec = [16, sample_parameters(3,:)];
+% rhoMin_vec = [1, sample_parameters(4,:)];
+% rhoMax_vec = [10^6, sample_parameters(5,:)];
+% 
+% for sampleID = 1:length(height_vec)
+%     height = height_vec(sampleID);
+%     width = width_vec(sampleID);
+%     number = number_vec(sampleID);
+%     rhoMin = rhoMin_vec(sampleID);
+%     rhoMax = rhoMax_vec(sampleID);
+% 
+%     fprintf("#### Starte Durchlauf: Koeffizientenfunktion Zufall mit position=%2i, width=%2i, number=%2i, rhoMin=%7i, rhoMax=%7i\n",position,width,number,rhoMin,rhoMax)
+%     tic
+%     %     [rhoTri,rhoTriSD,maxRhoVert,maxRhoVertSD] = coefficient_Rand(number,h,rhoMax,rhoMin,vert,tri,logicalTri__sd,plot_grid);
+%     f_randomBlocks = @(vertices) coeffFun_randomBlocks(vertices(:,1),vertices(:,2),N,n,number);
+%     [rhoTri,rhoTriSD,maxRhoVert,maxRhoVertSD] = getCoefficientMatrices(f_randomBlocks,rhoMax,rhoMin,vert,tri,logicalTri__sd,plot_grid);
+%     fprintf("Benoetigte Zeit: Aufstellen der Koeffizientenmatrizen: %5fs ",toc)
+%     rho_struct = struct('rhoTriSD',{rhoTriSD},'maxRhoVert',{maxRhoVert},'maxRhoVertSD',{maxRhoVertSD});
+%     tic
+%     [edgesPrimalGlobal,cGamma,edgesSD,cLocalPrimal,cB,cBskal,cInner,cK,cDirichlet] = setup_matrices(rho_struct,grid_struct,f);
+%     fprintf(", Aufstellen des Sprungoperators/Steifigkeitsmatrix: %5fs\n", toc)
+%     numEdges = length(edgesSD);
+% 
+%     input = cell(numEdges,1);
+%     label = zeros(numEdges,1);
+% 
+%     for edgeID = 1:numEdges
+%         % Pruefe ob eines der beteiligten TG einen Dirichletknoten enthaelt.
+%         % Falls ja ist eins der TG kein floating TG und wird daher nicht
+%         % beruecksichtigt
+%         if (nnz(cDirichlet{edgesSD(edgeID,1)}) > 0) || (nnz(cDirichlet{edgesSD(edgeID,2)}) > 0)
+%             label(edgeID) = 2;
+%             continue
+%         else
+%             input{edgeID} = generate_input(edgeID,edgesSD,maxRhoVert,l2g__sd);
+%             label(edgeID) = generate_label(edgeID,edgesPrimalGlobal,cGamma,edgesSD,cLocalPrimal,cB,cBskal,cInner,cK,TOL);
+%         end
+%         fprintf("Kante %2i bzgl. der TG (%2i,%2i) erhaelt das Label %i\n",edgeID,edgesSD(edgeID,1),edgesSD(edgeID,2),label(edgeID))
+%     end
+%     skipped_edges = nnz(label == 2);
+%     fprintf("Fuer das gegebene Gitter wurden %i (%4.1f%%) Kanten uebersprungen\n",skipped_edges,skipped_edges/numEdges*100)
+%     % Fuege neue Daten an den trainingsdatensatz an
+%     output_cell{output_counter} = [cell2mat(input),label(label ~= 2)];
+%     output_counter = output_counter + 1;
+% end
 
 
 
@@ -265,4 +369,14 @@ if export
     output_mat = cell2mat(output_cell);
     writematrix(output_mat,file_name);
     fprintf("Fertig!\n")
+end
+
+
+function sample_parameters = generateSampleParameters(nRandSamples,varargin)
+parameter_grid = cell(numel(varargin),1);
+[parameter_grid{:}] = ndgrid(varargin{:});
+parameter_grid = cellfun(@(X) reshape(X,1,[]),parameter_grid,'UniformOutput',false);
+parameter_grid = cell2mat(parameter_grid);
+random_permutation = randperm(size(parameter_grid,2));
+sample_parameters = parameter_grid(:,random_permutation(1:nRandSamples));
 end
