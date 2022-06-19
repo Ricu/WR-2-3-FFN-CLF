@@ -18,6 +18,13 @@ numVert = length(vert);
 %% Definiere Koeffizientenfunktion auf den Elementen
 markedVertices = find(f_coeff(vert)); % Knotenindizes der markierten Knoten
 
+
+% Idee: direkt die markedElements zurueckgeben lassen: die elementliste in
+% knoten indizes uebersetzen, reshapen. markierung prüfen -> zurueck
+% reshapen -> mittels any die elemente markieren. In der FKT: bei nargout =
+% 1 die markierten Knoten, bei nargout = 2 die markierten elemente
+% zurueckgeben
+
 % Erstelle Vektor welcher die Koeffizientenfunktion pro Element angibt. Ein
 % Element gilt als markiert wenn alle zugehörigen Eckknoten markiert sind.
 % Alle markierten Elemente werden auf rhoMax und der Rest auf rhoMin gesetzt.
