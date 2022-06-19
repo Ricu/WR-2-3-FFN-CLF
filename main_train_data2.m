@@ -32,7 +32,7 @@ rhoMin = 1;
 rhoMax = 10^6;
 %Bilddatei einlesen 
 %ii)
-pic_ii = imread('rho_coeff_multiple_stripes.png');
+pic_ii = imread('./resources/img/rho_coeff_multiple_stripes.png');
 pic_ii_bw = pic_ii(:,:,1); %benoetigen nur einen Kanal, da schwarz-weiss Bild
 num_pixel_ii = length(pic_ii_bw); %Anzahl Pixel je Dimension
 
@@ -41,7 +41,7 @@ num_pixel_ii = length(pic_ii_bw); %Anzahl Pixel je Dimension
 
 
 %iii)
-pic_iii = imread('multiple_circle_bw_512x512px.jpeg');
+pic_iii = imread('./resources/img/multiple_circle_bw_512x512px.jpeg');
 pic_iii_bw = pic_iii(:,:,1); %benoetigen nur einen Kanal, da schwarz-weiss Bild
 num_pixel_iii = length(pic_iii_bw); %Anzahl Pixel je Dimension
 
