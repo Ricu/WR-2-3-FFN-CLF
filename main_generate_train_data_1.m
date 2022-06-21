@@ -37,14 +37,9 @@ dirichlet = or(ismember(vert(:,1),xyLim), ismember(vert(:,2),xyLim));
 grid_struct = struct('vert__sd',{vert__sd},'tri__sd',{tri__sd},'l2g__sd',{l2g__sd},'dirichlet',{dirichlet});
 
 %% Koeffizientenfunktion aufstellen
-% Definiere rho im Kanal und außerhalb des Kanals
+% Definiere maximales und minimales rho
 rhoMax = 10^6;
 rhoMin = 1;
-
-
-% Definiere Koeffizient auf den Elementen (und teilgebietsweise);
-% maximalen Koeffizienten pro Knoten (und teilgebietsweise)
-
 
 TOL = 100;  % Toleranz zur Auswahl der Eigenwerte
 rng(0);
@@ -83,7 +78,7 @@ for sampleID = 1:length(position_vec)
 end
 
 %% Blockstruktur Koeffizientenfunktion
-% Test verschiedene parameter fuer die Kanalfunktion
+% Teste verschiedene Parameter fuer die Kanalfunktion
 difBound = -4:2:4;
 prop1Bound = 0:0.25:1;
 prop2Bound = 0:0.25:1;
@@ -151,6 +146,8 @@ output_cell = cell(n_cases,1);
 for case_id = 1:n_cases
     fprintf("#### Starte Fall: Koeffizientenfunktion %s ####\n",parameter_cell{case_id})
     tic
+    % Definiere Koeffizient auf den Elementen (und teilgebietsweise);
+    % maximalen Koeffizienten pro Knoten (und teilgebietsweise)
     [rhoTri,rhoTriSD,maxRhoVert,maxRhoVertSD] = getCoefficientMatrices(coeffFun_cell{case_id},rhoMax,rhoMin,vert,tri,logicalTri__sd,plot_grid);
     fprintf("Benoetigte Zeit: Aufstellen der Koeffizientenmatrizen: %5fs ",toc)
     rho_struct = struct('rhoTriSD',{rhoTriSD},'maxRhoVert',{maxRhoVert},'maxRhoVertSD',{maxRhoVertSD});
