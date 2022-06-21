@@ -24,7 +24,7 @@ for p = 1 : length(tri)
     %neahsten integer-Wert runden
     err_cor = 0.5*(1/num_pixel); %korrigiere zum Pixelmittelpunkt
     x_pixel = round((x_centroid-err_cor)*num_pixel); 
-    y_pixel = round((y_centroid-err_cor)*num_pixel);
+    y_pixel = num_pixel -round((y_centroid-err_cor)*num_pixel);
     
     if x_pixel < 1
         x_pixel = x_pixel +1;

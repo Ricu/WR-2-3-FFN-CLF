@@ -30,10 +30,18 @@ grid_struct = struct('vert__sd',{vert__sd},'tri__sd',{tri__sd},'l2g__sd',{l2g__s
 %% Koeffizientenfunktion aufstellen
 rhoMin = 1;
 rhoMax = 10^6;
+
+%Parameter fuer Hufeisen/Streifen Triangulierung
+yStripeLim = [0.1,0.9];
+position = 2;
+width = 1;
+hight = 2;
+[markedVertices] = coeffFun_horseshoe(vert(:,1),vert(:,2),N,n,yStripeLim,position,width,hight);
+
 %Bilddatei einlesen 
 %ii)
 pic_ii = imread('./resources/img/rho_coeff_multiple_stripes.png');
-pic_ii_bw = pic_ii(:,:,1); %benoetigen nur einen Kanal, da schwarz-weiss Bild
+pic_ii_bw = pic_ii(:,:,1)'; %benoetigen nur einen Kanal, da schwarz-weiss Bild
 num_pixel_ii = length(pic_ii_bw); %Anzahl Pixel je Dimension
 
 %Erstelle Koeffizientenfunktion fuer Gitter ii)
@@ -42,7 +50,7 @@ num_pixel_ii = length(pic_ii_bw); %Anzahl Pixel je Dimension
 
 %iii)
 pic_iii = imread('./resources/img/multiple_circle_bw_512x512px.jpeg');
-pic_iii_bw = pic_iii(:,:,1); %benoetigen nur einen Kanal, da schwarz-weiss Bild
+pic_iii_bw = pic_iii(:,:,1)'; %benoetigen nur einen Kanal, da schwarz-weiss Bild
 num_pixel_iii = length(pic_iii_bw); %Anzahl Pixel je Dimension
 
 %Erstelle Koeffizientenfunktion fuer Gitter iii)

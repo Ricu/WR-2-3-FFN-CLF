@@ -1,5 +1,6 @@
 clear; clc;
 addpath('libs')
+addpath('old')
 export = 0;
 plot_grid = true;   % Auswahl: Plotten der Triangulierung mit Kanal-Koeffizientenfunktion
 
@@ -61,20 +62,20 @@ widthC = width(4);
 numberC = number(1);
 propB1 = prop1(2);
 propB2 = prop2(2);
-difB = dif(2);
+difB = dif(3);
 
 numRand = numrand(15);
 numSub = numsub(5);
 
-[rhoTri,rhoTriSD,maxRhoVert,maxRhoVertSD] = coefficient_Constant(numSub,vert,tri,logicalTri__sd,plot_grid);
+%[rhoTri,rhoTriSD,maxRhoVert,maxRhoVertSD] = coefficient_Constant(numSub,vert,tri,logicalTri__sd,plot_grid);
 
 
-[rhoTri,rhoTriSD,maxRhoVert,maxRhoVertSD] = coefficient_Rand(numRand,h,rhoMax,rhoMin,vert,tri,logicalTri__sd,plot_grid);
+%[rhoTri,rhoTriSD,maxRhoVert,maxRhoVertSD] = coefficient_Rand(numRand,h,rhoMax,rhoMin,vert,tri,logicalTri__sd,plot_grid);
 
 
 [rhoTri,rhoTriSD,maxRhoVert,maxRhoVertSD] = coefficient_Block(propB1,propB2,difB,positionC,widthC,numberC,h,rhoMax,rhoMin,vert,tri,logicalTri__sd,plot_grid);
 
-[rhoTri,rhoTriSD,maxRhoVert,maxRhoVertSD] = coefficient_Canal(positionC,widthC,numberC,h,rhoMax,rhoMin,vert,tri,logicalTri__sd,plot_grid);
+%[rhoTri,rhoTriSD,maxRhoVert,maxRhoVertSD] = coefficient_Canal(positionC,widthC,numberC,h,rhoMax,rhoMin,vert,tri,logicalTri__sd,plot_grid);
 % Structure fuer rho-Variablen
 rho_struct = struct('rhoTriSD',{rhoTriSD},'maxRhoVert',{maxRhoVert},'maxRhoVertSD',{maxRhoVertSD});
   
