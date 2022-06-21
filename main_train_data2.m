@@ -45,8 +45,7 @@ pic_ii_bw = pic_ii(:,:,1)'; %benoetigen nur einen Kanal, da schwarz-weiss Bild
 num_pixel_ii = length(pic_ii_bw); %Anzahl Pixel je Dimension
 
 %Erstelle Koeffizientenfunktion fuer Gitter ii)
-[rhoTri,rhoTriSD,maxRhoVert,maxRhoVertSD] = coefficient_pixel(rhoMax,rhoMin,pic_ii_bw,num_pixel_ii,vert,tri,logicalTri__sd,plot_grid);
-
+[indElementsrhoMax] = coeffFun_pixel(vert(:,1),vert(:,2),tri,rhoMax,rhoMin,pic_bw_ii,num_pixel_ii);
 
 %iii)
 pic_iii = imread('./resources/img/multiple_circle_bw_512x512px.jpeg');
@@ -54,7 +53,6 @@ pic_iii_bw = pic_iii(:,:,1)'; %benoetigen nur einen Kanal, da schwarz-weiss Bild
 num_pixel_iii = length(pic_iii_bw); %Anzahl Pixel je Dimension
 
 %Erstelle Koeffizientenfunktion fuer Gitter iii)
-[rhoTri,rhoTriSD,maxRhoVert,maxRhoVertSD] = coefficient_pixel(rhoMax,rhoMin,pic_iii_bw,num_pixel_iii,vert,tri,logicalTri__sd,plot_grid);
-
+[indElementsrhoMax] = coeffFun_pixel(vert(:,1),vert(:,2),tri,rhoMax,rhoMin,pic_bw_iii,num_pixel_iii);
 
 
