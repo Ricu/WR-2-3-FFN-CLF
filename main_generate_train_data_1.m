@@ -48,7 +48,7 @@ coeffFun_cell = cell(nRandSamples*5,1);
 coeffFun_counter = 1;
 parameter_cell = cell(nRandSamples*5,1);
 
-rhoBound = 10.^(0:7);
+rhoBound = 10.^[0,3,6];
 
 %% Kanal Koeffizientenfunktion
 % Test verschiedene parameter fuer die Kanalfunktion
