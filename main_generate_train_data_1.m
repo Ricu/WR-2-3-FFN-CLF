@@ -171,6 +171,7 @@ for case_id = 1:n_cases
             label(edgeID) = 2;
             continue
         else
+            generate_input_2(edgeID,edgesSD,rhoTriSD,vert__sd,tri__sd)
             input{edgeID} = generate_input(edgeID,edgesSD,maxRhoVert,l2g__sd);
             label(edgeID) = generate_label(edgeID,edgesPrimalGlobal,cGamma,edgesSD,cLocalPrimal,cB,cBskal,cInner,cK,TOL);
         end
