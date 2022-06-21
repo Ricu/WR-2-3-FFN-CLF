@@ -139,8 +139,9 @@ end
 %% Assembliere die lokalen Steifigkeitsmatrizen und die lokalen Lastvektoren
 cK = cell(numSD,1); % Steifigkeitsmatrizen
 cb = cell(numSD,1); % Lastvektoren
+storedMatrices = load("./libs/localMatrices_N4n40.mat").storedMatrices;
 for i = 1:numSD
-    [cK{i},~,cb{i}] = assemble(tri__sd{i}, vert__sd{i},1,f,rhoTriSD{i});
+    [cK{i},~,cb{i}] = assemble(tri__sd{i}, vert__sd{i},1,f,rhoTriSD{i},false,storedMatrices{i});
 end
 
 %% Assembliere globale Steifigkeitsmatrix in primalen Variablen
@@ -191,7 +192,7 @@ temp = apply_1(cB_B,cK_BB,cK_PiB,S_PiPi \ temp);
 d = d - temp;
 
 %% Nebenbedingung Vorarbeit
-if strcmp(constraint_type,'adaptive') || strcmp(constraint_type,'non-adaptive')
+if strcmp(constraint_type,'adaptive') || strcmp(constraint_type,'non-adaptive') || strcmp(constraint_type,'adaptive-improved')
     %% Erstelle Kantenlisten
     cEdgesSD = cell(1,1);
     for i = 1:length(cLM)
@@ -245,9 +246,12 @@ if strcmp(constraint_type,'adaptive') || strcmp(constraint_type,'non-adaptive')
             end
         end
     end
-    if strcmp(constraint_type,'adaptive')
+    if strcmp(constraint_type,'adaptive') || strcmp(constraint_type,'adaptive-improved')
         cU=cell(1,numEdges);
         for edgeID = 1:numEdges
+            if strcmp(constraint_type,'adaptive-improved') %&& label == 0
+                continue
+            end
             %% Assemblierungmatrix R_ij
             nPrimal = length(edgesPrimalGlobal{edgeID}); % Anzahl primaler Knoten auf der Kante
             nGamma = [nnz(cGamma{edgesSD(edgeID,1)}),nnz(cGamma{edgesSD(edgeID,2)})]; % Anzahl Interfaceknoten pro TG
