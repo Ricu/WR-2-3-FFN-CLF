@@ -1,49 +1,71 @@
 function [input] = generate_input(edgeID,edgesSD,rhoTriSD,vert__sd,tri__sd)
+%
+%
+%
 
-sd1 = edgesSD(edgeID,1);
-sd2 = edgesSD(edgeID,2);
+% Parameter welche vor erstellen des Netzwerkes festgelegt werden muessen!
 n_vertx = 40;
 n_verty = 40;
-input_cell = cell(2,1);
 coverage = 3/4;
 
+% Cell-Array in welchem die rhoWerte an den Knoten fuer die TG gespeichert
+% werden
+input_cell = cell(1,2);
 
+% Iteriere ueber die angrenzenden TG
 for i = 1:2
+    % Bestimmte die Grenzen des Teilgebiets
     sd = edgesSD(edgeID,i);
     left_sd_bound = min(vert__sd{sd}(:,1));
     right_sd_bound = max(vert__sd{sd}(:,1));
     bottom_sd_bound = min(vert__sd{sd}(:,2));
     top_sd_bound = max(vert__sd{sd}(:,2));
+    
 
-
-    if abs(sd1-sd2) == 1
-        xsize = (right_sd_bound-left_sd_bound);
+    if abs(edgesSD(edgeID,1)-edgesSD(edgeID,2)) == 1 
+        % Fall 1: TG liegen nebeneinander
+        xsize = (right_sd_bound-left_sd_bound); % Breite des aktuellen TG
         if i == 1
+            % Fall 1a: TG liegen nebeneinander und betrachten linkes TG
             left_sd_bound = right_sd_bound - coverage * xsize;
         else
+            % Fall 1b: TG liegen nebeneinander und betrachten rechtes TG
             right_sd_bound = left_sd_bound + coverage * xsize;
         end
     else
+        % Fall 2: TG liegen uebereinander
         ysize = (right_sd_bound-left_sd_bound);
         if i == 1
+            % Fall 2a: TG liegen uebereinander und betrachten unteres TG
             bottom_sd_bound = top_sd_bound - coverage * ysize;
         else
+            % Fall 2b: TG liegen uebereinander und betrachten oberes TG
             top_sd_bound = bottom_sd_bound + coverage * ysize;
         end
     end
 
+    % Gleichmaessig verteilte Punkte erstellen. Erstelle 2 zusaetzliche
+    % Punkte welche spaeter rausgeworfen werden, sodass alle Punkte im
+    % inneren liegen
     x = linspace(left_sd_bound,right_sd_bound,n_vertx+2);
     y = linspace(bottom_sd_bound,top_sd_bound,n_verty+2);
 
+    % Erstelle das Gitter
     [XX,YY] = meshgrid(x(2:end-1),y(2:end-1));
 
-    if ~(abs(sd1-sd2) == 1)
+    if ~(abs(edgesSD(edgeID,1)-edgesSD(edgeID,2)) == 1)
+        % Falls die TG uebereinander liegen, transponiere die Reihenfolge
+        % der Knoten. Dadurch wird eine konsistente Nummerierung bzgl des
+        % Abstands zur Kante gewaehrleistet.
         XX = XX'; YY = YY';
     end
 
-    X = XX(:); Y = YY(:);
+    X = XX(:); Y = YY(:); % Gitter in Vektor umwandeln
+    % In X_element wird fuer jeden Knoten gespeichert in welchem Element
+    % dieser liegt.
     X_element = zeros(length(X),1);
 
+    % Pruefe fuer jeden Knoten in welchem Element er liegt
     for ind= 1:size(tri__sd{sd},1)
         element = tri__sd{sd}(ind,:);
         element_corners_x = vert__sd{sd}(element,1);
@@ -51,7 +73,11 @@ for i = 1:2
         in = inpolygon(X,Y,element_corners_x,element_corners_y);
         X_element(in) = ind;
     end
-    input_cell{i} = rhoTriSD{sd}(X_element);
+    % Extrahiere den rho Wert fuer jeden Knoten entsprechend fuer in
+    % welchem Element er liegt.
+    input_cell{i} = rhoTriSD{sd}(X_element)';
+    
+    % Plotbefehle zum ueberpruefen
 %     scatter(X,Y)
 %     str = compose('%g',1:length(X));
 %     text(X,Y,str,'HorizontalAlignment','left')
