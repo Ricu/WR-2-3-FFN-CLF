@@ -171,8 +171,7 @@ for case_id = 1:n_cases
             label(edgeID) = 2;
             continue
         else
-            generate_input_2(edgeID,edgesSD,rhoTriSD,vert__sd,tri__sd)
-            input{edgeID} = generate_input(edgeID,edgesSD,maxRhoVert,l2g__sd);
+            input{edgeID} = generate_input(edgeID,edgesSD,rhoTriSD,vert__sd,tri__sd);
             label(edgeID) = generate_label(edgeID,edgesPrimalGlobal,cGamma,edgesSD,cLocalPrimal,cB,cBskal,cInner,cK,TOL);
         end
         fprintf("Kante %2i bzgl. der TG (%2i,%2i) erhaelt das Label %i\n",edgeID,edgesSD(edgeID,1),edgesSD(edgeID,2),label(edgeID))
@@ -228,7 +227,7 @@ end
 %             label(edgeID) = 2;
 %             continue
 %         else
-%             input{edgeID} = generate_input(edgeID,edgesSD,maxRhoVert,l2g__sd);
+%             input{edgeID} = generate_input(edgeID,edgesSD,rhoTriSD,vert__sd,tri__sd);
 %             label(edgeID) = generate_label(edgeID,edgesPrimalGlobal,cGamma,edgesSD,cLocalPrimal,cB,cBskal,cInner,cK,TOL);
 %         end
 %         fprintf("Kante %2i bzgl. der TG (%2i,%2i) erhaelt das Label %i\n",edgeID,edgesSD(edgeID,1),edgesSD(edgeID,2),label(edgeID))
@@ -290,7 +289,7 @@ end
 %             label(edgeID) = 2;
 %             continue
 %         else
-%             input{edgeID} = generate_input(edgeID,edgesSD,maxRhoVert,l2g__sd);
+%             input{edgeID} = generate_input(edgeID,edgesSD,rhoTriSD,vert__sd,tri__sd);
 %             label(edgeID) = generate_label(edgeID,edgesPrimalGlobal,cGamma,edgesSD,cLocalPrimal,cB,cBskal,cInner,cK,TOL);
 %         end
 %         fprintf("Kante %2i bzgl. der TG (%2i,%2i) erhaelt das Label %i\n",edgeID,edgesSD(edgeID,1),edgesSD(edgeID,2),label(edgeID))
@@ -347,7 +346,7 @@ end
 %             label(edgeID) = 2;
 %             continue
 %         else
-%             input{edgeID} = generate_input(edgeID,edgesSD,maxRhoVert,l2g__sd);
+%             input{edgeID} = generate_input(edgeID,edgesSD,rhoTriSD,vert__sd,tri__sd);
 %             label(edgeID) = generate_label(edgeID,edgesPrimalGlobal,cGamma,edgesSD,cLocalPrimal,cB,cBskal,cInner,cK,TOL);
 %         end
 %         fprintf("Kante %2i bzgl. der TG (%2i,%2i) erhaelt das Label %i\n",edgeID,edgesSD(edgeID,1),edgesSD(edgeID,2),label(edgeID))

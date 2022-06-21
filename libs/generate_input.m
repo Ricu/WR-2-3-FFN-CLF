@@ -1,4 +1,4 @@
-function [input] = generate_input_2(edgeID,edgesSD,rhoTriSD,vert__sd,tri__sd)
+function [input] = generate_input(edgeID,edgesSD,rhoTriSD,vert__sd,tri__sd)
 
 sd1 = edgesSD(edgeID,1);
 sd2 = edgesSD(edgeID,2);
@@ -52,7 +52,7 @@ for i = 1:2
         X_element(in) = ind;
     end
     input_cell{i} = rhoTriSD{sd}(X_element);
-    scatter(X,Y)
+%     scatter(X,Y)
 %     str = compose('%g',1:length(X));
 %     text(X,Y,str,'HorizontalAlignment','left')
 end
