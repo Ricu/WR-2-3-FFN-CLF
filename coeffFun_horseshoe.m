@@ -18,13 +18,13 @@ indSt = indySt & indxSt;  %Logischer Vektor, welche Knoten in den Streifen liege
 indHuf = false(size(x)); %Logischer Vektor, welche Knoten im Hufeisen liegen
                          %initialisiere mit logical false fuer x- und y-Koordinate
 for j = 0:N-1   %iteriere ueber TG in x-Richtung
+    bool3 = SD_size*j + h*position;
     for i = 1:N-1   %iteriere ueber y-Koordinaten
-        bool3 = SD_size*j + h*position;
         bool4 = SD_size*i;
-        indx1 = ((bool3 <= x) & (x <= bool3 +h)) | ((bool3 +2*h <= x) & (x <= bool3 +3*h));
+        indx1 = ((bool3 <= x) & (x <= bool3 +h +10^6)) | ((bool3 +2*h <= x) & (x <= bool3 +3*h));
         indy1 = (bool4 - h*hight <= y) & (y <= bool4 + h*hight);
         indHuf = indHuf | (indx1&indy1);
-        indx2 = (bool3 +h <= x) & (x <= bool3 +2*h);
+        indx2 = (bool3 <= x) & (x <= bool3 +3*h);
         indy2 = (bool4 -2*h <= y) & (y <= bool4 -h);
         indHuf = indHuf | (indx2&indy2);
     end
