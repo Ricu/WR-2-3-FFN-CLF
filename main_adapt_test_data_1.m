@@ -53,9 +53,17 @@ rhoMax = 10^6;
 
 %Parameter fuer Hufeisen/Streifen Triangulierung
 yStripeLim = [0.1,0.9];
+<<<<<<< HEAD
 position = 6;
 width = 3;
 hight = 5;
+=======
+position = 2;
+width = 1;
+hight = 2;
+
+coeffFun = @(vertices) coeffFun_horseshoe(vert(:,1),vert(:,2),N,n,yStripeLim,position,width,hight);
+>>>>>>> e136c1af6a91ff2b5a43d51d51306e5dc887220c
 
 elements = @(vertices) coeffFun_horseshoe(tri,vert(:,1),vert(:,2),N,n,yStripeLim,position,width,hight);
 markedElements = elements(vert);

@@ -18,7 +18,6 @@ numVert = length(vert);
 %% Definiere Koeffizientenfunktion auf den Elementen
 markedVertices = find(f_coeff(vert)); % Knotenindizes der markierten Knoten
 
-
 % Idee: direkt die markedElements zurueckgeben lassen: die elementliste in
 % knoten indizes uebersetzen, reshapen. markierung prüfen -> zurueck
 % reshapen -> mittels any die elemente markieren. In der FKT: bei nargout =
