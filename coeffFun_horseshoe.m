@@ -1,4 +1,4 @@
-function [markedVertices] = coeffFun_horseshoe(x,y,N,n,yStripeLim,position,width,hight)
+function [markedVertices] = coeffFun_horseshoe(vert,x,y,N,n,yStripeLim,position,width,hight)
 assert(all(size(x) == size(y)),'Die Vektoren x und y haben unterschiedliche Groesse')
 SD_size = 1/N;
 h = 1/(N*n);
@@ -30,6 +30,11 @@ for j = 0:N-1   %iteriere ueber TG in x-Richtung
     end
 end
 markedVertices = indSt | indHuf;
+
+
+%% Plotten des Gitters mit Kanal
+figure(2);
+scatter(vert(markedVertices,1),vert(markedVertices,2),[],"r") % Dirichletknoten markieren
 
 end
 
