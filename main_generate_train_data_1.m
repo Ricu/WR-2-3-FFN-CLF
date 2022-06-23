@@ -3,7 +3,7 @@ addpath('libs')
 export = 0;
 plot_grid = 1;   % Auswahl: Plotten der Triangulierung mit Kanal-Koeffizientenfunktion
 
-fprintf("############ Erstelle Testdaten Start ############\n")
+fprintf("############ Erstelle Trainingsdaten Start ############\n")
 fprintf("Startzeit %s\n", datestr(datetime))
 if export
     fprintf("Die Daten werden gespeichert\n")
@@ -161,7 +161,7 @@ for case_id = 1:n_cases
     end
     skipped_edges = nnz(label == 2);
     fprintf("Fuer das gegebene Gitter wurden %i (%4.1f%%) Kanten uebersprungen\n",skipped_edges,skipped_edges/numEdges*100)
-    % Fuege neue Daten an den trainingsdatensatz an
+    % Fuege neue Daten an den Trainingsdatensatz an
     output_cell{case_id} = [cell2mat(input),label(label ~= 2)];
 end
 
