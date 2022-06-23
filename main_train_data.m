@@ -42,7 +42,7 @@ rhoMin = 1;
 
 %Parameter fuer die Kanalstruktur
 position = -2:2;
-width = -2:2;
+width = 0:2:8;
 number = 1:5;
 
 %Parameter fuer die Blockstruktur
@@ -57,12 +57,12 @@ numrand = 0:5:100;
 numsub = 0:2:N^2;
 
 %Beispielparameter zum Testen
-positionC = position(1);
-widthC = width(4);
-numberC = number(1);
+positionC = position(3);
+widthC = width(5);
+numberC = number(2);
 propB1 = prop1(2);
 propB2 = prop2(2);
-difB = dif(3);
+difB = dif(4);
 
 numRand = numrand(15);
 numSub = numsub(5);

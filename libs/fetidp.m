@@ -249,9 +249,9 @@ if strcmp(constraint_type,'adaptive') || strcmp(constraint_type,'non-adaptive') 
     if strcmp(constraint_type,'adaptive') || strcmp(constraint_type,'adaptive-improved')
         cU=cell(1,numEdges);
         for edgeID = 1:numEdges
-            if strcmp(constraint_type,'adaptive-improved') %&& label == 0
-                continue
-            end
+%             if strcmp(constraint_type,'adaptive-improved') %&& label == 0
+%                 continue
+%             end
             %% Assemblierungmatrix R_ij
             nPrimal = length(edgesPrimalGlobal{edgeID}); % Anzahl primaler Knoten auf der Kante
             nGamma = [nnz(cGamma{edgesSD(edgeID,1)}),nnz(cGamma{edgesSD(edgeID,2)})]; % Anzahl Interfaceknoten pro TG

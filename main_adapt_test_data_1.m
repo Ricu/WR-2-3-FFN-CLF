@@ -57,7 +57,7 @@ position = 2;
 width = 1;
 hight = 2;
 
-coeffFun = @(vertices) coeffFun_horseshoe(vert(:,1),vert(:,2),N,n,yStripeLim,position,width,hight);
+coeffFun = @(vertices) coeffFun_horseshoe(vert,vert(:,1),vert(:,2),N,n,yStripeLim,position,width,hight);
 
 % Definiere Koeffizient auf den Elementen (und teilgebietsweise);
 % maximalen Koeffizienten pro Knoten (und teilgebietsweise)
