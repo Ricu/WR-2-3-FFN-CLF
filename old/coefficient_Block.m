@@ -17,26 +17,39 @@ numVert = length(vert);
 
 %% Definiere Koeffizientenfunktion auf den Elementen
 SD_size = 1/N;
-propStripes = SD_size/(2*numberC+1); %Gibt an in wie viele Teile das TG vom Kanal geteilt wird
 
-invindx = false(numVert,1);  %initialisiere mit logical false fuer inverse x-Koordinate
+%Bloecke fuer jedes zweite TG spaltenweise ab 1.Spalte
+indx = false(numVert,1);   %initialisiere mit logical false fuer x-Koordinate
 for j = 0:2:N-2
-    bool1 = (propB1+j)*SD_size;
-    bool2 = (propB2+j+1)*SD_size;
-    invindx = invindx | (bool1 <= vert(:,1)) & (vert(:,1) <= bool2);
+    bool1 = j*SD_size;
+    bool2 = (propB1+j)*SD_size;
+    indx = indx | (bool1 <= vert(:,1)) & (vert(:,1) <= bool2);
 end
-indx = not(invindx);
+indy = false(numVert,1);  %initialisiere mit logical false fuer y-Koordinate
+for i = 0:N-1
+    bool3 = (i+0.5)*SD_size + h*(positionC -0.5*widthC);
+    bool4 = (i+0.5)*SD_size + h*(positionC +0.5*widthC);
+    indy = indy | (bool3 <= vert(:,2)) & (vert(:,2) <= bool4);
+end
+indBlock1 = (indx&indy);
 
-indy = false(numVert,1);    %initialisiere mit logical false fuer y-Koordinate
-for j = 0:N-1
-    for i = 1:numberC
-        bool3 = (2*i-1)*propStripes + j*SD_size + h*(positionC-mod(j,2)*difB);
-        bool4 = 2*i*propStripes + j*SD_size + h*(positionC+widthC-mod(j,2)*difB);
-        indy = indy | (bool3 <= vert(:,2)) & (vert(:,2) <= bool4); 
-    end
+%Bloecke fuer jedes zweite TG spaltenweise ab 2.Spalte
+indx = false(numVert,1);   %initialisiere mit logical false fuer x-Koordinate
+for j = 1:2:N-1
+    bool1 = (propB2+j)*SD_size;
+    bool2 = (1+j)*SD_size;
+    indx = indx | (bool1 <= vert(:,1)) & (vert(:,1) <= bool2);
 end
-indVertCanal = indy & indx;  % Logischer Vektor, welche Knoten im Kanal liegen
-numVertCanal = find(indVertCanal); % Knotennummern der Knoten, die im Kanal liegen
+indy = false(numVert,1);  %initialisiere mit logical false fuer y-Koordinate
+for i = 0:N-1
+    bool3 = (i+0.5)*SD_size + h*(positionC -0.5*widthC +difB);
+    bool4 = (i+0.5)*SD_size + h*(positionC +0.5*widthC +difB);
+    indy = indy | (bool3 <= vert(:,2)) & (vert(:,2) <= bool4);
+end
+indBlock2 = (indx&indy);
+
+indBlock = indBlock1|indBlock2;
+numVertCanal = find(indBlock); % Knotennummern der Knoten, die maximalen Koeffizienten haben
 
 rhoTri = rhoMin*ones(numTri,1); % Koeffizient (zuerst) auf allen Elementen = Koeffizient (gleich) auf Elementen außerhalb des Kanals
 
