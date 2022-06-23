@@ -79,15 +79,15 @@ prop1Bound = 0:0.25:1;
 prop2Bound = 0:0.25:1;
 
 % Erstelle die Parameterstruktur
-param_names = ["yOffset","width","nStrips","rhoMin","rhoMax","dif","prop1","prop2"];
-sample_parameters = generateSampleParameters(nRandSamples,param_names,yOffsetBound,widthBound,nStripsBound,rhoBound,rhoBound,difBound,prop1Bound,prop2Bound);
+param_names = ["yOffset","width","rhoMin","rhoMax","dif","prop1","prop2"];
+sample_parameters = generateSampleParameters(nRandSamples,param_names,yOffsetBound,widthBound,rhoBound,rhoBound,difBound,prop1Bound,prop2Bound);
 
 for sampleID = 1:length(sample_parameters)
     yOffset = sample_parameters(sampleID).yOffset;
     width   = sample_parameters(sampleID).width;
-    nStrips = sample_parameters(sampleID).nStrips;
+%     nStrips = sample_parameters(sampleID).nStrips;
 
-    coeffFun_cell{coeffFun_counter} = @(vertices) coeffFun_block(vertices(:,1), vertices(:,2), N, n, yOffset,width,nStrips,dif,prop1,prop2);
+    coeffFun_cell{coeffFun_counter} = @(vertices) coeffFun_block(vertices(:,1), vertices(:,2), N, n, yOffset,width,dif,prop1,prop2);
     parameter_cell{coeffFun_counter,1}  = "Blocks";
     parameter_cell{coeffFun_counter,2}  = param_names;
     parameter_cell{coeffFun_counter,3}  = sample_parameters(sampleID);
