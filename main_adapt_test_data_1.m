@@ -95,4 +95,3 @@ end
 rowNames = ["Anzahl Iterationen","Konditionszahl"];
 T_results = cell2table([iters';kappa_ests'],"RowNames",rowNames,"VariableNames",method_type{:,2}');
 disp(T_results)
-
