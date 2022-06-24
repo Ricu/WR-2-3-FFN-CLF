@@ -134,7 +134,8 @@ for case_id = 1:n_cases
     % maximalen Koeffizienten pro Knoten (und teilgebietsweise)
     rhoMin = parameter_cell{case_id,3}.rhoMin;
     rhoMax = parameter_cell{case_id,3}.rhoMax;
-    [rhoTri,rhoTriSD,maxRhoVert,maxRhoVertSD] = getCoefficientMatrices(coeffFun_cell{case_id},rhoMax,rhoMin,vert,tri,logicalTri__sd,plot_grid);
+    base = 'verts';
+    [rhoTri,rhoTriSD,maxRhoVert,maxRhoVertSD] = getCoefficientMatrices(coeffFun_cell{case_id},base,rhoMax,rhoMin,vert,tri,logicalTri__sd,plot_grid);
     fprintf("Benoetigte Zeit: Aufstellen der Koeffizientenmatrizen: %5fs ",toc)
     rho_struct = struct('rhoTriSD',{rhoTriSD},'maxRhoVert',{maxRhoVert},'maxRhoVertSD',{maxRhoVertSD});
 

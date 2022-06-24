@@ -1,4 +1,4 @@
-function [rhoTri,rhoTriSD,maxRhoVert,maxRhoVertSD] = getCoefficientMatrices(f_coeff,rhoMax,rhoMin,vert,tri,logicalTri__sd,plot)
+function [rhoTri,rhoTriSD,maxRhoVert,maxRhoVertSD] = getCoefficientMatrices(f_coeff,base,rhoMax,rhoMin,vert,tri,logicalTri__sd,plot)
 % Input: xCanalLim,yCanalLim: Grenzen des Kanalgebiets in x- und y-Richtung
 % Input: rhoMax,rhoMin: rho im Kanal und außerhalb des Kanals
 % Input: vert,tri: Knoten- und Elementliste
@@ -14,21 +14,25 @@ N = sqrt(numSD);
 numTri = length(tri);
 numVert = length(vert);
 
-
-%% Definiere Koeffizientenfunktion auf den Elementen
-markedVertices = find(f_coeff(vert)); % Knotenindizes der markierten Knoten
-
-% Idee: direkt die markedElements zurueckgeben lassen: die elementliste in
-% knoten indizes uebersetzen, reshapen. markierung prüfen -> zurueck
-% reshapen -> mittels any die elemente markieren. In der FKT: bei nargout =
-% 1 die markierten Knoten, bei nargout = 2 die markierten elemente
-% zurueckgeben
-
-% Erstelle Vektor welcher die Koeffizientenfunktion pro Element angibt. Ein
-% Element gilt als markiert wenn alle zugehörigen Eckknoten markiert sind.
-% Alle markierten Elemente werden auf rhoMax und der Rest auf rhoMin gesetzt.
-rhoTri = rhoMin*ones(numTri,1); 
-markedElements = (sum(ismember(tri,markedVertices),2)==3);
+ %% Definiere Koeffizientenfunktion auf den Elementen
+if strcmp('verts',base)
+    markedVertices = find(f_coeff(vert)); % Knotenindizes der markierten Knoten
+    
+    % Idee: direkt die markedElements zurueckgeben lassen: die elementliste in
+    % knoten indizes uebersetzen, reshapen. markierung prüfen -> zurueck
+    % reshapen -> mittels any die elemente markieren. In der FKT: bei nargout =
+    % 1 die markierten Knoten, bei nargout = 2 die markierten elemente
+    % zurueckgeben
+    
+    % Erstelle Vektor welcher die Koeffizientenfunktion pro Element angibt. Ein
+    % Element gilt als markiert wenn alle zugehörigen Eckknoten markiert sind.
+    % Alle markierten Elemente werden auf rhoMax und der Rest auf rhoMin gesetzt.
+    rhoTri = rhoMin*ones(numTri,1);
+    markedElements = (sum(ismember(tri,markedVertices),2)==3);
+else % strcmp('elements',base)
+    rhoTri = rhoMin*ones(numTri,1);
+    markedElements = find(f_coeff(tri));
+end
 rhoTri(markedElements) = rhoMax;
 
 %% Definiere Koeffizientenfunktion auf den Elementen eines TG

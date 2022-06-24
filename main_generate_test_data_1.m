@@ -1,6 +1,6 @@
 clear; clc;
 addpath('libs')
-export = 1;
+export = 0;
 plot_grid = true;   % Auswahl: Plotten der Triangulierung mit Kanal-Koeffizientenfunktion
 
 %% Erstelle das Gitter
@@ -31,16 +31,17 @@ rhoMax = 10^6;
 
 %Parameter fuer Hufeisen/Streifen Triangulierung
 yStripeLim = [0.1,0.9];
-position = 2;
-width = 1;
-hight = 2;
+position = 6;
+width = 3;
+hight = 5;
 
 % Definiere zu testende Koeffizientenverteilung: 1 -  Hufeisen
-coeffFun = @(vertices) coeffFun_horseshoe(vert,vert(:,1),vert(:,2),N,n,yStripeLim,position,width,hight);
+coeffFun = @(tri) coeffFun_horseshoe(tri,vert(:,1),vert(:,2),N,n,yStripeLim,position,width,hight);
+base = 'elements';
 
 % Definiere Koeffizient auf den Elementen (und teilgebietsweise);
 % maximalen Koeffizienten pro Knoten (und teilgebietsweise)
-[rhoTri,rhoTriSD,maxRhoVert,maxRhoVertSD] = getCoefficientMatrices(coeffFun,rhoMax,rhoMin,vert,tri,logicalTri__sd,plot_grid);
+[rhoTri,rhoTriSD,maxRhoVert,maxRhoVertSD] = getCoefficientMatrices(coeffFun,base,rhoMax,rhoMin,vert,tri,logicalTri__sd,plot_grid);
 rho_struct = struct('rhoTriSD',{rhoTriSD},'maxRhoVert',{maxRhoVert},'maxRhoVertSD',{maxRhoVertSD});
 
 %% Funktion rechte Seite
