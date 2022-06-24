@@ -34,8 +34,8 @@ rhoMax = 10^6;
 %Bilddatei einlesen 
 %ii)
 pic_ii = imread('./resources/img/rho_coeff_multiple_stripes.png');
-pic_ii_bw = pic_ii(:,:,1)'; %benoetigen nur einen Kanal, da schwarz-weiss Bild
-num_pixel_ii = length(pic_ii_bw); %Anzahl Pixel je Dimension
+pic_ii_bw = pic_ii(:,:,1)'; % Nur ein Kanal, da schwarz-weiss Bild
+num_pixel_ii = length(pic_ii_bw); % Anzahl Pixel je Dimension
 
 %Erstelle Koeffizientenfunktion fuer Gitter ii)
 [elements] = coeffFun_pixel(vert(:,1),vert(:,2),tri,rhoMax,rhoMin,pic_ii_bw,num_pixel_ii);

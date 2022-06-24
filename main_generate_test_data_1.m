@@ -1,13 +1,13 @@
 clear; clc;
 addpath('libs')
-export = 0;
+export = 1;         % Auswahl: Testdaten abspeichern
 plot_grid = true;   % Auswahl: Plotten der Triangulierung mit Kanal-Koeffizientenfunktion
 
 %% Erstelle das Gitter
 n = 40;         % 2*n^2 Elemente pro Teilgebiet
 N = 4;          % Partition in NxN quadratische Teilgebiete
-H = 1/N;
-h = 1/(N*n);
+H = 1/N;        % Schrittweite: Teilgebiete
+h = 1/(N*n);    % Schrittweite: Elemente
 numSD = N^2;    % Anzahl Teilgebiete
 xyLim = [0,1];  % Gebiet: Einheitsquadrat
 
@@ -29,7 +29,7 @@ grid_struct = struct('vert__sd',{vert__sd},'tri__sd',{tri__sd},'l2g__sd',{l2g__s
 rhoMin = 1;
 rhoMax = 10^6;
 
-%Parameter fuer Hufeisen/Streifen Triangulierung
+% Parameter fuer die Koeffizientenverteilung
 yStripeLim = [0.1,0.9];
 position = 6;
 width = 3;
@@ -37,11 +37,11 @@ hight = 5;
 
 % Definiere zu testende Koeffizientenverteilung: 1 -  Hufeisen
 coeffFun = @(tri) coeffFun_horseshoe(tri,vert(:,1),vert(:,2),N,n,yStripeLim,position,width,hight);
-base = 'elements';
+base = 'elements';  % Die Koeffizientenverteilung ist elementweise definiert
 
-% Definiere Koeffizient auf den Elementen (und teilgebietsweise);
+% Definiere Koeffizientenfunktion auf den Elementen (teilgebietsweise);
 % maximalen Koeffizienten pro Knoten (und teilgebietsweise)
-[rhoTri,rhoTriSD,maxRhoVert,maxRhoVertSD] = getCoefficientMatrices(coeffFun,base,rhoMax,rhoMin,vert,tri,logicalTri__sd,plot_grid);
+[~,rhoTriSD,maxRhoVert,maxRhoVertSD] = getCoefficientMatrices(coeffFun,base,rhoMax,rhoMin,vert,tri,logicalTri__sd,plot_grid);
 rho_struct = struct('rhoTriSD',{rhoTriSD},'maxRhoVert',{maxRhoVert},'maxRhoVertSD',{maxRhoVertSD});
 
 %% Funktion rechte Seite
@@ -63,14 +63,12 @@ for edgeID = 1:numEdges
         input_cell{edgeID} = generate_input(edgeID,edgesSD,rhoTriSD,vert__sd,tri__sd);
     end
 end
-% Fuege neue Daten an den Testdatensatz an
 input_mat = cell2mat(input_cell);
-
 
 %% Daten exportieren
 if export
-    file_name = sprintf("./resources/test_data/%s-test_data_dump.csv",datestr(datetime,'yyyy-mm-dd-HH-MM-SS'));
-    fprintf("Speichere Traininsdaten als %s...",file_name)
+    file_name = sprintf("./resources/test_data/%s-test_data_1_dump.csv",datestr(datetime,'yyyy-mm-dd-HH-MM-SS'));
+    fprintf("Speichere Testdaten als %s...",file_name)
     writematrix(input_mat,file_name);
     fprintf("Fertig!\n")
 end

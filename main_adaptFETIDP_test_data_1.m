@@ -1,15 +1,18 @@
 clear; clc;
 addpath('libs')
-export = 0;
 plot_grid = true;   % Auswahl: Plotten der Triangulierung mit Kanal-Koeffizientenfunktion
 
-%% Definiere zu vergleichende Verfahren
+%% Daten importieren
+file_name = sprintf("./resources/test_data/%s-test_data_1_dump.csv",datestr(datetime,'yyyy-mm-dd-HH-MM-SS'));
+fprintf("Lese Testdaten aus %s...",file_name)
+input = readmatrix(file_name);
 
-method_type = {'Balancing','adaptive-improved';
+%% Definiere zu vergleichende Verfahren
+method_type = {'Dirichlet','none';
+               'Balancing','non-adaptive'
                'Balancing','adaptive';
-               'Dirichlet','non-adaptive';
-               'Balancing','adaptive'};
-         
+               'Balancing','adaptive-improved';
+               };       
  numMethods = length(method_type);
 
 %% Initialisiere Parameter fuer PCG
@@ -78,7 +81,7 @@ tiledlayout('flow')
 
 plot_iteration = false; % Auswahl: Plotten der Loesung nach den ersten Iterationen von PCG
 
-TOL = 100;  % Toleranz zur Auswahl der Eigenwerte  
+TOL = 100;  % Toleranz zur Auswahl der Eigenwerte bei adaptive 
 
 for m = 1:numMethods
     VK = method_type{m,1};
@@ -87,7 +90,6 @@ for m = 1:numMethods
     
     % Loesen des Systems mit FETI-DP mit entsprechendem VK
     [cu,u_FETIDP_glob,~,iters{m},kappa_ests{m}] = fetidp(grid_struct,f,pc_param,rho_struct,pcg_param,plot_iteration);
-    
 end
 
 %% Ergebnistabelle
