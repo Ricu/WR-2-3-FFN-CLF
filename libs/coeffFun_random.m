@@ -1,10 +1,10 @@
-function [markedVertices] = coeffFun_random(x,y,random_percentage,random_state)
+function [markedVertices] = coeffFun_random(x,y,randomPercentage,randomState)
 assert(all(size(x) == size(y)),'Die Vektoren x und y haben unterschiedliche Groesse')
 
 if nargin > 3
-    rng(random_state)
+    rng(randomState)
 end
-markedVertices = rand(size(x)) < random_percentage;
+markedVertices = rand(size(x)) < randomPercentage;
 
 end
 
