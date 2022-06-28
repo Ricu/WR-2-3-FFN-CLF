@@ -1,4 +1,4 @@
-function [markedVertices] = coeffFun_canal(y,N,n,canal_width,n_canals,indexShifty)
+function [markedVertices] = coeffFun_canal(y,N,n,height,n_canals,indexShifty)
 %Input: y   y-Koordinaten aller Knoten
 %Input: N   Anzahl Teilgebiete in einer Richtung
 %Input: n   Feinheit des Gitters
@@ -14,8 +14,8 @@ propStripes = SD_size/(2*n_canals+1); %Gibt an in wie viele Teile das TG vom Kan
 markedVertices = false(size(y));    %initialisiere mit logical false fuer y-Koordinate
 for j = 0:N-1 %iteriere ueber die Teilgebiete in y-Richtung
     for i = 1:n_canals
-        a = (2*i-1)*propStripes + j*SD_size - h * 0.5 * canal_width;
-        b = 2*i*propStripes + j*SD_size + h* 0.5 * canal_width;
+        a = (2*i-1)*propStripes + j*SD_size - h * 0.5 * height;
+        b = 2*i*propStripes + j*SD_size + h* 0.5 * height;
         markedVertices = markedVertices | (a <= y) & (y <= b); 
     end
 end

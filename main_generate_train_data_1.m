@@ -41,7 +41,7 @@ TOL = 100;  % Toleranz zur Auswahl der Eigenwerte
 rng(0);
 % Durchschnittliche Zeit pro Sample ungefaehr 15s -> 4 pro Minute
 % 4 * 60 * 16
-nRandSamples = 600;
+nRandSamples = 1;
 coeffFun_cell = cell(nRandSamples*10,1); % Faktor 10 kommt daher, dass ... ?
 coeffFun_counter = 1;
 parameter_cell = cell(nRandSamples*10,4); % Faktor 4 kommt daher, dass ... ?
@@ -55,7 +55,7 @@ indexShiftBound = 0:2:20; % Array moeglicher Verschiebungen der Elemente mit hoe
 % Erstelle die Parameterstruktur
 param_names = ["affectedSubdomains","rhoMin","rhoMax","indexShiftx","indexShifty"];
 fprintf("%s: Insgesamt %i Parameter zur Auswahl.\n","Constant",length(param_names))
-affectedSubdomains = [6,10];
+affectedSubdomains = [6,10]; % TG-Wahl fuer hoeherem Koeffizienten decken alle moeglichen Faelle ab
 % Samples hier haendisch erstellen
 parameter_const = {affectedSubdomains; affectedSubdomains; affectedSubdomains};
 parameter_const = [parameter_const, num2cell([rhoBound;circshift(rhoBound,1,2);0,0,0;0,0,0])']';
@@ -78,9 +78,9 @@ for sampleID = 1:length(sample_parameters)
 end
 
 %% Streifen Koeffizientenfunktion
-% Test verschiedene parameter fuer die Kanalfunktion
-heightBound = -2:4;  %Breite der Kanaele, 0 ist dabei eine initiale Breite abhaengig von der Anzahl an Kanaelen je TG
-nStripsBound = 1:5; %Gibt die Anazhl Kanaele je TG an
+% Test verschiedene Parameter fuer die Kanalfunktion
+heightBound = -2:4;  % Breite der Kanaele, 0 ist dabei eine initiale Breite abhaengig von der Anzahl an Kanaelen je TG
+nStripsBound = 1:5; % Gibt die Anazhl Kanaele je TG an
 
 % Erstelle die Parameterstruktur
 param_names = ["height","nStrips","rhoMin","rhoMax","indexShifty"];
@@ -89,7 +89,7 @@ sample_parameters = generateSampleParameters(nRandSamples,param_names,heightBoun
 % sample_parameters(6) = cell2struct(num2cell([0; 1; 2; 3; 4]),param_names,1);
 
 for sampleID = 1:length(sample_parameters)
-    height       = sample_parameters(sampleID).height;
+    height      = sample_parameters(sampleID).height;
     nStrips     = sample_parameters(sampleID).nStrips;
     rhoMin      = sample_parameters(sampleID).rhoMin;
     rhoMax      = sample_parameters(sampleID).rhoMax;
@@ -105,11 +105,11 @@ end
 
 %% Bloecke Koeffizientenfunktion
 % Teste verschiedene Parameter fuer die Kanalfunktion
-difBound = -20:2:20; %Gibt an, wie weit die Bloecke in jedem zweiten TG (spaltenweise ab 2.Spalte) 
-                   %voneinander versetzt sind. 0 entspricht keiner Versetzung
-prop1Bound = 0:0.2:1; %Gibt den Anteil an Block in jedem zweiten TG (spaltenweise ab 1.Spalte) an
-prop2Bound = 0:0.2:1; %Gibt den Anteil an Block in jedem zweiten TG (spaltenweise ab 2.Spalte) an
-heightBound = 2:2:38;  %Hoehe der Bloecke
+difBound = -20:2:20; % Gibt an, wie weit die Bloecke in jedem zweiten TG (spaltenweise ab 2.Spalte) 
+                     % voneinander versetzt sind. 0 entspricht keiner Versetzung
+prop1Bound = 0:0.2:1; % Gibt den Anteil an Block in jedem zweiten TG (spaltenweise ab 1.Spalte) an
+prop2Bound = 0:0.2:1; % Gibt den Anteil an Block in jedem zweiten TG (spaltenweise ab 2.Spalte) an
+heightBound = 2:2:38; % Hoehe der Bloecke
 
 % Erstelle die Parameterstruktur
 param_names = ["height","rhoMin","rhoMax","dif","prop1","prop2","indexShiftx","indexShifty"];
@@ -136,10 +136,10 @@ end
 
 %% Zufalls - Bloecke Koeffizientenfunktion
 % Test verschiedene parameter fuer die Kanalfunktion
-widthBound      =  2:1:10; %Breite der Bloecke mit Faktor der Schrittweite
-heightBound     =  2:1:10; %Hoehe der Bloecke mit Faktor der Schrittweite
-varianceBound   =  0:1: 5; %positive Varianz in Breite und Hoehe
-nBlocksBound    = 10:10:70; %Anzahl an random erstellten Bloecken
+widthBound      =  2:1:10; % Breite der Bloecke mit Faktor der Schrittweite
+heightBound     =  2:1:10; % Hoehe der Bloecke mit Faktor der Schrittweite
+varianceBound   =  0:1:5;  % positive Varianz in Breite und Hoehe
+nBlocksBound    = 10:10:70; % Anzahl an random erstellten Bloecken
 
 % Erstelle die Parameterstruktur
 param_names = ["nBlocks","height","heightVariance","width","widthVariance","rhoMin","rhoMax","indexShiftx","indexShifty"];
