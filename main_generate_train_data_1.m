@@ -46,7 +46,7 @@ coeffFun_cell = cell(nRandSamples*10,1);
 coeffFun_counter = 1;
 parameter_cell = cell(nRandSamples*10,4);
 
-rhoBound = 10.^[0,3,6];
+rhoBound = 10.^[0,6];
 indexShiftBound = 0:2:20;
 
 %% Konstante Koeffizientenfunktion
