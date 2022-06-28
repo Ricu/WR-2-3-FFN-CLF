@@ -6,10 +6,12 @@ function [markedVertices] = coeffFun_block(x,y,N,n,prop1,prop2,dif,hight,indexSh
 %Input: prop1    Anteil des Blocks in x-Richtung im zugehoerigen TG (jedes zweite ab 1.Spalte)
 %Input: prop2    Anteil des Blocks in x-Richtung im zugehoerigen TG (jedes zweite ab 2.Spalte)
 %Input: dif    Versetzung der Bloecke spaltenweise in den TG
-%Input: hight    Breite des Kanals, Wert von 0 entspricht der initialen Breite und ist abhaengig von der Anzahl an Kanaelen
+%Input: hight    Hoehe der Bloecke
+%Input: indexShiftx    Verschiebt die Kaneale in x-Richtung
 %Input: indexShifty    Verschiebt die Kaneale in y-Richtung
 
 %Output: markedVertices    Gibt an welchen Knoten der maximale Koeffizient zugewiesen wird
+
 assert(all(size(x) == size(y)),'Die Vektoren x und y haben unterschiedliche Groesse')
 SD_size = 1/N;
 h = 1/(N*n);

@@ -6,6 +6,7 @@ function [markedVertices] = coeffFun_canal(y,N,n,canal_width,n_canals,indexShift
 %Input: indexShifty    Verschiebt die Kaneale in y-Richtung
 
 %Output: markedVertices    Gibt an welchen Knoten der maximale Koeffizient zugewiesen wird
+
 SD_size = 1/N;
 h = 1/(N*n);
 propStripes = SD_size/(2*n_canals+1); %Gibt an in wie viele Teile das TG vom Kanal geteilt wird

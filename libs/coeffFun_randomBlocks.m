@@ -1,4 +1,18 @@
 function [markedVertices] = coeffFun_randomBlocks(x,y,N,n,n_blocks,widthBound,heightBound,indexShiftx,indexShifty)
+%Input: x   x-Koordinaten aller Knoten
+%Input: y   y-Koordinaten aller Knoten
+%Input: N   Anzahl Teilgebiete in einer Richtung
+%Input: n   Feinheit des Gitters
+%Input: n_blocks   Anzahl an random erstellten Bloecken
+%Input: prop1    Anteil des Blocks in x-Richtung im zugehoerigen TG (jedes zweite ab 1.Spalte)
+%Input: prop2    Anteil des Blocks in x-Richtung im zugehoerigen TG (jedes zweite ab 2.Spalte)
+%Input: dif    Versetzung der Bloecke spaltenweise in den TG
+%Input: hight    Hoehe der Bloecke
+%Input: indexShiftx    Verschiebt die Kaneale in x-Richtung
+%Input: indexShifty    Verschiebt die Kaneale in y-Richtung
+
+%Output: markedVertices    Gibt an welchen Knoten der maximale Koeffizient zugewiesen wird
+
 assert(all(size(x) == size(y)),'Die Vektoren x und y haben unterschiedliche Groesse')
 
 numCoord = N*n+1;
