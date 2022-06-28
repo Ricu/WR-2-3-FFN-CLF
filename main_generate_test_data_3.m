@@ -36,11 +36,11 @@ rhoMax = 10^6;
 
 % Aufstellen der zu testenden Koeffizientenverteilung: 3 -  Kreise
 coeffFun = @(tri) coeffFun_pixel(vert(:,1),vert(:,2),tri,rhoMax,rhoMin,pic_bw,num_pixel);
-base = 'elements';  % Die Koeffizientenverteilung ist elementweise definiert
+markerType = 'elements';  % Die Koeffizientenverteilung ist elementweise definiert
 
 % Definiere Koeffizientenfunktion auf den Elementen (teilgebietsweise);
 % maximalen Koeffizienten pro Knoten (und teilgebietsweise)
-[~,rhoTriSD,maxRhoVert,maxRhoVertSD] = getCoefficientMatrices(coeffFun,base,rhoMax,rhoMin,vert,tri,logicalTri__sd,plot_grid);
+[~,rhoTriSD,maxRhoVert,maxRhoVertSD] = getCoefficientMatrices(coeffFun,markerType,rhoMax,rhoMin,vert,tri,logicalTri__sd,plot_grid);
 rho_struct = struct('rhoTriSD',{rhoTriSD},'maxRhoVert',{maxRhoVert},'maxRhoVertSD',{maxRhoVertSD});
 
 %% Funktion rechte Seite

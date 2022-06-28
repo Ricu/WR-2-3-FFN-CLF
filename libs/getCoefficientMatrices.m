@@ -1,4 +1,4 @@
-function [rhoTri,rhoTriSD,maxRhoVert,maxRhoVertSD] = getCoefficientMatrices(f_coeff,base,rhoMax,rhoMin,vert,tri,logicalTri__sd,plot)
+function [rhoTri,rhoTriSD,maxRhoVert,maxRhoVertSD] = getCoefficientMatrices(f_coeff,markerType,rhoMax,rhoMin,vert,tri,logicalTri__sd,plot)
 % Input: xCanalLim,yCanalLim: Grenzen des Kanalgebiets in x- und y-Richtung
 % Input: rhoMax,rhoMin: rho im Kanal und außerhalb des Kanals
 % Input: vert,tri: Knoten- und Elementliste
@@ -15,7 +15,7 @@ numTri = length(tri);
 numVert = length(vert);
 
  %% Definiere Koeffizientenfunktion auf den Elementen
-if strcmp('verts',base)
+if strcmp('verts',markerType)
     markedVertices = find(f_coeff(vert)); % Knotenindizes der markierten Knoten
     
     % Idee: direkt die markedElements zurueckgeben lassen: die elementliste in
@@ -29,9 +29,11 @@ if strcmp('verts',base)
     % Alle markierten Elemente werden auf rhoMax und der Rest auf rhoMin gesetzt.
     rhoTri = rhoMin*ones(numTri,1);
     markedElements = (sum(ismember(tri,markedVertices),2)==3);
-else % strcmp('elements',base)
+elseif strcmp('elements',markerType)
     rhoTri = rhoMin*ones(numTri,1);
     markedElements = find(f_coeff(tri));
+else
+    error('Ungueltigen Markertyp angegeben.')
 end
 rhoTri(markedElements) = rhoMax;
 

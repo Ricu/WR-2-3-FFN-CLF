@@ -1,9 +1,9 @@
-function [elements] = coeffFun_horseshoe(tri,x,y,N,n,yStripeLim,position,width,hight)
+function [markedElements] = coeffFun_horseshoe(tri,x,y,N,n,yStripeLim,position,width,hight)
 assert(all(size(x) == size(y)),'Die Vektoren x und y haben unterschiedliche Groesse')
 SD_size = 1/N;
 h = 1/(N*n);
 numTri = size(tri,1);
-elements = false(numTri,1); % Logischer Vektor, welche Elemente hoeheren Koeffizienten haben
+markedElements = false(numTri,1); % Logischer Vektor, welche Elemente hoeheren Koeffizienten haben
 
 tol = 10^(-6); %Toleranz gegen Rundungsfehler
  
@@ -17,7 +17,7 @@ for j = 0:N-1
 end
 indSt = indySt & indxSt;
 vertNum = find(indSt); % Knotennummern der Knoten mit hoehem Koeffizienten
-elements(sum(ismember(tri,vertNum),2)==3) = true;
+markedElements(sum(ismember(tri,vertNum),2)==3) = true;
 
 %Erstelle Hufeisen
 indHuf = false(size(x)); %Logischer Vektor, welche Knoten im Hufeisen liegen
@@ -51,7 +51,7 @@ for j = 0:N-1   %iteriere ueber TG in x-Richtung
         elements3(sum(ismember(tri,vertNum3),2)==3) = true;
 
 
-        elements = elements | (elements1 | elements2 | elements3);
+        markedElements = markedElements | (elements1 | elements2 | elements3);
         indHuf = indHuf | ind1 | ind2 | ind3;
     end
 end

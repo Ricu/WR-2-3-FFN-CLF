@@ -37,11 +37,11 @@ hight = 5;
 
 % Definiere zu testende Koeffizientenverteilung: 1 -  Hufeisen
 coeffFun = @(tri) coeffFun_horseshoe(tri,vert(:,1),vert(:,2),N,n,yStripeLim,position,width,hight);
-base = 'elements';  % Die Koeffizientenverteilung ist elementweise definiert
+markerType = 'elements';  % Die Koeffizientenverteilung ist elementweise definiert
 
 % Definiere Koeffizientenfunktion auf den Elementen (teilgebietsweise);
 % maximalen Koeffizienten pro Knoten (und teilgebietsweise)
-[~,rhoTriSD,maxRhoVert,maxRhoVertSD] = getCoefficientMatrices(coeffFun,base,rhoMax,rhoMin,vert,tri,logicalTri__sd,plot_grid);
+[~,rhoTriSD,maxRhoVert,maxRhoVertSD] = getCoefficientMatrices(coeffFun,markerType,rhoMax,rhoMin,vert,tri,logicalTri__sd,plot_grid);
 rho_struct = struct('rhoTriSD',{rhoTriSD},'maxRhoVert',{maxRhoVert},'maxRhoVertSD',{maxRhoVertSD});
 
 %% Funktion rechte Seite
