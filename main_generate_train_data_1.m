@@ -108,15 +108,15 @@ difBound = -4:4; %Gibt an, wie weit die Bloecke in jedem zweiten TG (spaltenweis
                    %voneinander versetzt sind. 0 entspricht keiner Versetzung
 prop1Bound = 0:0.25:1; %Gibt den Anteil an Block in jedem zweiten TG (spaltenweise ab 1.Spalte) an
 prop2Bound = 0:0.25:1; %Gibt den Anteil an Block in jedem zweiten TG (spaltenweise ab 2.Spalte) an
-%widthBound = -2:2;  %Breite der Kanaele, 0 ist dabei eine initiale Breite abhaengig von der Anzahl an Kanaelen je TG
- 
+hightBound = 2:2:8;  %Hoehe der Bloecke
+
 % Erstelle die Parameterstruktur
-param_names = ["width","rhoMin","rhoMax","dif","prop1","prop2","indexShiftx","indexShifty"];
+param_names = ["hight","rhoMin","rhoMax","dif","prop1","prop2","indexShiftx","indexShifty"];
 fprintf("%s: Insgesamt %8i Parameter zur Auswahl.\n","Blocks",length(param_names))
-sample_parameters = generateSampleParameters(nRandSamples,param_names,widthBound,rhoBound,rhoBound,difBound,prop1Bound,prop2Bound,indexShiftBound,indexShiftBound);
+sample_parameters = generateSampleParameters(nRandSamples,param_names,hightBound,rhoBound,rhoBound,difBound,prop1Bound,prop2Bound,indexShiftBound,indexShiftBound);
 
 for sampleID = 1:length(sample_parameters)
-    width       = sample_parameters(sampleID).width;
+    hight       = sample_parameters(sampleID).hight;
     dif         = sample_parameters(sampleID).dif;
     prop1       = sample_parameters(sampleID).prop1;
     prop2       = sample_parameters(sampleID).prop2;
@@ -125,10 +125,10 @@ for sampleID = 1:length(sample_parameters)
     indexShiftx = sample_parameters(sampleID).indexShiftx;
     indexShifty = sample_parameters(sampleID).indexShifty;
 
-    coeffFun_cell{coeffFun_counter} = @(vertices) coeffFun_block(vertices(:,1), vertices(:,2), N, n, prop1,prop2,dif,width,indexShiftx,indexShifty);
+    coeffFun_cell{coeffFun_counter} = @(vertices) coeffFun_block(vertices(:,1), vertices(:,2), N, n, prop1,prop2,dif,hight,indexShiftx,indexShifty);
     parameter_cell{coeffFun_counter,1}  = "Blocks";
     parameter_cell{coeffFun_counter,2}  = param_names;
-    parameter_cell{coeffFun_counter,3}  = [width,rhoMin,rhoMax,dif,prop1,prop2,indexShiftx,indexShifty];
+    parameter_cell{coeffFun_counter,3}  = [hight,rhoMin,rhoMax,dif,prop1,prop2,indexShiftx,indexShifty];
     parameter_cell{coeffFun_counter,4}  = sample_parameters(sampleID);
     coeffFun_counter = coeffFun_counter + 1;
 end
