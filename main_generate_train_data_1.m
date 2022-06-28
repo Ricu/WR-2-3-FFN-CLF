@@ -14,6 +14,8 @@ end
 %% Funktion rechte Seite
 f = @(vert,y) ones(size(vert));   % Rechte Seite der DGL
 
+%% Lade vertTris fuer schnellere Berechnung der coeff-funktion
+vertTris = load("./libs/precomputed_vertTris.mat").vertTris;
 %% Erstelle das Gitter
 n = 40;         % 2*n^2 Elemente pro Teilgebiet
 N = 4;          % Partition in NxN quadratische Teilgebiete
@@ -58,7 +60,7 @@ TOL = 100;  % Toleranz zur Auswahl der Eigenwerte
 rng(0);
 % Durchschnittliche Zeit pro Sample ungefaehr 15s -> 4 pro Minute
 % 4 * 60 * 16
-nRandSamples = 1;
+nRandSamples = 5;
 coeffFun_cell = cell(nRandSamples*10,1); % Faktor 10 kommt daher, dass ... ?
 coeffFun_counter = 1;
 parameter_cell = cell(nRandSamples*10,4); % Faktor 4 kommt daher, dass ... ?
@@ -224,13 +226,13 @@ for case_id = 1:n_cases
     rhoMin = parameter_cell{case_id,4}.rhoMin;
     rhoMax = parameter_cell{case_id,4}.rhoMax;
     markerType = 'verts';
-    [rhoTri,rhoTriSD,maxRhoVert,maxRhoVertSD] = getCoefficientMatrices(coeffFun_cell{case_id},markerType,rhoMax,rhoMin,vert,tri,logicalTri__sd,plot_grid);
-    fprintf("Benoetigte Zeit: Aufstellen der Koeffizientenmatrizen: %5fs ",toc(t_coeffFun))
+    [rhoTri,rhoTriSD,maxRhoVert,maxRhoVertSD] = getCoefficientMatrices(coeffFun_cell{case_id},markerType,rhoMax,rhoMin,vert,tri,logicalTri__sd,plot_grid,vertTris);
+    fprintf("Benoetigte Zeit: Aufstellen der Koeffizientenmatrizen: %5fs",toc(t_coeffFun))
     rho_struct = struct('rhoTriSD',{rhoTriSD},'maxRhoVert',{maxRhoVert},'maxRhoVertSD',{maxRhoVertSD});
 
     t_matrices = tic;
     [edgesPrimalGlobal,cGamma,edgesSD,cLocalPrimal,cB,cBskal,cInner,cK,cDirichlet] = setup_matrices(rho_struct,grid_struct,f);
-    fprintf(", Aufstellen des Sprungoperators/Steifigkeitsmatrix: %5fs\n", toc(t_matrices))
+    fprintf(", Sprungoperators/Steifigkeitsmatrix: %5fs\n", toc(t_matrices))
 
     nValidEdges = length(validEdges);
     input = cell(nValidEdges,1);

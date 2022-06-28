@@ -1,4 +1,4 @@
-function [rhoTri,rhoTriSD,maxRhoVert,maxRhoVertSD] = getCoefficientMatrices(f_coeff,markerType,rhoMax,rhoMin,vert,tri,logicalTri__sd,plot)
+function [rhoTri,rhoTriSD,maxRhoVert,maxRhoVertSD] = getCoefficientMatrices(f_coeff,markerType,rhoMax,rhoMin,vert,tri,logicalTri__sd,plot,vertTris)
 % Input: xCanalLim,yCanalLim: Grenzen des Kanalgebiets in x- und y-Richtung
 % Input: rhoMax,rhoMin: rho im Kanal und außerhalb des Kanals
 % Input: vert,tri: Knoten- und Elementliste
@@ -9,6 +9,12 @@ function [rhoTri,rhoTriSD,maxRhoVert,maxRhoVertSD] = getCoefficientMatrices(f_co
 % Output: indElementsCanal: Logischer Vektor, welche Elemente im Kanal liegen
 % Output: maxRhoVert,maxRhoVertSD: maximaler Koeffizient pro Knoten (und teilgebietsweise)
 
+if exist("vertTris","var")
+    assert(length(vertTris) == length(vert),'Unpassendes Gitter fuer das geladene vertTris')
+    loadedVertTris = 1;
+else
+    loadedVertTris = 0;
+end
 numSD = length(logicalTri__sd);
 N = sqrt(numSD);
 numTri = length(tri);
@@ -45,11 +51,16 @@ end
 
 %% Definiere maximalen Koeffizienten pro Knoten
 maxRhoVert = zeros(numVert,1);
-vertTris = cell(numVert,1); 
+if ~loadedVertTris
+    vertTris = cell(numVert,1);
+end
 maxRhoVertSD = cell(numVert,1);
 % [vertTris2,test] = cellfun(@(x) find(x==tri),num2cell(1:numVert),'UniformOutput',false)';
 for i = 1:numVert % Iteriere ueber Knoten
-    [vertTris{i},~,~] = find(i == tri);
+    if ~loadedVertTris
+        [vertTris{i},~,~] = find(i == tri);
+    end
+
     maxRhoVert(i) = max(rhoTri(vertTris{i})); % Maximaler Koeffizient pro Knoten
     
     %% Definiere maximalen Koeffizienten pro Knoten eines TG
