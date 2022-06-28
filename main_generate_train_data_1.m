@@ -77,9 +77,11 @@ end
 
 %% Streifen Koeffizientenfunktion
 % Test verschiedene parameter fuer die Kanalfunktion
-yOffsetBound = -2:2;
-widthBound = -2:2;
-nStripsBound = 1:5;
+yOffsetBound = -4:4;  %Verschiebung der Kanalstruktur, 0 ist dabei die symmetrische Position
+                      %wir verschieben jeweils um Schrittweite h
+widthBound = -2:2;  %Breite der Kanaele, 0 ist dabei eine initiale Breite abhaengig von der Anzahl an Kanaelen je TG
+          
+nStripsBound = 1:5; %Gibt die Anazhl Kanaele je TG an
 
 % Erstelle die Parameterstruktur
 param_names = ["yOffset","width","nStrips","rhoMin","rhoMax","indexShiftx","indexShifty"];
@@ -106,9 +108,14 @@ end
 
 %% Bloecke Koeffizientenfunktion
 % Teste verschiedene Parameter fuer die Kanalfunktion
-difBound = -4:2:4;
-prop1Bound = 0:0.25:1;
-prop2Bound = 0:0.25:1;
+difBound = -4:4; %Gibt an, wie weit die Bloecke in jedem zweiten TG (spaltenweise ab 2.Spalte) 
+                   %voneinander versetzt sind. 0 entspricht keiner Versetzung
+prop1Bound = 0:0.25:1; %Gibt den Anteil an Block in jedem zweiten TG (spaltenweise ab 1.Spalte) an
+prop2Bound = 0:0.25:1; %Gibt den Anteil an Block in jedem zweiten TG (spaltenweise ab 2.Spalte) an
+%yOffsetBound = -2:2;  %Verschiebung der Kanalstruktur, 0 ist dabei die symmetrische Position
+                      %wir verschieben jeweils um Schrittweite h
+%widthBound = -2:2;  %Breite der Kanaele, 0 ist dabei eine initiale Breite abhaengig von der Anzahl an Kanaelen je TG
+ 
 
 % Erstelle die Parameterstruktur
 param_names = ["yOffset","width","rhoMin","rhoMax","dif","prop1","prop2","indexShiftx","indexShifty"];
@@ -136,10 +143,10 @@ end
 
 %% Zufalls - Bloecke Koeffizientenfunktion
 % Test verschiedene parameter fuer die Kanalfunktion
-widthBound      =  2: 1: 6; 
-heightBound     =  2: 1: 6; 
-varianceBound   =  0: 1: 5;
-nBlocksBound    = 10:10:70;
+widthBound      =  2: 1: 6; %Breite der Bloecke mit Faktor der Schrittweite
+heightBound     =  2: 1: 6; %Hoehe der Bloecke mit Faktor der Schrittweite
+varianceBound   =  0: 1: 5; %positive Varianz in Breite und Hoehe
+nBlocksBound    = 10:10:70; %Anzahl an random erstellten Bloecken
 
 % Erstelle die Parameterstruktur
 param_names = ["nBlocks","height","heightVariance","width","widthVariance","rhoMin","rhoMax","indexShiftx","indexShifty"];
