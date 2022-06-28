@@ -1,7 +1,7 @@
 clear; clc;
 addpath('libs')
 export = 1;
-plot_grid = 1;   % Auswahl: Plotten der Triangulierung mit Kanal-Koeffizientenfunktion
+plot_grid = 0;   % Auswahl: Plotten der Triangulierung mit Kanal-Koeffizientenfunktion
 
 fprintf("############ Erstelle Trainingsdaten Start ############\n")
 fprintf("Startzeit %s\n", datestr(datetime))
@@ -41,7 +41,7 @@ TOL = 100;  % Toleranz zur Auswahl der Eigenwerte
 rng(0);
 % Durchschnittliche Zeit pro Sample ungefaehr 15s -> 4 pro Minute
 % 4 * 60 * 12
-nRandSamples = 1;
+nRandSamples = 600;
 coeffFun_cell = cell(nRandSamples*10,1);
 coeffFun_counter = 1;
 parameter_cell = cell(nRandSamples*10,4);
