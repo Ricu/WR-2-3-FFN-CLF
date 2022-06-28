@@ -4,10 +4,8 @@ function [markedVertices] = coeffFun_randomBlocks(x,y,N,n,n_blocks,widthBound,he
 %Input: N   Anzahl Teilgebiete in einer Richtung
 %Input: n   Feinheit des Gitters
 %Input: n_blocks   Anzahl an random erstellten Bloecken
-%Input: prop1    Anteil des Blocks in x-Richtung im zugehoerigen TG (jedes zweite ab 1.Spalte)
-%Input: prop2    Anteil des Blocks in x-Richtung im zugehoerigen TG (jedes zweite ab 2.Spalte)
-%Input: dif    Versetzung der Bloecke spaltenweise in den TG
-%Input: hight    Hoehe der Bloecke
+%Input: widthbound    Array mit moeglichen Breiten der Bloecke
+%Input: hightbound    Array mit moeglichen Hoehen der Bloecke
 %Input: indexShiftx    Verschiebt die Kaneale in x-Richtung
 %Input: indexShifty    Verschiebt die Kaneale in y-Richtung
 
@@ -32,8 +30,8 @@ for current_block = 1:n_blocks
     block_width = widthBound(randwidth);
     block_height = heightBound(randheight);
 
-    indx = (vertx - block_width  * h <= x) & (x <= vertx + block_width  * h);
-    indy = (verty - block_height * h <= y) & (y <= verty + block_height * h);
+    indx = (vertx - h*0.5*block_width <= x) & (x <= vertx + h*0.5*block_width);
+    indy = (verty - h*0.5*block_height <= y) & (y <= verty + h*0.5*block_height);
 
     markedVertices = markedVertices | (indx & indy);
 end

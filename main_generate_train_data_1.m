@@ -108,15 +108,15 @@ difBound = -4:4; %Gibt an, wie weit die Bloecke in jedem zweiten TG (spaltenweis
                    %voneinander versetzt sind. 0 entspricht keiner Versetzung
 prop1Bound = 0:0.25:1; %Gibt den Anteil an Block in jedem zweiten TG (spaltenweise ab 1.Spalte) an
 prop2Bound = 0:0.25:1; %Gibt den Anteil an Block in jedem zweiten TG (spaltenweise ab 2.Spalte) an
-hightBound = 2:2:8;  %Hoehe der Bloecke
+heightBound = 2:2:8;  %Hoehe der Bloecke
 
 % Erstelle die Parameterstruktur
-param_names = ["hight","rhoMin","rhoMax","dif","prop1","prop2","indexShiftx","indexShifty"];
+param_names = ["height","rhoMin","rhoMax","dif","prop1","prop2","indexShiftx","indexShifty"];
 fprintf("%s: Insgesamt %8i Parameter zur Auswahl.\n","Blocks",length(param_names))
-sample_parameters = generateSampleParameters(nRandSamples,param_names,hightBound,rhoBound,rhoBound,difBound,prop1Bound,prop2Bound,indexShiftBound,indexShiftBound);
+sample_parameters = generateSampleParameters(nRandSamples,param_names,heightBound,rhoBound,rhoBound,difBound,prop1Bound,prop2Bound,indexShiftBound,indexShiftBound);
 
 for sampleID = 1:length(sample_parameters)
-    hight       = sample_parameters(sampleID).hight;
+    height       = sample_parameters(sampleID).height;
     dif         = sample_parameters(sampleID).dif;
     prop1       = sample_parameters(sampleID).prop1;
     prop2       = sample_parameters(sampleID).prop2;
@@ -125,10 +125,10 @@ for sampleID = 1:length(sample_parameters)
     indexShiftx = sample_parameters(sampleID).indexShiftx;
     indexShifty = sample_parameters(sampleID).indexShifty;
 
-    coeffFun_cell{coeffFun_counter} = @(vertices) coeffFun_block(vertices(:,1), vertices(:,2), N, n, prop1,prop2,dif,hight,indexShiftx,indexShifty);
+    coeffFun_cell{coeffFun_counter} = @(vertices) coeffFun_block(vertices(:,1), vertices(:,2), N, n, prop1,prop2,dif,height,indexShiftx,indexShifty);
     parameter_cell{coeffFun_counter,1}  = "Blocks";
     parameter_cell{coeffFun_counter,2}  = param_names;
-    parameter_cell{coeffFun_counter,3}  = [hight,rhoMin,rhoMax,dif,prop1,prop2,indexShiftx,indexShifty];
+    parameter_cell{coeffFun_counter,3}  = [height,rhoMin,rhoMax,dif,prop1,prop2,indexShiftx,indexShifty];
     parameter_cell{coeffFun_counter,4}  = sample_parameters(sampleID);
     coeffFun_counter = coeffFun_counter + 1;
 end
@@ -165,7 +165,7 @@ for sampleID = 1:length(sample_parameters)
 end
 
 %% Zufalls Koeffizientenfunktion
-% Test verschiedene parameter fuer die Kanalfunktion
+% Teste verschiedene Parameter fuer die Kanalfunktion
 randomPercentageBound = 0.2:0.1:0.5;
 randomStateBound = 1:5;
 
