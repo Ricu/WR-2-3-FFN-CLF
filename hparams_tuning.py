@@ -7,19 +7,25 @@ Created on Thu Jun 16 23:58:30 2022
 Hyperparameter Tuning
 
 """
-
+import numpy as np
 import tensorflow as tf
 import keras_tuner
 import pandas as pd
 import datetime
+import os
 # from tensorboard.plugins.hparams import api as hp
+from  tensorflow import keras
 from sklearn.model_selection import train_test_split
 from tensorflow.keras import layers
+from kerastuner import RandomSearch
+from kerastuner.engine.hyperparameters import HyperParameters
+
 
 # Datensatz laden
-train_data = pd.read_csv('2022-06-17-00-17-57-train_data_dump.csv', header=None)
-X = train_data.iloc[:,:-1].values
-y = train_data.iloc[:,-1:].values
+train_data = pd.read_csv('2022-06-28-11-05-08-train_data_dump.csv', header=None)
+coefficients = train_data.iloc[:,:-1].values
+label = train_data.iloc[:,-1:].values
+print(label)
 
 # Splitte Daten in Test und Trainingsdatensatz auf
 X_train, X_test, y_train, y_test = train_test_split(X,
@@ -35,32 +41,43 @@ normalize = layers.Normalization().adapt(X_train)
 
 def build_model(hp):
 # Simples Modell
-    inputs = layers.Input(shape = (3362,), name = 'input_layer')
-    model = tf.keras.Sequential(inputs)
+    inputs = keras.Input(shape = (3362,), name = 'input_layer')
+    model = keras.Sequential(inputs)
     for i in range(hp.Int("n_layers", 1, 3)):
-        model.add(layers.dense(units=hp.Int(f"units_{i}", 32, 128, step=32),
+        model.add(layers.dense(units=hp.Int(f"units_{i}", min_value=32, max_value=128, step=32),
                                activation = 'sigmoid'
             ))
     model.add(layers.dense(1, activation = 'sigmoid'))
         
-    model.compile(loss = tf.keras.losses.MeanSquaredError(),
-                  ptimizer = tf.keras.optimizers.Adam(),
+    model.compile(loss = keras.losses.MeanSquaredError(),
+                  optimizer = keras.optimizers.Adam(hp.Choice('learning_rate',values=[1e-2, 1e-3])),
                   metrics = ["accuracy"])
     return model
 
 
-hp = keras_tuner.HyperParameters()
+#hp = keras_tuner.HyperParameters()
 
+# Random Search to find best hyperparameters
+tuner_search = RandomSearch(build_model,
+                            objective = 'val_accuracy',
+                            max_trials = 10, directory = 'output', project_name = "sortingEdges")
+tuner_search.search(train_edges,train_labels,epochs=10,validation_split=0.2)
 
+# Best Hyperparameters Determined
+model = tuner_search.get_best_models(num_models=1)[0]
+model.summary()
 
+# Retraining considering the best model hyperparameters
+history = model.fit(train_edges,
+                    train_labels,
+                    epochs = 10,
+                    callbacks = tf.keras.callbacks.TensorBoard(log_dir),
+                    #verbose = 0,
+                    validation_split = 0.2)
 
+# Make predicitions
+predictions = model.predict(test_edges)
 
-clf.fit(X_train,
-        y_train,
-        epochs = 10,
-        callbacks = tf.keras.callbacks.TensorBoard(log_dir),
-        verbose = 0,
-        validation_split = 0.2)
 accuracy = clf.evaluate(X_test,y_test)
 
 

@@ -1,0 +1,3 @@
+"Strip","yOffset,width,nStrips,rhoMin,rhoMax","1,-1,5,1000,1000,,"
+"Blocks","yOffset,width,rhoMin,rhoMax,dif,prop1,prop2","0,-2,1000,1000,2,0.75,0.5"
+"Random Blocks","nBlocks,height,heightVariance,width,widthVariance,rhoMin,rhoMax","60,4,0,6,2,1000,1000"
