@@ -1,11 +1,11 @@
-function [markedVertices] = coeffFun_canal(y,N,n,yOffset,canal_width,n_canals,indexShifty)
+function [markedVertices] = coeffFun_canal(y,N,n,canal_width,n_canals,indexShifty)
 %Input: y   y-Koordinaten aller Knoten
 %Input: N   Anzahl Teilgebiete in einer Richtung
 %Input: n   Feinheit des Gitters
 %Input: canal_width    Breite des Kanals, Wert von 0 entspricht der initialen Breite und ist abhaengig von der Anzahl an Kanaelen
 %Input: indexShifty    Verschiebt die Kaneale in y-Richtung
 
-%Output: 
+%Output: markedVertices    Gibt an welchen Knoten der maximale Koeffizient zugewiesen wird
 SD_size = 1/N;
 h = 1/(N*n);
 propStripes = SD_size/(2*n_canals+1); %Gibt an in wie viele Teile das TG vom Kanal geteilt wird

@@ -77,31 +77,27 @@ end
 
 %% Streifen Koeffizientenfunktion
 % Test verschiedene parameter fuer die Kanalfunktion
-yOffsetBound = -4:4;  %Verschiebung der Kanalstruktur, 0 ist dabei die symmetrische Position
-                      %wir verschieben jeweils um Schrittweite h
 widthBound = -2:2;  %Breite der Kanaele, 0 ist dabei eine initiale Breite abhaengig von der Anzahl an Kanaelen je TG
           
 nStripsBound = 1:5; %Gibt die Anazhl Kanaele je TG an
 
 % Erstelle die Parameterstruktur
-param_names = ["yOffset","width","nStrips","rhoMin","rhoMax","indexShiftx","indexShifty"];
+param_names = ["width","nStrips","rhoMin","rhoMax","indexShifty"];
 fprintf("%s: Insgesamt %8i Parameter zur Auswahl.\n","Strip",length(param_names))
-sample_parameters = generateSampleParameters(nRandSamples,param_names,yOffsetBound,widthBound,nStripsBound,rhoBound,rhoBound,indexShiftBound,indexShiftBound);
+sample_parameters = generateSampleParameters(nRandSamples,param_names,widthBound,nStripsBound,rhoBound,rhoBound,indexShiftBound);
 % sample_parameters(6) = cell2struct(num2cell([0; 1; 2; 3; 4]),param_names,1);
 
 for sampleID = 1:length(sample_parameters)
-    yOffset     = sample_parameters(sampleID).yOffset;
     width       = sample_parameters(sampleID).width;
     nStrips     = sample_parameters(sampleID).nStrips;
     rhoMin      = sample_parameters(sampleID).rhoMin;
     rhoMax      = sample_parameters(sampleID).rhoMax;
-    indexShiftx = sample_parameters(sampleID).indexShiftx;
     indexShifty = sample_parameters(sampleID).indexShifty;
 
-    coeffFun_cell{coeffFun_counter} = @(vertices) coeffFun_canal(vertices(:,2),N,n,yOffset,width,nStrips,indexShiftx,indexShifty);
+    coeffFun_cell{coeffFun_counter} = @(vertices) coeffFun_canal(vertices(:,2),N,n,width,nStrips,indexShifty);
     parameter_cell{coeffFun_counter,1} = "Strip";
     parameter_cell{coeffFun_counter,2} = param_names;
-    parameter_cell{coeffFun_counter,3} = [yOffset,width,nStrips,rhoMin,rhoMax,indexShiftx,indexShifty];
+    parameter_cell{coeffFun_counter,3} = [width,nStrips,rhoMin,rhoMax,indexShifty];
     parameter_cell{coeffFun_counter,4}  = sample_parameters(sampleID);
     coeffFun_counter = coeffFun_counter + 1;
 end
@@ -112,18 +108,14 @@ difBound = -4:4; %Gibt an, wie weit die Bloecke in jedem zweiten TG (spaltenweis
                    %voneinander versetzt sind. 0 entspricht keiner Versetzung
 prop1Bound = 0:0.25:1; %Gibt den Anteil an Block in jedem zweiten TG (spaltenweise ab 1.Spalte) an
 prop2Bound = 0:0.25:1; %Gibt den Anteil an Block in jedem zweiten TG (spaltenweise ab 2.Spalte) an
-%yOffsetBound = -2:2;  %Verschiebung der Kanalstruktur, 0 ist dabei die symmetrische Position
-                      %wir verschieben jeweils um Schrittweite h
 %widthBound = -2:2;  %Breite der Kanaele, 0 ist dabei eine initiale Breite abhaengig von der Anzahl an Kanaelen je TG
  
-
 % Erstelle die Parameterstruktur
-param_names = ["yOffset","width","rhoMin","rhoMax","dif","prop1","prop2","indexShiftx","indexShifty"];
+param_names = ["width","rhoMin","rhoMax","dif","prop1","prop2","indexShiftx","indexShifty"];
 fprintf("%s: Insgesamt %8i Parameter zur Auswahl.\n","Blocks",length(param_names))
-sample_parameters = generateSampleParameters(nRandSamples,param_names,yOffsetBound,widthBound,rhoBound,rhoBound,difBound,prop1Bound,prop2Bound,indexShiftBound,indexShiftBound);
+sample_parameters = generateSampleParameters(nRandSamples,param_names,widthBound,rhoBound,rhoBound,difBound,prop1Bound,prop2Bound,indexShiftBound,indexShiftBound);
 
 for sampleID = 1:length(sample_parameters)
-    yOffset     = sample_parameters(sampleID).yOffset;
     width       = sample_parameters(sampleID).width;
     dif         = sample_parameters(sampleID).dif;
     prop1       = sample_parameters(sampleID).prop1;
@@ -133,10 +125,10 @@ for sampleID = 1:length(sample_parameters)
     indexShiftx = sample_parameters(sampleID).indexShiftx;
     indexShifty = sample_parameters(sampleID).indexShifty;
 
-    coeffFun_cell{coeffFun_counter} = @(vertices) coeffFun_block(vertices(:,1), vertices(:,2), N, n, prop1,prop2,dif,yOffset,width,indexShiftx,indexShifty);
+    coeffFun_cell{coeffFun_counter} = @(vertices) coeffFun_block(vertices(:,1), vertices(:,2), N, n, prop1,prop2,dif,width,indexShiftx,indexShifty);
     parameter_cell{coeffFun_counter,1}  = "Blocks";
     parameter_cell{coeffFun_counter,2}  = param_names;
-    parameter_cell{coeffFun_counter,3}  = [yOffset,width,rhoMin,rhoMax,dif,prop1,prop2,indexShiftx,indexShifty];
+    parameter_cell{coeffFun_counter,3}  = [width,rhoMin,rhoMax,dif,prop1,prop2,indexShiftx,indexShifty];
     parameter_cell{coeffFun_counter,4}  = sample_parameters(sampleID);
     coeffFun_counter = coeffFun_counter + 1;
 end

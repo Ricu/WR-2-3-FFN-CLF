@@ -1,4 +1,13 @@
 function [markedVertices] = coeffFun_block(x,y,N,n,prop1,prop2,dif,width,indexShiftx,indexShifty)
+%Input: x   x-Koordinaten aller Knoten
+%Input: y   y-Koordinaten aller Knoten
+%Input: N   Anzahl Teilgebiete in einer Richtung
+%Input: n   Feinheit des Gitters
+
+%Input: canal_width    Breite des Kanals, Wert von 0 entspricht der initialen Breite und ist abhaengig von der Anzahl an Kanaelen
+%Input: indexShifty    Verschiebt die Kaneale in y-Richtung
+
+%Output: markedVertices    Gibt an welchen Knoten der maximale Koeffizient zugewiesen wird
 assert(all(size(x) == size(y)),'Die Vektoren x und y haben unterschiedliche Groesse')
 SD_size = 1/N;
 h = 1/(N*n);
