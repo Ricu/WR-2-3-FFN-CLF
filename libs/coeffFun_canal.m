@@ -1,4 +1,4 @@
-function [markedVertices] = coeffFun_canal(y,N,n,yOffset,canal_width,n_canals)
+function [markedVertices] = coeffFun_canal(y,N,n,yOffset,canal_width,n_canals,indexShiftx,indexShifty)
 SD_size = 1/N;
 h = 1/(N*n);
 propStripes = SD_size/(2*n_canals+1); %Gibt an in wie viele Teile das TG vom Kanal geteilt wird
@@ -11,5 +11,10 @@ for j = 0:N-1
         markedVertices = markedVertices | (a <= y) & (y <= b); 
     end
 end
+
+markedMatrix = reshape(markedVertices,sqrt(length(y)),sqrt(length(y)));
+markedMatrix= circshift(markedMatrix,indexShiftx,2);
+markedMatrix= circshift(markedMatrix,indexShifty,1);
+markedVertices = markedMatrix(:);
 end
 

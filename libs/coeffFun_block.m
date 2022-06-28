@@ -1,4 +1,4 @@
-function [markedVertices] = coeffFun_block(x,y,N,n,prop1,prop2,dif,yOffset,width)
+function [markedVertices] = coeffFun_block(x,y,N,n,prop1,prop2,dif,yOffset,width,indexShiftx,indexShifty)
 assert(all(size(x) == size(y)),'Die Vektoren x und y haben unterschiedliche Groesse')
 SD_size = 1/N;
 h = 1/(N*n);
@@ -35,5 +35,10 @@ end
 indBlock2 = (indx&indy);
 
 markedVertices = indBlock1|indBlock2;
+
+markedMatrix = reshape(markedVertices,sqrt(length(y)),sqrt(length(y)));
+markedMatrix= circshift(markedMatrix,indexShiftx,2);
+markedMatrix= circshift(markedMatrix,indexShifty,1);
+markedVertices = markedMatrix(:);
 end
 

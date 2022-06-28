@@ -1,4 +1,4 @@
-function [markedVertices] = coeffFun_randomBlocks(x,y,N,n,n_blocks,widthBound,heightBound)
+function [markedVertices] = coeffFun_randomBlocks(x,y,N,n,n_blocks,widthBound,heightBound,indexShiftx,indexShifty)
 assert(all(size(x) == size(y)),'Die Vektoren x und y haben unterschiedliche Groesse')
 
 numCoord = N*n+1;
@@ -23,5 +23,10 @@ for current_block = 1:n_blocks
 
     markedVertices = markedVertices | (indx & indy);
 end
+
+markedMatrix = reshape(markedVertices,sqrt(length(y)),sqrt(length(y)));
+markedMatrix= circshift(markedMatrix,indexShiftx,2);
+markedMatrix= circshift(markedMatrix,indexShifty,1);
+markedVertices = markedMatrix(:);
 end
 

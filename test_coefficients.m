@@ -30,8 +30,10 @@ grid_struct = struct('vert__sd',{vert__sd},'tri__sd',{tri__sd},'l2g__sd',{l2g__s
 % affectedSubdomains = [6,10];
 % rhoMin = 1;
 % rhoMax = 10^6;
+% indexShiftx = 10;
+% indexShifty = 2;
 %
-% coeffFun= @(vertices) coeffFun_subdomains(vertices(:,1),vertices(:,2),affectedSubdomains,vert__sd);
+% coeffFun= @(vertices) coeffFun_subdomains(vertices(:,1),vertices(:,2),affectedSubdomains,vert__sd,indexShiftx,indexShifty);
 
 
 %% Streifen Koeffizientenfunktion
@@ -39,13 +41,15 @@ grid_struct = struct('vert__sd',{vert__sd},'tri__sd',{tri__sd},'l2g__sd',{l2g__s
 % widthBound = -2:2;
 % nStripsBound = 1:5;
 
-yOffset = 0;
-width   = 0;
-nStrips = 2;
-rhoMin  = 1;
-rhoMax  = 10^6;
-
-coeffFun = @(vertices) coeffFun_canal(vertices(:,2),N,n,yOffset,width,nStrips);
+% yOffset = 0;
+% width   = 0;
+% nStrips = 2;
+% rhoMin  = 1;
+% rhoMax  = 10^6;
+% indexShiftx = 10;
+% indexShifty = 2;
+% 
+% coeffFun = @(vertices) coeffFun_canal(vertices(:,2),N,n,yOffset,width,nStrips,indexShiftx,indexShifty);
 
 
 %% Bloecke Koeffizientenfunktion
@@ -53,15 +57,17 @@ coeffFun = @(vertices) coeffFun_canal(vertices(:,2),N,n,yOffset,width,nStrips);
 % prop1Bound = 0:0.25:1;
 % prop2Bound = 0:0.25:1;
 
-% yOffset = 0;
-% width   = 0;
-% dif     = 0;
-% prop1   = 0.5;
-% prop2   = 0.5;
-% rhoMin  = 1;
-% rhoMax  = 10^6;
-% 
-% coeffFun = @(vertices) coeffFun_block(vertices(:,1), vertices(:,2), N, n, prop1,prop2,dif,yOffset,width);
+yOffset = 0;
+width   = 5;
+dif     = 0;
+prop1   = 0.5;
+prop2   = 0.5;
+rhoMin  = 1;
+rhoMax  = 10^6;
+indexShiftx = 4;
+indexShifty = 2;
+
+coeffFun = @(vertices) coeffFun_block(vertices(:,1), vertices(:,2), N, n, prop1,prop2,dif,yOffset,width,indexShiftx,indexShifty);
 
 
 %% Zufalls - Bloecke Koeffizientenfunktion
@@ -77,8 +83,10 @@ coeffFun = @(vertices) coeffFun_canal(vertices(:,2),N,n,yOffset,width,nStrips);
 % widthVariance   = 2;
 % rhoMin          = 1;
 % rhoMax          = 10^6;
+% indexShiftx = 10;
+% indexShifty = 2;
 % 
-% coeffFun = @(vertices) coeffFun_randomBlocks(vertices(:,1),vertices(:,2),N,n,nBlocks,width:width+widthVariance,height:height+heightVariance);
+% coeffFun = @(vertices) coeffFun_randomBlocks(vertices(:,1),vertices(:,2),N,n,nBlocks,width:width+widthVariance,height:height+heightVariance,indexShiftx,indexShifty);
 
 %% Zufalls Koeffizientenfunktion
 % randomPercentageBound = 0.2:0.1:0.5;
@@ -88,10 +96,12 @@ coeffFun = @(vertices) coeffFun_canal(vertices(:,2),N,n,yOffset,width,nStrips);
 % randomState         = 1;
 % rhoMin  = 1;
 % rhoMax  = 10^6;
+% indexShiftx = 10;
+% indexShifty = 2;
 % 
-% coeffFun = @(vertices) coeffFun_random(vertices(:,1),vertices(:,2),randomPercentage,randomState);
+% coeffFun = @(vertices) coeffFun_random(vertices(:,1),vertices(:,2),randomPercentage,randomState,indexShiftx,indexShifty);
 
-%% Faelle 
+%% Plot
 
 markerType = 'verts';
 getCoefficientMatrices(coeffFun,markerType,rhoMax,rhoMin,vert,tri,logicalTri__sd,plot_grid);
