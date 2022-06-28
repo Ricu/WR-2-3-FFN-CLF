@@ -1,4 +1,13 @@
 function [markedVertices] = coeffFun_subdomains(x,y,affectedSubdomains,vert__sd,indexShiftx,indexShifty)
+%Input: x   x-Koordinaten aller Knoten
+%Input: y   y-Koordinaten aller Knoten
+%Input: affectedSubdomains     Teilgebiete mit maximalem Koeffizienten
+%Input: vert__sd    Knotenliste teilgebietsweise
+%Input: indexShiftx    Verschiebt die Kaneale in x-Richtung
+%Input: indexShifty    Verschiebt die Kaneale in y-Richtung
+
+%Output: markedVertices    Gibt an welchen Knoten der maximale Koeffizient zugewiesen wird
+
 assert(all(size(x) == size(y)),'Die Vektoren x und y haben unterschiedliche Groesse')
 markedVertices = false(size(x)); %initialisiere mit logical false fuer Punkt
 for i = 1:length(affectedSubdomains)

@@ -1,36 +1,42 @@
-function [markedVertices] = coeffFun_image(x,y)
+function [markedVertices] = coeffFun_image(x,y,pic_bw,num_pixel)
+%Input: x   x-Koordinaten aller Knoten
+%Input: y   y-Koordinaten aller Knoten
+%Input: pic_bw     Bildmatrix mit Pixeleintaegen
+%Input: num_pixel    Anzahl Pixel je Dimension
+
+%Output: markedVertices    Gibt an welchen Knoten der maximale Koeffizient zugewiesen wird
+
 assert(all(size(x) == size(y)),'Die Vektoren x und y haben unterschiedliche Groesse')
 
-markedElements = false(size(x));
-for p = 1 : length(tri)
-    %Berechne Schwerpunkt fuer rechtwinkliges Dreieckselement
-    x_centroid = (vert(tri(p,1),1)+vert(tri(p,2),1)+vert(tri(p,3),1))/3;
-    y_centroid = (vert(tri(p,1),2)+vert(tri(p,2),2)+vert(tri(p,3),2))/3;
+numVert = length(x);
+value_bw = zeros(numVert,1);
+
+err_cor = 0.5*(1/num_pixel); %korrigiere zum Pixelmittelpunkt
+for v = 1 : numVert
     %Bestimme die Pixelnummer in x- und y-Richtung, indem wir auf den
     %neahsten integer-Wert runden
-    err_cor = 0.5*(1/num_pixel); %korrigiere zum Pixelmittelpunkt
-    x_pixel = round((x_centroid-err_cor)*num_pixel); 
-    y_pixel = round((y_centroid-err_cor)*num_pixel);
+    x_pixel = round((x(v)-err_cor)*num_pixel); 
+    y_pixel = num_pixel -round((y(v)-err_cor)*num_pixel);
     
     if x_pixel < 1
-        x_pixel = x_pixel +1;
-    else if x_pixel > num_pixel
-        x_pixel = x_pixel -1;
-    end
+        x_pixel = 1;
+    else 
+        if x_pixel > num_pixel
+            x_pixel = num_pixel;
+        end
     end
 
     if y_pixel < 1
-        y_pixel = y_pixel +1;
-    else if y_pixel > num_pixel
-        y_pixel = y_pixel -1;
-    end
+        y_pixel = 1;
+    else 
+        if y_pixel > num_pixel
+            y_pixel = num_pixel;
+        end
     end
    
     %werte die Pixelnummer im Bild aus
-    value_bw = pic_bw(x_pixel,y_pixel);
-    if value_bw < 100
-        markedElements(p) = 1;
-    end
-end
+    value_bw(v) = pic_bw(x_pixel,y_pixel);
 end
 
+markedVertices = (value_bw < 100); %enthaelt die Knoten mit rhoMax als Koeffizient
+end

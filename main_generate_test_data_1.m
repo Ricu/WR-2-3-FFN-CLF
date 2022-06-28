@@ -31,12 +31,12 @@ rhoMax = 10^6;
 
 % Parameter fuer die Koeffizientenverteilung
 yStripeLim = [0.1,0.9];
-position = 6;
+xDisplacement = 6;
 width = 3;
 hight = 5;
 
 % Definiere zu testende Koeffizientenverteilung: 1 -  Hufeisen
-coeffFun = @(tri) coeffFun_horseshoe(tri,vert(:,1),vert(:,2),N,n,yStripeLim,position,width,hight);
+coeffFun = @(tri) coeffFun_horseshoe(tri,vert(:,1),vert(:,2),N,n,yStripeLim,xDisplacement,width,hight);
 markerType = 'elements';  % Die Koeffizientenverteilung ist elementweise definiert
 
 % Definiere Koeffizientenfunktion auf den Elementen (teilgebietsweise);
