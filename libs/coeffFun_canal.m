@@ -13,14 +13,13 @@ propStripes = SD_size/(2*n_canals+1); %Gibt an in wie viele Teile das TG vom Kan
 markedVertices = false(size(y));    %initialisiere mit logical false fuer y-Koordinate
 for j = 0:N-1 %iteriere ueber die Teilgebiete in y-Richtung
     for i = 1:n_canals
-        a = (2*i-1)*propStripes + j*SD_size + h*(yOffset -0.5*canal_width);
-        b = 2*i*propStripes + j*SD_size + h*(yOffset+0.5*canal_width);
+        a = (2*i-1)*propStripes + j*SD_size - h * 0.5 * canal_width;
+        b = 2*i*propStripes + j*SD_size + h* 0.5 * canal_width;
         markedVertices = markedVertices | (a <= y) & (y <= b); 
     end
 end
 
 markedMatrix = reshape(markedVertices,sqrt(length(y)),sqrt(length(y)));
-markedMatrix= circshift(markedMatrix,indexShiftx,2);
 markedMatrix= circshift(markedMatrix,indexShifty,1);
 markedVertices = markedMatrix(:);
 end
