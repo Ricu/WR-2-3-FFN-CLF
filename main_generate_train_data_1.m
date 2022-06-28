@@ -40,17 +40,17 @@ grid_struct = struct('vert__sd',{vert__sd},'tri__sd',{tri__sd},'l2g__sd',{l2g__s
 TOL = 100;  % Toleranz zur Auswahl der Eigenwerte
 rng(0);
 % Durchschnittliche Zeit pro Sample ungefaehr 15s -> 4 pro Minute
-% 4 * 60 * 12
+% 4 * 60 * 16
 nRandSamples = 600;
-coeffFun_cell = cell(nRandSamples*10,1);
+coeffFun_cell = cell(nRandSamples*10,1); % Faktor 10 kommt daher, dass ... ?
 coeffFun_counter = 1;
-parameter_cell = cell(nRandSamples*10,4);
+parameter_cell = cell(nRandSamples*10,4); % Faktor 4 kommt daher, dass ... ?
 
-rhoBound = 10.^[0,6];
-indexShiftBound = 0:2:20;
+rhoBound = 10.^[0,6]; % enthaelt den minimalen und maximalen Koeffizienten
+indexShiftBound = 0:2:20; % Array moeglicher Verschiebungen der Elemente mit hoeherem Koeffizienten in x- oder y-Richtung
 
 %% Konstante Koeffizientenfunktion
-% Test verschiedene parameter fuer die Kanalfunktion
+% Test verschiedene Parameter fuer die Kanalfunktion
 
 % Erstelle die Parameterstruktur
 param_names = ["affectedSubdomains","rhoMin","rhoMax","indexShiftx","indexShifty"];
