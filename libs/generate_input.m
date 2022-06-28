@@ -3,6 +3,10 @@ function [input] = generate_input(edgeID,edgesSD,rhoTriSD,vert__sd,tri__sd)
 %
 %
 
+h = vert__sd{1}(2,2);
+N = sqrt(length(vert__sd));
+n = 1/(N*h);
+
 % Parameter welche vor erstellen des Netzwerkes festgelegt werden muessen!
 n_vertx = 40;
 n_verty = 40;
@@ -32,6 +36,10 @@ for i = 1:2
             % Fall 1b: TG liegen nebeneinander und betrachten rechtes TG
             right_sd_bound = left_sd_bound + coverage * xsize;
         end
+        x1 = linspace(left_sd_bound+ h/3,right_sd_bound - 2/3*h,coverage*n);
+        y1 = linspace(bottom_sd_bound + h/3, top_sd_bound - 2/3*h, n);
+        x2 = linspace(left_sd_bound+ 2/3*h,right_sd_bound - 1/3*h,coverage*n);
+        y2 = linspace(bottom_sd_bound + 2/3*h, top_sd_bound - 1/3*h, n);
     else
         % Fall 2: TG liegen uebereinander
         ysize = (right_sd_bound-left_sd_bound);
@@ -42,25 +50,32 @@ for i = 1:2
             % Fall 2b: TG liegen uebereinander und betrachten oberes TG
             top_sd_bound = bottom_sd_bound + coverage * ysize;
         end
+        x1 = linspace(left_sd_bound+ h/3,right_sd_bound - 2/3*h,n);
+        y1 = linspace(bottom_sd_bound + h/3, top_sd_bound - 2/3*h, coverage*n);
+        x2 = linspace(left_sd_bound+ 2/3*h,right_sd_bound - 1/3*h,n);
+        y2 = linspace(bottom_sd_bound + 2/3*h, top_sd_bound - 1/3*h, coverage*n);
     end
 
     % Gleichmaessig verteilte Punkte erstellen. Erstelle 2 zusaetzliche
     % Punkte welche spaeter rausgeworfen werden, sodass alle Punkte im
     % inneren liegen
-    x = linspace(left_sd_bound,right_sd_bound,n_vertx+2);
-    y = linspace(bottom_sd_bound,top_sd_bound,n_verty+2);
+%     x = linspace(left_sd_bound,right_sd_bound,n_vertx+2);
+%     y = linspace(bottom_sd_bound,top_sd_bound,n_verty+2);
 
     % Erstelle das Gitter
-    [XX,YY] = meshgrid(x(2:end-1),y(2:end-1));
+%     [XX,YY] = meshgrid(x(2:end-1),y(2:end-1));
+    [XX1,YY1] = meshgrid(x1,y1);
+    [XX2,YY2] = meshgrid(x2,y2);
 
     if ~(abs(edgesSD(edgeID,1)-edgesSD(edgeID,2)) == 1)
         % Falls die TG uebereinander liegen, transponiere die Reihenfolge
         % der Knoten. Dadurch wird eine konsistente Nummerierung bzgl des
         % Abstands zur Kante gewaehrleistet.
-        XX = XX'; YY = YY';
+        XX1 = XX1'; YY1 = YY1';
+        XX2 = XX2'; YY2 = YY2';
     end
 
-    X = XX(:); Y = YY(:); % Gitter in Vektor umwandeln
+    X = [XX1(:); XX2(:)]; Y = [YY1(:); YY2(:)]; % Gitter in Vektor umwandeln
     % In X_element wird fuer jeden Knoten gespeichert in welchem Element
     % dieser liegt.
     X_element = zeros(length(X),1);
@@ -78,7 +93,7 @@ for i = 1:2
     input_cell{i} = rhoTriSD{sd}(X_element)';
     
     % Plotbefehle zum ueberpruefen
-    %scatter(X,Y,'filled')
+%     scatter(X,Y,'filled')
 %     str = compose('%g',1:length(X));
 %     text(X,Y,str,'HorizontalAlignment','left')
 end
