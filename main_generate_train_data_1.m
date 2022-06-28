@@ -1,7 +1,7 @@
 clear; clc;
 addpath('libs')
-export = 0;
-plot_grid = 1;   % Auswahl: Plotten der Triangulierung mit Kanal-Koeffizientenfunktion
+export = 1;
+plot_grid = 0;   % Auswahl: Plotten der Triangulierung mit Kanal-Koeffizientenfunktion
 
 fprintf("############ Erstelle Trainingsdaten Start ############\n")
 fprintf("Startzeit %s\n", datestr(datetime))
@@ -39,10 +39,10 @@ grid_struct = struct('vert__sd',{vert__sd},'tri__sd',{tri__sd},'l2g__sd',{l2g__s
 %% Koeffizientenfunktion vorbereiten
 TOL = 100;  % Toleranz zur Auswahl der Eigenwerte
 rng(0);
-nRandSamples = 5;
+nRandSamples = 1;
 coeffFun_cell = cell(nRandSamples*5,1);
 coeffFun_counter = 1;
-parameter_cell = cell(nRandSamples*5,3);
+parameter_cell = cell(nRandSamples*5,4);
 
 rhoBound = 10.^[0,3,6];
 
@@ -59,6 +59,7 @@ sample_parameters = generateSampleParameters(nRandSamples,param_names,yOffsetBou
 % sample_parameters(6) = cell2struct(num2cell([0; 1; 2; 3; 4]),param_names,1);
 
 for sampleID = 1:length(sample_parameters)
+    sample = sample_parameters(sampleID);
     yOffset = sample_parameters(sampleID).yOffset;
     width   = sample_parameters(sampleID).width;
     nStrips = sample_parameters(sampleID).nStrips;
@@ -68,7 +69,8 @@ for sampleID = 1:length(sample_parameters)
     coeffFun_cell{coeffFun_counter} = @(vertices) coeffFun_canal(vertices(:,2),N,n,yOffset,width,nStrips);
     parameter_cell{coeffFun_counter,1} = "Strip";
     parameter_cell{coeffFun_counter,2} = param_names;
-    parameter_cell{coeffFun_counter,3} = sample_parameters(sampleID);
+    parameter_cell{coeffFun_counter,3} = [yOffset,width,nStrips,rhoMin,rhoMax];
+    parameter_cell{coeffFun_counter,4}  = sample_parameters(sampleID);
     coeffFun_counter = coeffFun_counter + 1;
 end
 
@@ -85,12 +87,15 @@ sample_parameters = generateSampleParameters(nRandSamples,param_names,yOffsetBou
 for sampleID = 1:length(sample_parameters)
     yOffset = sample_parameters(sampleID).yOffset;
     width   = sample_parameters(sampleID).width;
-%     nStrips = sample_parameters(sampleID).nStrips;
+    dif     = sample_parameters(sampleID).dif;
+    prop1   = sample_parameters(sampleID).prop1;
+    prop2   = sample_parameters(sampleID).prop2;
 
-    coeffFun_cell{coeffFun_counter} = @(vertices) coeffFun_block(vertices(:,1), vertices(:,2), N, n, yOffset,width,dif,prop1,prop2);
+    coeffFun_cell{coeffFun_counter} = @(vertices) coeffFun_block(vertices(:,1), vertices(:,2), N, n, prop1,prop2,dif,yOffset,width);
     parameter_cell{coeffFun_counter,1}  = "Blocks";
     parameter_cell{coeffFun_counter,2}  = param_names;
-    parameter_cell{coeffFun_counter,3}  = sample_parameters(sampleID);
+    parameter_cell{coeffFun_counter,3}  = [yOffset,width,rhoMin,rhoMax,dif,prop1,prop2];
+    parameter_cell{coeffFun_counter,4}  = sample_parameters(sampleID);
     coeffFun_counter = coeffFun_counter + 1;
 end
 
@@ -107,15 +112,16 @@ sample_parameters = generateSampleParameters(nRandSamples,param_names,nBlocksBou
 
 for sampleID = 1:length(sample_parameters)
     nBlocks         = sample_parameters(sampleID).nBlocks;
-    height          = sample_parameters(sampleID).width;
+    height          = sample_parameters(sampleID).height;
     heightVariance  = sample_parameters(sampleID).heightVariance;
     width           = sample_parameters(sampleID).width;
     widthVariance   = sample_parameters(sampleID).widthVariance;
 
     coeffFun_cell{coeffFun_counter} = @(vertices) coeffFun_randomBlocks(vertices(:,1),vertices(:,2),N,n,nBlocks,width:width+widthVariance,height:height+heightVariance);
-    parameter_cell{coeffFun_counter,1}  = " Random Blocks";
+    parameter_cell{coeffFun_counter,1}  = "Random Blocks";
     parameter_cell{coeffFun_counter,2}  = param_names;
-    parameter_cell{coeffFun_counter,3}  = sample_parameters(sampleID);
+    parameter_cell{coeffFun_counter,3}  = [nBlocks,height,heightVariance,width,widthVariance,rhoMin,rhoMax];
+    parameter_cell{coeffFun_counter,4}  = sample_parameters(sampleID);
     coeffFun_counter = coeffFun_counter + 1;
 end
 
@@ -132,8 +138,8 @@ for case_id = 1:n_cases
     tic
     % Definiere Koeffizient auf den Elementen (und teilgebietsweise);
     % maximalen Koeffizienten pro Knoten (und teilgebietsweise)
-    rhoMin = parameter_cell{case_id,3}.rhoMin;
-    rhoMax = parameter_cell{case_id,3}.rhoMax;
+    rhoMin = parameter_cell{case_id,4}.rhoMin;
+    rhoMax = parameter_cell{case_id,4}.rhoMax;
     base = 'verts';
     [rhoTri,rhoTriSD,maxRhoVert,maxRhoVertSD] = getCoefficientMatrices(coeffFun_cell{case_id},base,rhoMax,rhoMin,vert,tri,logicalTri__sd,plot_grid);
     fprintf("Benoetigte Zeit: Aufstellen der Koeffizientenmatrizen: %5fs ",toc)
@@ -172,6 +178,9 @@ if export
     fprintf("Speichere Traininsdaten als %s...",file_name)
     output_mat = cell2mat(output_cell);
     writematrix(output_mat,file_name);
+    file_name2 = sprintf("./resources/train_data/%s-parameter_dump.csv",datestr(datetime,'yyyy-mm-dd-HH-MM-SS'));
+    fprintf("Speichere Parameterdaten als %s...",file_name2)
+    writecell(parameter_cell(:,1:3),file_name2);
     fprintf("Fertig!\n")
 end
 

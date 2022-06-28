@@ -2,6 +2,7 @@ function [markedVertices] = coeffFun_block(x,y,N,n,prop1,prop2,dif,yOffset,width
 assert(all(size(x) == size(y)),'Die Vektoren x und y haben unterschiedliche Groesse')
 SD_size = 1/N;
 h = 1/(N*n);
+numVert = length(x);
 
 %Bloecke fuer jedes zweite TG spaltenweise ab 1.Spalte
 indx = false(numVert,1);   %initialisiere mit logical false fuer x-Koordinate
