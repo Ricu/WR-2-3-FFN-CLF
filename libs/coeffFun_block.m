@@ -1,4 +1,4 @@
-function [markedVertices] = coeffFun_block(x,y,N,n,prop1,prop2,dif,yOffset,width,indexShiftx,indexShifty)
+function [markedVertices] = coeffFun_block(x,y,N,n,prop1,prop2,dif,width,indexShiftx,indexShifty)
 assert(all(size(x) == size(y)),'Die Vektoren x und y haben unterschiedliche Groesse')
 SD_size = 1/N;
 h = 1/(N*n);
@@ -13,8 +13,8 @@ for j = 0:2:N-2
 end
 indy = false(numVert,1);  %initialisiere mit logical false fuer y-Koordinate
 for i = 0:N-1
-    bool3 = (i+0.5)*SD_size + h*(yOffset -0.5*width);
-    bool4 = (i+0.5)*SD_size + h*(yOffset +0.5*width);
+    bool3 = (i+0.5)*SD_size - h * 0.5 * width;
+    bool4 = (i+0.5)*SD_size + h * 0.5 * width;
     indy = indy | (bool3 <= y) & (y <= bool4);
 end
 indBlock1 = (indx&indy);
@@ -28,8 +28,8 @@ for j = 1:2:N-1
 end
 indy = false(numVert,1);  %initialisiere mit logical false fuer y-Koordinate
 for i = 0:N-1
-    bool3 = (i+0.5)*SD_size + h*(yOffset -0.5*width +dif);
-    bool4 = (i+0.5)*SD_size + h*(yOffset +0.5*width +dif);
+    bool3 = (i+0.5)*SD_size + h*(dif - 0.5 * width);
+    bool4 = (i+0.5)*SD_size + h*(dif + 0.5 * width);
     indy = indy | (bool3 <= y) & (y <= bool4);
 end
 indBlock2 = (indx&indy);

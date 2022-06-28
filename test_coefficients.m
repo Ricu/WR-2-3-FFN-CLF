@@ -49,7 +49,7 @@ grid_struct = struct('vert__sd',{vert__sd},'tri__sd',{tri__sd},'l2g__sd',{l2g__s
 % indexShiftx = 10;
 % indexShifty = 2;
 % 
-% coeffFun = @(vertices) coeffFun_canal(vertices(:,2),N,n,yOffset,width,nStrips,indexShiftx,indexShifty);
+% coeffFun = @(vertices) coeffFun_canal(vertices(:,2),N,n,width,nStrips,indexShiftx,indexShifty);
 
 
 %% Bloecke Koeffizientenfunktion
@@ -67,7 +67,7 @@ rhoMax  = 10^6;
 indexShiftx = 4;
 indexShifty = 2;
 
-coeffFun = @(vertices) coeffFun_block(vertices(:,1), vertices(:,2), N, n, prop1,prop2,dif,yOffset,width,indexShiftx,indexShifty);
+coeffFun = @(vertices) coeffFun_block(vertices(:,1), vertices(:,2), N, n, prop1,prop2,dif,width,indexShiftx,indexShifty);
 
 
 %% Zufalls - Bloecke Koeffizientenfunktion
