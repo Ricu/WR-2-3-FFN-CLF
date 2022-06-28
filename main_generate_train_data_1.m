@@ -36,6 +36,23 @@ dirichlet = or(ismember(vert(:,1),xyLim), ismember(vert(:,2),xyLim));
 % Structure fuer grid-Variablen
 grid_struct = struct('vert__sd',{vert__sd},'tri__sd',{tri__sd},'l2g__sd',{l2g__sd},'dirichlet',{dirichlet});
 
+%% Vorbereitung benoetigte Kanten & TG
+% Pruefe ob eines der beteiligten TG einen Dirichletknoten enthaelt.
+% Falls ja ist eins der TG kein floating TG und wird daher nicht
+% beruecksichtigt
+floatingSD = false(numSD,1);
+for sd = 1:numSD
+    floatingSD(sd) = nnz(dirichlet(l2g__sd{sd})) == 0;
+end
+
+edgesSD = [(1:numSD-N)',(N+1:numSD)';...
+           setdiff(1:numSD,N:N:numSD)', setdiff(1:numSD,1:N:numSD)'];
+edgesSD = sortrows(edgesSD);
+floatingEdges = all(floatingSD(edgesSD),2);
+validEdges = find(floatingEdges);
+fprintf("Fuer das gegebene Gitter werden %i (%4.1f%%) Kanten uebersprungen\n",sum(~floatingEdges),sum(~floatingEdges)/length(floatingEdges)*100)
+% Schmeiße alle anderen Kanten raus
+
 %% Koeffizientenfunktion vorbereiten
 TOL = 100;  % Toleranz zur Auswahl der Eigenwerte
 rng(0);
@@ -57,8 +74,8 @@ param_names = ["affectedSubdomains","rhoMin","rhoMax","indexShiftx","indexShifty
 fprintf("%s: Insgesamt %i Parameter zur Auswahl.\n","Constant",length(param_names))
 affectedSubdomains = [6,10]; % TG-Wahl fuer hoeherem Koeffizienten decken alle moeglichen Faelle ab
 % Samples hier haendisch erstellen
-parameter_const = {affectedSubdomains; affectedSubdomains; affectedSubdomains};
-parameter_const = [parameter_const, num2cell([rhoBound;circshift(rhoBound,1,2);0,0,0;0,0,0])']';
+parameter_const = {affectedSubdomains; affectedSubdomains};
+parameter_const = [parameter_const, num2cell([rhoBound;circshift(rhoBound,1,2);0,0;0,0])']';
 
 sample_parameters = cell2struct(parameter_const,param_names,1);
 
@@ -200,7 +217,7 @@ output_cell = cell(n_cases,1);
 
 t_casesStart = tic;
 for case_id = 1:n_cases
-    fprintf("#### Starte Fall: Koeffizientenfunktion %s ####\n",parameter_cell{case_id})
+    fprintf("#### Starte Fall %5i/%5i: Koeffizientenfunktion %s ####\n",case_id,n_cases,parameter_cell{case_id})
     t_coeffFun = tic;
     % Definiere Koeffizient auf den Elementen (und teilgebietsweise);
     % maximalen Koeffizienten pro Knoten (und teilgebietsweise)
@@ -215,28 +232,24 @@ for case_id = 1:n_cases
     [edgesPrimalGlobal,cGamma,edgesSD,cLocalPrimal,cB,cBskal,cInner,cK,cDirichlet] = setup_matrices(rho_struct,grid_struct,f);
     fprintf(", Aufstellen des Sprungoperators/Steifigkeitsmatrix: %5fs\n", toc(t_matrices))
 
-    numEdges = length(edgesSD);
-    input = cell(numEdges,1);
-    label = zeros(numEdges,1);
+    nValidEdges = length(validEdges);
+    input = cell(nValidEdges,1);
+    label = zeros(nValidEdges,1);
 
-    for edgeID = 1:numEdges
-        % Pruefe ob eines der beteiligten TG einen Dirichletknoten enthaelt.
-        % Falls ja ist eins der TG kein floating TG und wird daher nicht
-        % beruecksichtigt
-        if (nnz(cDirichlet{edgesSD(edgeID,1)}) > 0) || (nnz(cDirichlet{edgesSD(edgeID,2)}) > 0)
-            label(edgeID) = 2;
-            continue
-        else
-            input{edgeID} = generate_input(edgeID,edgesSD,rhoTriSD,vert__sd,tri__sd);
-            label(edgeID) = generate_label(edgeID,edgesPrimalGlobal,cGamma,edgesSD,cLocalPrimal,cB,cBskal,cInner,cK,TOL);
-        end
-        fprintf("Kante %2i bzgl. der TG (%2i,%2i) erhaelt das Label %i\n",edgeID,edgesSD(edgeID,1),edgesSD(edgeID,2),label(edgeID))
+    fprintf("Kanten:")
+    for i = 1:length(validEdges)
+        edgeID = validEdges(i);
+        input{i} = generate_input(edgeID,edgesSD,rhoTriSD,vert__sd,tri__sd);
+        label(i) = generate_label(edgeID,edgesPrimalGlobal,cGamma,edgesSD,cLocalPrimal,cB,cBskal,cInner,cK,TOL);
+%         fprintf("Kante %2i bzgl. der TG (%2i,%2i) erhaelt das Label %i\n",edgeID,edgesSD(edgeID,1),edgesSD(edgeID,2),label(i))
+        fprintf("   %2i", edgeID)
     end
-%     skipped_edges = nnz(label == 2);
-%     fprintf("Fuer das gegebene Gitter wurden %i (%4.1f%%) Kanten uebersprungen\n",skipped_edges,skipped_edges/numEdges*100)
+    fprintf("\nLabels:")
+    fprintf("   %2i",label)
+    fprintf("\n")
     % Fuege neue Daten an den Trainingsdatensatz an
-    output_cell{case_id} = [cell2mat(input),label(label ~= 2)];
-    fprintf("Durchschnittliche Zeit pro Fall bisher %fs\n", toc(t_casesStart)/case_id)
+    output_cell{case_id} = [cell2mat(input),label];
+    fprintf("Durchschnittliche Zeit pro Fall bisher %fs. Verbleibende Zeit ca: %.2fm\n", toc(t_casesStart)/case_id, (n_cases-case_id)*toc(t_casesStart)/case_id/60)
 end
 
 %% Daten exportieren
