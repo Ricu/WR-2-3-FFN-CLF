@@ -53,10 +53,10 @@ rhoBound = 10.^[0,3,6];
 param_names = ["affectedSubdomains","rhoMin","rhoMax"];
 affectedSubdomains = [6,10];
 % Samples hier haendisch erstellen
-parameter_cell = {affectedSubdomains; affectedSubdomains; affectedSubdomains};
-parameter_cell = [parameter_cell, num2cell([rhoBound;circshift(rhoBound,1,2)])']';
+parameter_const = {affectedSubdomains; affectedSubdomains; affectedSubdomains};
+parameter_const = [parameter_const, num2cell([rhoBound;circshift(rhoBound,1,2)])']';
 
-sample_parameters = cell2struct(parameter_cell,param_names,1);
+sample_parameters = cell2struct(parameter_const,param_names,1);
 
 for sampleID = 1:length(sample_parameters)
     affectedSubdomains = sample_parameters(sampleID).affectedSubdomains;
@@ -83,7 +83,6 @@ sample_parameters = generateSampleParameters(nRandSamples,param_names,yOffsetBou
 % sample_parameters(6) = cell2struct(num2cell([0; 1; 2; 3; 4]),param_names,1);
 
 for sampleID = 1:length(sample_parameters)
-    sample = sample_parameters(sampleID);
     yOffset = sample_parameters(sampleID).yOffset;
     width   = sample_parameters(sampleID).width;
     nStrips = sample_parameters(sampleID).nStrips;
@@ -165,10 +164,10 @@ sample_parameters = generateSampleParameters(nRandSamples,param_names,randomPerc
 for sampleID = 1:length(sample_parameters)
     randomPercentage    = sample_parameters(sampleID).randomPercentage;
     randomState         = sample_parameters(sampleID).randomState;
-    rhoMin  = sample_parameters(sampleID).rhoMin;
-    rhoMax  = sample_parameters(sampleID).rhoMax;
+    rhoMin              = sample_parameters(sampleID).rhoMin;
+    rhoMax              = sample_parameters(sampleID).rhoMax;
 
-    coeffFun_cell{coeffFun_counter} = @(vertices) coeffFun_randomBlocks(vertices(:,1),vertices(:,2),N,n,nBlocks,width:width+widthVariance,height:height+heightVariance);
+    coeffFun_cell{coeffFun_counter} = @(vertices) coeffFun_random(vertices(:,1),vertices(:,2),randomPercentage,randomState);
     parameter_cell{coeffFun_counter,1}  = "Completely Random";
     parameter_cell{coeffFun_counter,2}  = param_names;
     parameter_cell{coeffFun_counter,3}  = [randomPercentage,randomState,rhoMin,rhoMax];
