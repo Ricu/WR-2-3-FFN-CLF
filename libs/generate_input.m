@@ -93,7 +93,7 @@ for i = 1:2
     input_cell{i} = rhoTriSD{sd}(X_element)';
     
     % Plotbefehle zum ueberpruefen
-    scatter(X,Y,'filled')
+%     scatter(X,Y,'filled')
 %     str = compose('%g',1:length(X));
 %     text(X,Y,str,'HorizontalAlignment','left')
 end
