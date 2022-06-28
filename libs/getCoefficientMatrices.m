@@ -73,9 +73,9 @@ if plot
     rhoMin = sprintf('\\rho = %g',rhoMin);
     legend(rhoMin,rhoMax,'Interface','','','')
     title("Triangulierung mit Koeffizientenfunktion")
-        yt = (1:2:2*N)/(2*N);
-    xt = reshape(repmat(yt,N,1),N^2,1);
-    yt = repmat(yt,1,N);
+    temp = (1:2:2*N)/(2*N);
+    yt = reshape(repmat(temp,N,1),N^2,1);
+    xt = repmat(temp,1,N);
     str = compose('%g',1:N^2);
     text(xt,yt,str,'HorizontalAlignment','center','FontWeight','bold','FontSize',14)
 end
