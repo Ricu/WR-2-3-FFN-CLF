@@ -1,4 +1,4 @@
-function [indElementsrhoMax] = coeffFun_pixel(x,y,tri,rhoMax,rhoMin,pic_bw,num_pixel)
+function [markedElements] = coeffFun_pixel(x,y,tri,rhoMax,rhoMin,pic_bw,num_pixel)
 assert(all(size(x) == size(y)),'Die Vektoren x und y haben unterschiedliche Groesse')
 
 numTri = length(tri);
@@ -38,6 +38,6 @@ for p = 1 : numTri
         rhoTri(p) = rhoMin;
     end
 end
-indElementsrhoMax = (rhoTri == rhoMax); % Logischer Vektor, welche Elemente rhoMax-Wert haben
+markedElements = (rhoTri == rhoMax); % Logischer Vektor, welche Elemente rhoMax-Wert haben
 end
 

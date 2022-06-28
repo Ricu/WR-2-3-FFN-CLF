@@ -1,7 +1,7 @@
 clear; clc;
 addpath('libs')
 export = 1;
-plot_grid = 0;   % Auswahl: Plotten der Triangulierung mit Kanal-Koeffizientenfunktion
+plot_grid = 1;   % Auswahl: Plotten der Triangulierung mit Kanal-Koeffizientenfunktion
 
 fprintf("############ Erstelle Trainingsdaten Start ############\n")
 fprintf("Startzeit %s\n", datestr(datetime))
@@ -46,6 +46,31 @@ parameter_cell = cell(nRandSamples*5,4);
 
 rhoBound = 10.^[0,3,6];
 
+%% Konstante Koeffizientenfunktion
+% Test verschiedene parameter fuer die Kanalfunktion
+
+% Erstelle die Parameterstruktur
+param_names = ["affectedSubdomains","rhoMin","rhoMax"];
+affectedSubdomains = [6,10];
+% Samples hier haendisch erstellen
+parameter_const = {affectedSubdomains; affectedSubdomains; affectedSubdomains};
+parameter_const = [parameter_const, num2cell([rhoBound;circshift(rhoBound,1,2)])']';
+
+sample_parameters = cell2struct(parameter_const,param_names,1);
+
+for sampleID = 1:length(sample_parameters)
+    affectedSubdomains = sample_parameters(sampleID).affectedSubdomains;
+    rhoMin  = sample_parameters(sampleID).rhoMin;
+    rhoMax  = sample_parameters(sampleID).rhoMax;
+
+    coeffFun_cell{coeffFun_counter} = @(vertices) coeffFun_subdomains(vertices(:,1),vertices(:,2),affectedSubdomains,vert__sd);
+    parameter_cell{coeffFun_counter,1} = "Constant";
+    parameter_cell{coeffFun_counter,2} = param_names;
+    parameter_cell{coeffFun_counter,3} = [affectedSubdomains,rhoMin,rhoMax];
+    parameter_cell{coeffFun_counter,4}  = sample_parameters(sampleID);
+    coeffFun_counter = coeffFun_counter + 1;
+end
+
 %% Streifen Koeffizientenfunktion
 % Test verschiedene parameter fuer die Kanalfunktion
 yOffsetBound = -2:2;
@@ -55,11 +80,9 @@ nStripsBound = 1:5;
 % Erstelle die Parameterstruktur
 param_names = ["yOffset","width","nStrips","rhoMin","rhoMax"];
 sample_parameters = generateSampleParameters(nRandSamples,param_names,yOffsetBound,widthBound,nStripsBound,rhoBound,rhoBound);
-
 % sample_parameters(6) = cell2struct(num2cell([0; 1; 2; 3; 4]),param_names,1);
 
 for sampleID = 1:length(sample_parameters)
-    sample = sample_parameters(sampleID);
     yOffset = sample_parameters(sampleID).yOffset;
     width   = sample_parameters(sampleID).width;
     nStrips = sample_parameters(sampleID).nStrips;
@@ -90,6 +113,8 @@ for sampleID = 1:length(sample_parameters)
     dif     = sample_parameters(sampleID).dif;
     prop1   = sample_parameters(sampleID).prop1;
     prop2   = sample_parameters(sampleID).prop2;
+    rhoMin  = sample_parameters(sampleID).rhoMin;
+    rhoMax  = sample_parameters(sampleID).rhoMax;
 
     coeffFun_cell{coeffFun_counter} = @(vertices) coeffFun_block(vertices(:,1), vertices(:,2), N, n, prop1,prop2,dif,yOffset,width);
     parameter_cell{coeffFun_counter,1}  = "Blocks";
@@ -116,6 +141,8 @@ for sampleID = 1:length(sample_parameters)
     heightVariance  = sample_parameters(sampleID).heightVariance;
     width           = sample_parameters(sampleID).width;
     widthVariance   = sample_parameters(sampleID).widthVariance;
+    rhoMin          = sample_parameters(sampleID).rhoMin;
+    rhoMax          = sample_parameters(sampleID).rhoMax;
 
     coeffFun_cell{coeffFun_counter} = @(vertices) coeffFun_randomBlocks(vertices(:,1),vertices(:,2),N,n,nBlocks,width:width+widthVariance,height:height+heightVariance);
     parameter_cell{coeffFun_counter,1}  = "Random Blocks";
@@ -125,6 +152,28 @@ for sampleID = 1:length(sample_parameters)
     coeffFun_counter = coeffFun_counter + 1;
 end
 
+%% Zufalls Koeffizientenfunktion
+% Test verschiedene parameter fuer die Kanalfunktion
+randomPercentageBound = 0.2:0.1:0.5;
+randomStateBound = 1:5;
+
+% Erstelle die Parameterstruktur
+param_names = ["randomPercentage","randomState","rhoMin","rhoMax"];
+sample_parameters = generateSampleParameters(nRandSamples,param_names,randomPercentageBound,randomStateBound,rhoBound,rhoBound);
+
+for sampleID = 1:length(sample_parameters)
+    randomPercentage    = sample_parameters(sampleID).randomPercentage;
+    randomState         = sample_parameters(sampleID).randomState;
+    rhoMin              = sample_parameters(sampleID).rhoMin;
+    rhoMax              = sample_parameters(sampleID).rhoMax;
+
+    coeffFun_cell{coeffFun_counter} = @(vertices) coeffFun_random(vertices(:,1),vertices(:,2),randomPercentage,randomState);
+    parameter_cell{coeffFun_counter,1}  = "Completely Random";
+    parameter_cell{coeffFun_counter,2}  = param_names;
+    parameter_cell{coeffFun_counter,3}  = [randomPercentage,randomState,rhoMin,rhoMax];
+    parameter_cell{coeffFun_counter,4}  = sample_parameters(sampleID);
+    coeffFun_counter = coeffFun_counter + 1;
+end
 
 %% Faelle 
 empty_cells_ind = cellfun('isempty',coeffFun_cell);
@@ -140,8 +189,8 @@ for case_id = 1:n_cases
     % maximalen Koeffizienten pro Knoten (und teilgebietsweise)
     rhoMin = parameter_cell{case_id,4}.rhoMin;
     rhoMax = parameter_cell{case_id,4}.rhoMax;
-    base = 'verts';
-    [rhoTri,rhoTriSD,maxRhoVert,maxRhoVertSD] = getCoefficientMatrices(coeffFun_cell{case_id},base,rhoMax,rhoMin,vert,tri,logicalTri__sd,plot_grid);
+    markerType = 'verts';
+    [rhoTri,rhoTriSD,maxRhoVert,maxRhoVertSD] = getCoefficientMatrices(coeffFun_cell{case_id},markerType,rhoMax,rhoMin,vert,tri,logicalTri__sd,plot_grid);
     fprintf("Benoetigte Zeit: Aufstellen der Koeffizientenmatrizen: %5fs ",toc)
     rho_struct = struct('rhoTriSD',{rhoTriSD},'maxRhoVert',{maxRhoVert},'maxRhoVertSD',{maxRhoVertSD});
 
@@ -174,10 +223,13 @@ end
 
 %% Daten exportieren
 if export
+    % Input-Label Kombinationen der einzelnen Faelle abspeichern
     file_name = sprintf("./resources/train_data/%s-train_data_dump.csv",datestr(datetime,'yyyy-mm-dd-HH-MM-SS'));
     fprintf("Speichere Traininsdaten als %s...",file_name)
     output_mat = cell2mat(output_cell);
     writematrix(output_mat,file_name);
+    fprintf("Fertig!\n")
+    % Parameter der einzelnen Faelle abspeichern
     file_name2 = sprintf("./resources/train_data/%s-parameter_dump.csv",datestr(datetime,'yyyy-mm-dd-HH-MM-SS'));
     fprintf("Speichere Parameterdaten als %s...",file_name2)
     writecell(parameter_cell(:,1:3),file_name2);
