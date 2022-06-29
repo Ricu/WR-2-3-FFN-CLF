@@ -57,15 +57,15 @@ fprintf("Fuer das gegebene Gitter werden %i (%4.1f%%) Kanten uebersprungen\n",su
 
 %% Koeffizientenfunktion vorbereiten
 TOL = 100;  % Toleranz zur Auswahl der Eigenwerte
-rng(0);
+rng(42);
 % Durchschnittliche Zeit pro Sample ungefaehr 15s -> 4 pro Minute
 % 4 * 60 * 16
-nRandSamples = 5;
+nRandSamples = 1800;
 coeffFun_cell = cell(nRandSamples*10,1); % Faktor 10 kommt daher, dass ... ?
 coeffFun_counter = 1;
 parameter_cell = cell(nRandSamples*10,4); % Faktor 4 kommt daher, dass ... ?
 
-rhoBound = 10.^[0,6]; % enthaelt den minimalen und maximalen Koeffizienten
+rhoBound = 10.^[0,3,6]; % enthaelt den minimalen und maximalen Koeffizienten
 indexShiftBound = 0:2:20; % Array moeglicher Verschiebungen der Elemente mit hoeherem Koeffizienten in x- oder y-Richtung
 
 %% Konstante Koeffizientenfunktion
@@ -76,8 +76,8 @@ param_names = ["affectedSubdomains","rhoMin","rhoMax","indexShiftx","indexShifty
 fprintf("%s: Insgesamt %i Parameter zur Auswahl.\n","Constant",length(param_names))
 affectedSubdomains = [6,10]; % TG-Wahl fuer hoeherem Koeffizienten decken alle moeglichen Faelle ab
 % Samples hier haendisch erstellen
-parameter_const = {affectedSubdomains; affectedSubdomains};
-parameter_const = [parameter_const, num2cell([rhoBound;circshift(rhoBound,1,2);0,0;0,0])']';
+parameter_const = {affectedSubdomains; affectedSubdomains; affectedSubdomains};
+parameter_const = [parameter_const, num2cell([rhoBound;circshift(rhoBound,1,2);0,0,0;0,0,0])']';
 
 sample_parameters = cell2struct(parameter_const,param_names,1);
 
