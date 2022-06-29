@@ -198,3 +198,11 @@ cython_debug/
 #.idea/
 
 # End of https://www.toptal.com/developers/gitignore/api/python,matlab
+resources/train_data/2022-06-29-02-31-52-train_data_dump.csv
+resources/train_data/2022-06-29-02-32-41-parameter_dump.csv
+resources/train_data/2022-06-29-05-12-03-train_data_dump.csv
+resources/train_data/2022-06-29-05-14-01-parameter_dump.csv
+resources/train_data/2022-06-29-15-19-21-train_data_dump.csv
+resources/train_data/2022-06-29-15-21-37-parameter_dump.csv
+resources/train_data/training_dataset_ver1.csv
+resources/train_data/training_dataset_ver1_parameters.csv
