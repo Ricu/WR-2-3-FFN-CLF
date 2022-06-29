@@ -10,6 +10,8 @@ import numpy as np
 import pandas as pd
 import keras
 import matplotlib.pyplot as plt
+from keras.models import Sequential
+from keras.layers import Dense
 from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import AdaBoostRegressor
@@ -21,8 +23,8 @@ train_data = pd.read_csv('C:/Users/Angelina/Documents/GitHub/WR-2-3-FFN-CLF/reso
 coeff = train_data.iloc[:,:-1].values
 label = train_data.iloc[:,-1:].values
 
-#boston = load_boston()
-#x, y = boston.data, boston.target
+
+
 #xtrain, xtest, ytrain, ytest=train_test_split(x, y, test_size=0.15)
 
 # Splitte Daten in Test und Trainingsdatensatz auf
@@ -30,14 +32,18 @@ coeff_train, coeff_test, label_train, label_test = train_test_split(coeff,
                                                     label,
                                                     test_size=0.2)
 # Definiere Neuronales Netz
-def build_model(learning_rate):
-    inputs = keras.Input(shape = (3362,), name = 'input_layer')
-    model = keras.Sequential(inputs)
-    for i in range(hp.Int("n_layers", 1, 3)):
-        model.add(layers.dense(units=hp.Int(f"units_{i}", min_value=32, max_value=128, step=32),
-                               activation = 'sigmoid'
-            ))
-    model.add(layers.dense(1, activation = 'sigmoid'))
+def build_model(learning_rate,layer_size,output_shape):
+    #inputs = keras.Input(shape = (coeff.shape[1],), name = 'input_layer')
+    #model = keras.Sequential(inputs)
+    model = Sequential()
+    #for i in range(hp.Int("n_layers", 1, 3)):
+    for i in range(layer_size):
+       # model.add(Dense(units=hp.Int(f"units_{i}", min_value=32, max_value=128, step=32),
+       #                        activation = 'sigmoid'
+        #    ))
+         model.add(Dense(units=output_shape,activation = 'sigmoid'))
+         
+    model.add(Dense(1, activation = 'sigmoid'))
         
     model.compile(loss = keras.losses.MeanSquaredError(),
                   optimizer = keras.optimizers.Adam(lr=learning_rate),
@@ -48,9 +54,11 @@ model = KerasClassifier(build_model)
 
 # Zu testende Parameter des Modells
 parameters = {
- 'batch_size': [16, 32, 64, 128],
- 'epochs': [100, 150],
- 'learning_rate' : [0.001, 0.005, 0.01, 0.05, 0.1]
+ 'batch_size': [ 32, 64, 128],
+ 'epochs': [100],
+ 'learning_rate' : [0.001, 0.01, 0.1],
+ 'layer_size' : [2],
+ 'output_shape' : [100]
  }
 
 # Definiere score-function
@@ -60,7 +68,8 @@ gridsearch = GridSearchCV(estimator = model,
                           param_grid = parameters,
                           scoring=score,
                           cv=5,
-                          return_train_score=True)
+                          return_train_score=True,
+                          verbose = 1)
 
 # Wende Grid Search auf Daten an
 gridsearch.fit(coeff_train, np.ravel(label_train)) 
