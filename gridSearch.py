@@ -22,7 +22,8 @@ from tensorflow.keras.wrappers.scikit_learn import KerasClassifier
 from keras.callbacks import EarlyStopping
 
 # Datensatz laden
-train_data = pd.read_csv('C:/Users/Angelina/Documents/GitHub/WR-2-3-FFN-CLF/resources/train_data/2022-06-28-11-05-08-train_data_dump.csv')
+# train_data = pd.read_csv('C:/Users/Angelina/Documents/GitHub/WR-2-3-FFN-CLF/resources/train_data/2022-06-28-11-05-08-train_data_dump.csv', header = None)
+train_data = pd.read_csv('C:/Users/Valentin/Documents/10. Semester/WR2/Projekt 3 - FNN CLF/WR-2-3-FFN-CLF/resources/train_data/training_dataset_ver1.csv', header = None)
 coeff = train_data.iloc[:,:-1].values
 label = train_data.iloc[:,-1:].values
 
@@ -30,8 +31,8 @@ label = train_data.iloc[:,-1:].values
 
 # Splitte Daten in Test und Trainingsdatensatz auf
 coeff_train, coeff_test, label_train, label_test = train_test_split(coeff,
-                                                    label,
-                                                    test_size=0.2)
+                                                                    label,
+                                                                    test_size=0.2)
 
 
 # Input skalieren
@@ -58,7 +59,7 @@ def build_model(learning_rate,layer_size,output_shape):
                   metrics = ["accuracy"])
     return model
 
-model = KerasClassifier(build_model)
+model = KerasClassifier(build_model, verbose = 0)
 
 # Zu testende Parameter des Modells
 #parameters = {
@@ -85,7 +86,7 @@ gridsearch = GridSearchCV(estimator = model,
                           scoring=score,
                           cv=5,
                           return_train_score=True,
-                          verbose = 1,
+                          verbose = 4,
                           n_jobs = -1)
 
 callback = EarlyStopping(monitor='val_loss', min_delta=0.0001, patience=10)
