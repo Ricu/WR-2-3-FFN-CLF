@@ -10,6 +10,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import tensorflow as tf
+import joblib
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense
 from sklearn.model_selection import GridSearchCV, RandomizedSearchCV
@@ -18,7 +19,6 @@ from sklearn.model_selection import StratifiedKFold
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_squared_error, make_scorer, r2_score
 from sklearn.metrics import accuracy_score, log_loss
-from sklearn.externals import joblib
 from tensorflow.keras.wrappers.scikit_learn import KerasClassifier
 from tensorflow.keras.callbacks import EarlyStopping
 
@@ -66,38 +66,38 @@ def build_model(learning_rate,n_hidden_layers,layer_size,activation,dropout_rate
 model = KerasClassifier(build_model, verbose = 0)
 
 # Schnelle Testaparameter
-parameters = {
-    'activation' : ['sigmoid'],  
-    'batch_size': [32],
-    'epochs': [10],
-    'learning_rate' : [0.01],
-    'n_hidden_layers' : [1],
-    'layer_size' : [2,6,10],
-    'dropout_rate' : [0]
-    }
+# parameters = {
+#     'activation' : ['sigmoid'],  
+#     'batch_size': [32],
+#     'epochs': [10],
+#     'learning_rate' : [0.01],
+#     'n_hidden_layers' : [1],
+#     'layer_size' : [2,6,10],
+#     'dropout_rate' : [0]
+#     }
 
 
 # Weitere parameters
 # 'data_percentage' : [1/3,1/2,1]
 # init = ['glorot_uniform', 'normal', 'uniform']
 
-# activation      = ['sigmoid','relu']
-# batch_size      = [8,16,32,64]
-# epochs          = [100,200,400]
-# learning_rate   = [0.001,0.01,0.1]
-# n_hidden_layers = [1,2,3,4]
-# layer_size      = [100,500,1000]
-# dropout_rate    = [0, 0.1, 0.2, 0.5]
+activation      = ['sigmoid','relu']
+batch_size      = [8,16,32,64]
+epochs          = [100,200,400]
+learning_rate   = [0.001,0.01,0.1]
+n_hidden_layers = [1,2,3,4]
+layer_size      = [100,500,1000]
+dropout_rate    = [0, 0.1, 0.2, 0.5]
 
-# parameters = {
-#     'activation' : activation,  
-#     'batch_size': batch_size,
-#     'epochs': epochs,
-#     'learning_rate' : learning_rate,
-#     'n_hidden_layers' : n_hidden_layers,
-#     'layer_size' : layer_size,
-#     'dropout_rate' : dropout_rate
-#     }
+parameters = {
+    'activation' : activation,  
+    'batch_size': batch_size,
+    'epochs': epochs,
+    'learning_rate' : learning_rate,
+    'n_hidden_layers' : n_hidden_layers,
+    'layer_size' : layer_size,
+    'dropout_rate' : dropout_rate
+    }
 
 # Definiere score-function
 cv = StratifiedKFold(n_splits = 4, shuffle = True, random_state = random_state)
