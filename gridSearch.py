@@ -15,11 +15,15 @@ from keras.models import Sequential
 from keras.layers import Dense
 from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import train_test_split
+from sklearn.model_selection import StratifiedKFold
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.ensemble import AdaBoostRegressor
 from sklearn.metrics import mean_squared_error, make_scorer, r2_score
+from sklearn.metrics import accuracy_score
 from tensorflow.keras.wrappers.scikit_learn import KerasClassifier
 from keras.callbacks import EarlyStopping
+
+random_state = 0
 
 # Datensatz laden
 # train_data = pd.read_csv('C:/Users/Angelina/Documents/GitHub/WR-2-3-FFN-CLF/resources/train_data/2022-06-28-11-05-08-train_data_dump.csv', header = None)
@@ -37,22 +41,23 @@ coeff_train, coeff_test, label_train, label_test = train_test_split(coeff,
 
 # Input skalieren
 sc_st = MinMaxScaler()
-coeff_train = sc_st.fit_transform(coeff_train)
+sc_st.fit(coeff)
+coeff_train = sc_st.transform(coeff_train)
 coeff_test = sc_st.transform(coeff_test)
 
 # Definiere Neuronales Netz
-def build_model(learning_rate,layer_size,output_shape):
-    #inputs = keras.Input(shape = (coeff.shape[1],), name = 'input_layer')
-    #model = keras.Sequential(inputs)
-    model = Sequential()
+def build_model(learning_rate,n_hidden_layers,layer_size,activation):
+    inputs = keras.Input(shape = (4800,), name = 'input_layer')
+    model = keras.Sequential(inputs)
+    # model = Sequential()
     #for i in range(hp.Int("n_layers", 1, 3)):
-    for i in range(layer_size):
+    for i in range(n_hidden_layers):
        # model.add(Dense(units=hp.Int(f"units_{i}", min_value=32, max_value=128, step=32),
        #                        activation = 'sigmoid'
         #    ))
-         model.add(Dense(units=output_shape,activation = 'sigmoid'))
+         model.add(Dense(units=layer_size,activation = activation))
          
-    model.add(Dense(1, activation = 'sigmoid'))
+    model.add(Dense(1, activation = activation))
         
     model.compile(loss = keras.losses.MeanSquaredError(),
                   optimizer = keras.optimizers.Adam(lr=learning_rate),
@@ -69,31 +74,48 @@ model = KerasClassifier(build_model, verbose = 0)
 # 'layer_size' : [2],
 # 'output_shape' : [100]
 # }
+# Weitere parameters
+# 'activation' : ['sigmoid','relu']
+# 'data_percentage' : [1/3,1/2,1]
+# 'dropout'
+# 'patience'
+# 'min_delta'
+
+activation      = ['sigmoid','relu']
+batch_size      = [8,16,32,64]
+epochs          = [100,200]
+learning_rate   = [0.001,0.01,0.1]
+n_hidden_layers = [1,2,3,4]
+layer_size      = [100,500,1000]
+
+
 
 parameters = {
-     'batch_size': [16],
-     'epochs': [100],
-     'learning_rate' : [0.001],
-     'layer_size' : [2],
-     'output_shape' : [100]
+    'activation' : activation,
+        
+    'batch_size': batch_size,
+    'epochs': epochs,
+    'learning_rate' : learning_rate,
+    'n_hidden_layers' : n_hidden_layers,
+    'layer_size' : layer_size
     }
 
 # Definiere score-function
 score = make_scorer(mean_squared_error)
+cv = StratifiedKFold(n_splits = 4, shuffle = True, random_state = random_state)
 
 gridsearch = GridSearchCV(estimator = model,
                           param_grid = parameters,
                           scoring=score,
-                          cv=5,
-                          return_train_score=True,
-                          verbose = 4,
-                          n_jobs = -1)
+                          cv=cv,
+                          #return_train_score=True,
+                          verbose = 4)
 
 callback = EarlyStopping(monitor='val_loss', min_delta=0.0001, patience=10)
 
 # Wende Grid Search auf Daten an
 start = timeit.timeit()
-gridsearch.fit(coeff_train, np.ravel(label_train), callbacks=[callback], validation_split=0.1) 
+gridsearch.fit(coeff_train, np.ravel(label_train), callbacks=[callback], validation_split=0.1, verbose = 0) 
 end = timeit.timeit()
 
 
@@ -101,7 +123,8 @@ best_estim=gridsearch.best_estimator_
 
 
 # Wende bestes Modell auf Daten an
-best_estim.fit(coeff_train, np.ravel(label_train), callbacks=[callback], validation_split=0.1)
+# best_estim ist bereits auf coeff_train gefittet
+# best_estim.fit(coeff_train, np.ravel(label_train), callbacks=[callback], validation_split=0.1)
 
 # Vorhersage
 labeltr_pred=best_estim.predict(coeff_train)
@@ -116,6 +139,7 @@ print('Best Estimator:',best_estim)
 r2 = r2_score(labeltr_pred,label_train)
 print("Traindata: MSE: %.2f" % mse)
 print("Traindata: R2: %.2f" % r2)
+print("Traindata: ACC: %.2f" % accuracy_score(labeltr_pred,label_train))
 
 # Testen
 labelpred=best_estim.predict(coeff_test)
@@ -125,6 +149,7 @@ mse = mean_squared_error(label_test, labelpred)
 r2 = r2_score(label_test, labelpred)
 print("Testdata: MSE: %.2f" % mse)
 print("Testdata: R2: %.2f" % r2)
+print("Testdata: ACC: %.2f" % accuracy_score(labelpred,label_test))
 
 x_ax = range(len(label_test))
 plt.scatter(x_ax, label_test, s=5, color="blue", label="original")
