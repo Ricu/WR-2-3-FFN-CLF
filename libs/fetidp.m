@@ -1,4 +1,4 @@
-function [cu,u_FETIDP_glob,lambda,iter,kappa_est,residual,preconditioned_system] = fetidp(grid_struct,f,pc_param,rho_struct,pcg_param,plot_iteration)
+function [cu,u_FETIDP_glob,lambda,iter,kappa_est,residual,preconditioned_system] = fetidp(grid_struct,f,pc_param,rho_struct,pcg_param,plot_iteration,labelVec)
 % Input: grid_struct: Structure mit allen Gitterkomponenten:
 %        Komponenten: vert__sd,tri__sd,l2g__sd,dirichlet
 % Input: f: Function handle fuer rechte Seite der DGL
@@ -249,9 +249,11 @@ if strcmp(constraint_type,'adaptive') || strcmp(constraint_type,'non-adaptive') 
     if strcmp(constraint_type,'adaptive') || strcmp(constraint_type,'adaptive-improved')
         cU=cell(1,numEdges);
         for edgeID = 1:numEdges
-%             if strcmp(constraint_type,'adaptive-improved') %&& label == 0
-%                 continue
-%             end
+            if strcmp(constraint_type,'adaptive-improved') 
+                if  labelVec(edgeID) == 0 % unkritische oder nicht-floating Kante
+                    continue
+                end
+            end
             %% Assemblierungmatrix R_ij
             nPrimal = length(edgesPrimalGlobal{edgeID}); % Anzahl primaler Knoten auf der Kante
             nGamma = [nnz(cGamma{edgesSD(edgeID,1)}),nnz(cGamma{edgesSD(edgeID,2)})]; % Anzahl Interfaceknoten pro TG

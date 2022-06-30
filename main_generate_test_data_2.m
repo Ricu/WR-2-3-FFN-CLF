@@ -1,7 +1,10 @@
 clear; clc;
 addpath('libs')
-export = 0;         % Auswahl: Testdaten abspeichern
+export = 1;         % Auswahl: Testdaten abspeichern
 plot_grid = true;   % Auswahl: Plotten der Triangulierung mit Kanal-Koeffizientenfunktion
+
+%% Lade vertTris fuer schnellere Berechnung der coeff-funktion
+vertTris = load("./libs/precomputed_vertTris.mat").vertTris;
 
 %% Erstelle das Gitter
 n = 40;         % 2*n^2 Elemente pro Teilgebiet
@@ -24,6 +27,24 @@ dirichlet = or(ismember(vert(:,1),xyLim), ismember(vert(:,2),xyLim));
 % Structure fuer grid-Variablen
 grid_struct = struct('vert__sd',{vert__sd},'tri__sd',{tri__sd},'l2g__sd',{l2g__sd},'dirichlet',{dirichlet});
 
+TOL = 100;  % Toleranz zur Auswahl der Eigenwerte
+
+%% Vorbereitung benoetigte Kanten & TG
+% Pruefe ob eines der beteiligten TG einen Dirichletknoten enthaelt.
+% Falls ja ist eins der TG kein floating TG und wird daher nicht
+% beruecksichtigt
+floatingSD = false(numSD,1);
+for sd = 1:numSD
+    floatingSD(sd) = nnz(dirichlet(l2g__sd{sd})) == 0;
+end
+
+edgesSD = [(1:numSD-N)',(N+1:numSD)';...
+           setdiff(1:numSD,N:N:numSD)', setdiff(1:numSD,1:N:numSD)'];
+edgesSD = sortrows(edgesSD);
+floatingEdges = all(floatingSD(edgesSD),2);
+validEdges = find(floatingEdges);
+% Schmeiße alle anderen Kanten raus
+
 %% Koeffizientenfunktion aufstellen
 %Bilddatei einlesen 
 pic = imread('./resources/img/rho_coeff_multiple_stripes.png');
@@ -35,34 +56,30 @@ rhoMin = 1;
 rhoMax = 10^6;
 
 % Aufstellen der zu testenden Koeffizientenverteilung: 2 -  Streifen
-coeffFun = @(tri) coeffFun_pixel(vert(:,1),vert(:,2),tri,rhoMax,rhoMin,pic_bw,num_pixel);
-markerType = 'elements';  % Die Koeffizientenverteilung ist elementweise definiert
+coeffFun = @(vert) coeffFun_image(vert(:,1),vert(:,2),pic_bw,num_pixel);
+markerType = 'verts';  % Die Koeffizientenverteilung ist knotenweise definiert
 
 % Definiere Koeffizientenfunktion auf den Elementen (teilgebietsweise);
 % maximalen Koeffizienten pro Knoten (und teilgebietsweise)
-[~,rhoTriSD,maxRhoVert,maxRhoVertSD] = getCoefficientMatrices(coeffFun,markerType,rhoMax,rhoMin,vert,tri,logicalTri__sd,plot_grid);
+[~,rhoTriSD,maxRhoVert,maxRhoVertSD] = getCoefficientMatrices(coeffFun,markerType,rhoMax,rhoMin,vert,tri,logicalTri__sd,plot_grid,,vertTris);
 rho_struct = struct('rhoTriSD',{rhoTriSD},'maxRhoVert',{maxRhoVert},'maxRhoVertSD',{maxRhoVertSD});
 
 %% Funktion rechte Seite
 f = @(vert,y) ones(size(vert));   % Rechte Seite der DGL
 
-%% Kantenliste erstellen
-[~,~,edgesSD,~,~,~,~,~,cDirichlet] = setup_matrices(rho_struct,grid_struct,f);
-numEdges = length(edgesSD);
+%% Benoetigte Matrizen aufstellen
+[edgesPrimalGlobal,cGamma,edgesSD,cLocalPrimal,cB,cBskal,cInner,cK,cDirichlet] = setup_matrices(rho_struct,grid_struct,f);
 
 %% Inputgenerierung
-input_cell = cell(numEdges,1);
-for edgeID = 1:numEdges
-    % Pruefe ob eines der beteiligten TG einen Dirichletknoten enthaelt.
-    % Falls ja ist eins der TG kein floating TG und wird daher nicht
-    % beruecksichtigt
-    if (nnz(cDirichlet{edgesSD(edgeID,1)}) > 0) || (nnz(cDirichlet{edgesSD(edgeID,2)}) > 0)
-        continue
-    else
-        input_cell{edgeID} = generate_input(edgeID,edgesSD,rhoTriSD,vert__sd,tri__sd);
-    end
+nValidEdges = length(validEdges);
+input_cell = cell(nValidEdges,1);
+label = zeros(nValidEdges,1);
+for i = 1:nValidEdges
+    edgeID = validEdges(i);
+    input_cell{i} = generate_input(edgeID,edgesSD,rhoTriSD,vert__sd,tri__sd);
+    label(i) = generate_label(edgeID,edgesPrimalGlobal,cGamma,edgesSD,cLocalPrimal,cB,cBskal,cInner,cK,TOL);
 end
-input_mat = cell2mat(input_cell);
+input_mat = [cell2mat(input_cell),label];
 
 %% Daten exportieren
 if export
