@@ -18,6 +18,7 @@ from sklearn.model_selection import StratifiedKFold
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_squared_error, make_scorer, r2_score
 from sklearn.metrics import accuracy_score, log_loss
+from sklearn.externals import joblib
 from tensorflow.keras.wrappers.scikit_learn import KerasClassifier
 from tensorflow.keras.callbacks import EarlyStopping
 
@@ -171,4 +172,9 @@ y_test_pred=best_estim.predict(X_test)
 # plt.plot(x_ax, labelpred, lw=0.8, color="red", label="predicted")
 # plt.legend()
 # plt.show()
+
+# Save trained model
+joblib_file = "C:\Users\Angelina\Documents\GitHub\WR-2-3-FFN-CLF\resources\trained_model\trained_model.pkl"
+joblib.dump(best_estim, joblib_file)
+
 
