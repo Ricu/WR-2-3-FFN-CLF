@@ -106,7 +106,7 @@ def false_negatives_loss(y_true,y_pred):
     # Berechnet den Anteil an FN/(FN+TP)
     fn = sum(np.all([np.array(y_true) == 1,np.array(y_pred) == 0],0)) 
     n_positives = sum(np.array(y_true) == 1)
-    return fn/n_positives
+    return fn[0]/n_positives[0]
 
 fn_loss = make_scorer(false_negatives_loss,greater_is_better = False)
 randomsearch = RandomizedSearchCV(estimator = model,
@@ -114,11 +114,11 @@ randomsearch = RandomizedSearchCV(estimator = model,
                                   n_iter = 50,
                                   scoring={'accuracy':'accuracy',
                                            'neg_log_loss':'neg_log_loss',
-                                           'f1' : 'f1',
+                                           # 'f1' : 'f1',
                                            'fn_loss': fn_loss},   
                                   refit = 'accuracy',
                                   cv=cv,
-                                  return_train_score=True,
+                                  #return_train_score=True,
                                   verbose = 4)
 
 # callback = EarlyStopping(monitor='val_loss', min_delta=0.0001, patience=10)
