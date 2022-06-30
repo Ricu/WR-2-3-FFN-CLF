@@ -3,9 +3,9 @@ addpath('libs')
 plot_grid = true;   % Auswahl: Plotten der Triangulierung mit Kanal-Koeffizientenfunktion
 
 %% Daten importieren
-file_name = sprintf("./resources/test_data/%s-test_data_1_dump.csv",datestr(datetime,'yyyy-mm-dd-HH-MM-SS'));
+file_name = sprintf("./resources/trained_model/predicted_labels_1.csv");
 fprintf("Lese Testdaten aus %s...",file_name)
-input = readmatrix(file_name);
+predicted_labels = readmatrix(file_name);
 
 %% Definiere zu vergleichende Verfahren
 method_type = {'Dirichlet','none';
@@ -28,6 +28,9 @@ pcg_param = struct('tol', tol, 'x0',x0, 'resid_type',resid_type);
 %% Funktion rechte Seite
 f = @(vert,y) ones(size(vert));   % Rechte Seite der DGL
 
+%% Lade vertTris fuer schnellere Berechnung der coeff-funktion
+vertTris = load("./libs/precomputed_vertTris.mat").vertTris;
+
 %% Erstelle das Gitter
 n = 40;         % 2*n^2 Elemente pro Teilgebiet
 N = 4;          % Partition in NxN quadratische Teilgebiete
@@ -49,6 +52,25 @@ dirichlet = or(ismember(vert(:,1),xyLim), ismember(vert(:,2),xyLim));
 % Structure fuer grid-Variablen
 grid_struct = struct('vert__sd',{vert__sd},'tri__sd',{tri__sd},'l2g__sd',{l2g__sd},'dirichlet',{dirichlet});
 
+%% Vorbereitung benoetigte Kanten & TG
+% Pruefe ob eines der beteiligten TG einen Dirichletknoten enthaelt.
+% Falls ja ist eins der TG kein floating TG und wird daher nicht
+% beruecksichtigt
+floatingSD = false(numSD,1);
+for sd = 1:numSD
+    floatingSD(sd) = nnz(dirichlet(l2g__sd{sd})) == 0;
+end
+
+edgesSD = [(1:numSD-N)',(N+1:numSD)';...
+           setdiff(1:numSD,N:N:numSD)', setdiff(1:numSD,1:N:numSD)'];
+edgesSD = sortrows(edgesSD);
+floatingEdges = all(floatingSD(edgesSD),2);
+validEdges = find(floatingEdges);
+% Schmeiße alle anderen Kanten raus
+
+labelVec = zeros(numEdges,1);
+labelVec(floatingEdges) = predicted_labels;
+
 %% Koeffizientenfunktion aufstellen
 % Definiere minimales und maximales rho
 rhoMin = 1;
@@ -62,7 +84,7 @@ hight = 5;
 
 % Definiere zu testende Koeffizientenverteilung: 1 -  Hufeisen
 coeffFun = @(tri) coeffFun_horseshoe(tri,vert(:,1),vert(:,2),N,n,yStripeLim,position,width,hight);
-base = 'elements';
+markerType = 'verts';  % Die Koeffizientenverteilung ist elementweise definiert
 
 % Definiere Koeffizient auf den Elementen (und teilgebietsweise);
 % maximalen Koeffizienten pro Knoten (und teilgebietsweise)
@@ -76,7 +98,7 @@ rho_struct = struct('rhoTriSD',{rhoTriSD},'maxRhoVert',{maxRhoVert},'maxRhoVertS
 iters = cell(numMethods,1);
 kappa_ests = cell(numMethods,1);
 
-fig_VK_comp = figure("Name","Loesungen fuer verschiedene Verfahren");
+fig_method_comp = figure("Name","Loesungen fuer verschiedene Verfahren");
 tiledlayout('flow')
 
 plot_iteration = false; % Auswahl: Plotten der Loesung nach den ersten Iterationen von PCG
@@ -89,7 +111,7 @@ for m = 1:numMethods
     pc_param = struct('VK',VK,'constraint_type',constraint_type,'adaptiveTol',TOL);
     
     % Loesen des Systems mit FETI-DP mit entsprechendem VK
-    [cu,u_FETIDP_glob,~,iters{m},kappa_ests{m}] = fetidp(grid_struct,f,pc_param,rho_struct,pcg_param,plot_iteration);
+    [cu,u_FETIDP_glob,~,iters{m},kappa_ests{m}] = fetidp(grid_struct,f,pc_param,rho_struct,pcg_param,plot_iteration,labelVec);
 end
 
 %% Ergebnistabelle

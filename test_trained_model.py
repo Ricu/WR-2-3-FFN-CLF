@@ -31,6 +31,6 @@ print("MSE: %.2f" % mse)
 print("ACC: %.2f" % acc)
 
 # Save predicted labels
-fname = "C:\Users\Angelina\Documents\GitHub\WR-2-3-FFN-CLF\resources\trained_model\predicted_labels.csv"
+fname = "C:\Users\Angelina\Documents\GitHub\WR-2-3-FFN-CLF\resources\trained_model\predicted_labels_1.csv"
 np.savetxt(fname, label_predict, delimiter=",")
 
