@@ -22,6 +22,8 @@ from sklearn.metrics import accuracy_score, log_loss
 from tensorflow.keras.wrappers.scikit_learn import KerasClassifier
 from tensorflow.keras.callbacks import EarlyStopping
 
+tf.config.optimizer.set_jit(True)
+
 random_state = 0
 
 # Datensatz laden
@@ -83,10 +85,10 @@ model = KerasClassifier(build_model, verbose = 0)
 
 activation      = ['sigmoid','relu']
 batch_size      = [8,16,32,64]
-epochs          = [100,200,400]
+epochs          = [100,200,300]
 learning_rate   = [0.001,0.01,0.1]
 n_hidden_layers = [1,2,3,4]
-layer_size      = [100,500,1000]
+layer_size      = [100,200,500]
 dropout_rate    = [0, 0.1, 0.2, 0.5]
 
 parameters = {
@@ -99,7 +101,7 @@ parameters = {
     'dropout_rate' : dropout_rate
     }
 
-# Definiere score-function
+
 cv = StratifiedKFold(n_splits = 4, shuffle = True, random_state = random_state)
 
 def false_negatives_loss(y_true,y_pred):
@@ -107,18 +109,19 @@ def false_negatives_loss(y_true,y_pred):
     fn = sum(np.all([np.array(y_true) == 1,np.array(y_pred) == 0],0)) 
     n_positives = sum(np.array(y_true) == 1)
     return fn[0]/n_positives[0]
-
+# Definiere score-function
 fn_loss = make_scorer(false_negatives_loss,greater_is_better = False)
 randomsearch = RandomizedSearchCV(estimator = model,
                                   param_distributions = parameters,
-                                  n_iter = 50,
+                                  n_iter = 5,
                                   scoring={'accuracy':'accuracy',
                                            'neg_log_loss':'neg_log_loss',
                                            # 'f1' : 'f1',
                                            'fn_loss': fn_loss},   
                                   refit = 'accuracy',
                                   cv=cv,
-                                  #return_train_score=True,
+                                  random_state = 0,
+                                  return_train_score=True,
                                   verbose = 4)
 
 # callback = EarlyStopping(monitor='val_loss', min_delta=0.0001, patience=10)
