@@ -1,6 +1,6 @@
 clear; clc;
 addpath('libs')
-export = 1;         % Auswahl: Testdaten abspeichern
+export = 0;         % Auswahl: Testdaten abspeichern
 plot_grid = true;   % Auswahl: Plotten der Triangulierung mit Kanal-Koeffizientenfunktion
 
 %% Lade vertTris fuer schnellere Berechnung der coeff-funktion
