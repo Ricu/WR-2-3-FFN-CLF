@@ -24,11 +24,11 @@ from tensorflow.keras.callbacks import EarlyStopping
 
 tf.config.optimizer.set_jit(True)
 
-random_state = 0
+random_state = 1
 
 # Datensatz laden
-# train_data1000 = pd.read_csv('C:/Users/Angelina/Documents/GitHub/WR-2-3-FFN-CLF/resources/train_data/2022-06-28-11-05-08-train_data_dump.csv', header = None)
-train_data1000 = pd.read_csv('C:/Users/Valentin/Documents/10. Semester/WR2/Projekt 3 - FNN CLF/WR-2-3-FFN-CLF/resources/train_data/training_dataset_ver1.csv', header = None)
+train_data1000 = pd.read_csv('C:/Users/Angelina/Documents/GitHub/WR-2-3-FFN-CLF/resources/train_data/training_dataset_ver1.csv', header = None)
+# train_data1000 = pd.read_csv('C:/Users/Valentin/Documents/10. Semester/WR2/Projekt 3 - FNN CLF/WR-2-3-FFN-CLF/resources/train_data/training_dataset_ver1.csv', header = None)
 train_data = train_data1000.loc[~np.any(train_data1000 == 1000,axis = 1)] 
 X = train_data.iloc[:,:-1].values
 y = train_data.iloc[:,-1:].values
@@ -113,7 +113,7 @@ def false_negatives_loss(y_true,y_pred):
 fn_loss = make_scorer(false_negatives_loss,greater_is_better = False)
 randomsearch = RandomizedSearchCV(estimator = model,
                                   param_distributions = parameters,
-                                  n_iter = 5,
+                                  n_iter = 10,
                                   scoring={'accuracy':'accuracy',
                                            'neg_log_loss':'neg_log_loss',
                                            # 'f1' : 'f1',
