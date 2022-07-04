@@ -19,12 +19,13 @@ from sklearn.model_selection import StratifiedKFold
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_squared_error, make_scorer, r2_score
 from sklearn.metrics import accuracy_score, log_loss
+from sklearn.metrics import confusion_matrix
 from tensorflow.keras.wrappers.scikit_learn import KerasClassifier
 from tensorflow.keras.callbacks import EarlyStopping
 
 tf.config.optimizer.set_jit(True)
 
-random_state = 0
+random_state = 1
 
 # Datensatz laden
 # train_data1000 = pd.read_csv('C:/Users/Angelina/Documents/GitHub/WR-2-3-FFN-CLF/resources/train_data/2022-06-28-11-05-08-train_data_dump.csv', header = None)
@@ -42,13 +43,15 @@ normalizer.fit(X)
 X_train = normalizer.transform(X_train)
 X_test = normalizer.transform(X_test)
 
-metrics = [tf.keras.metrics.BinaryAccuracy(),
-           tf.keras.metrics.BinaryCrossentropy(),
-           tf.keras.metrics.AUC(),
-           tf.keras.metrics.Precision(),
-           tf.keras.metrics.Recall(),
-           tf.keras.metrics.TrueNegatives()
-           ]
+# metrics = [tf.keras.metrics.BinaryAccuracy(),
+#            tf.keras.metrics.BinaryCrossentropy(),
+#            tf.keras.metrics.AUC(),
+#            tf.keras.metrics.Precision(),
+#            tf.keras.metrics.Recall(),
+#            tf.keras.metrics.TrueNegatives()
+#            ]
+metrics = None
+
 # Definiere Neuronales Netz
 def build_model(learning_rate,n_hidden_layers,layer_size,activation,dropout_rate):
     model = Sequential()
@@ -109,18 +112,25 @@ def false_negatives_loss(y_true,y_pred):
     fn = sum(np.all([np.array(y_true) == 1,np.array(y_pred) == 0],0)) 
     n_positives = sum(np.array(y_true) == 1)
     return fn[0]/n_positives[0]
+
 # Definiere score-function
 fn_loss = make_scorer(false_negatives_loss,greater_is_better = False)
+float32neg_log_loss = make_scorer(log_loss, eps = 1e-7)
+def confusion_matrix_scorer(clf, X, y):
+     y_pred = clf.predict(X)
+     cm = confusion_matrix(y, y_pred)
+     return {'tn': cm[0, 0], 'fp': cm[0, 1],
+             'fn': cm[1, 0], 'tp': cm[1, 1]}
 randomsearch = RandomizedSearchCV(estimator = model,
                                   param_distributions = parameters,
-                                  n_iter = 5,
+                                  n_iter = 30,
                                   scoring={'accuracy':'accuracy',
-                                           'neg_log_loss':'neg_log_loss',
-                                           # 'f1' : 'f1',
-                                           'fn_loss': fn_loss},   
+                                           'ce':float32neg_log_loss,
+                                           #'conf_matrix': confusion_matrix_scorer,
+                                           'fn_rate': fn_loss},   
                                   refit = 'accuracy',
                                   cv=cv,
-                                  random_state = 0,
+                                  random_state = random_state,
                                   return_train_score=True,
                                   verbose = 4)
 
@@ -130,8 +140,11 @@ randomsearch = RandomizedSearchCV(estimator = model,
 # Wende Grid Search auf Daten an
 randomsearch.fit(X_train, y_train, verbose = 0) 
 
-result_df = pd.DataFrame.from_dict(randomsearch.cv_results_)
-    
+result_df1 = pd.DataFrame.from_dict(randomsearch.cv_results_)
+result_df2 = pd.DataFrame.from_dict(randomsearch2.cv_results_)
+result_df3 = pd.DataFrame.from_dict(randomsearch3.cv_results_)
+result_df = pd.concat([result_df1,result_df2,result_df3])
+result_df = result_df.drop_duplicates(subset = ['param_' + parameter for parameter in parameters.keys()])
 best_estim=randomsearch.best_estimator_
 
 
