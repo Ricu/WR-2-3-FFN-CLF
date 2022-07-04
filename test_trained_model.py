@@ -147,12 +147,12 @@ trained_model = tf.keras.models.load_model(file_name)
 
 
 # Load test data
-test_data = pd.read_csv("C:/Users/Angelina/Documents/GitHub/WR-2-3-FFN-CLF/resources/test_data/2022-06-30-16-13-08-test_data_1_dump.csv", header = None)
+test_data = pd.read_csv("C:/Users/Angelina/Documents/GitHub/WR-2-3-FFN-CLF/resources/test_data/2022-07-05-00-04-29-test_data_1_dump.csv", header = None)
 X_test2 = test_data.iloc[:,:-1].values
 y_test2 = test_data.iloc[:,-1:].values
 
 # Predict and classify test data
-predictions_test2 = model.predict(X_test2)
+predictions_test2 = trained_model.predict(X_test2)
 prediction_classes_test2_list = [
     1 if prob > 0.45 else 0 for prob in np.ravel(predictions_test2)
 ]
@@ -171,12 +171,12 @@ file_name = "C:/Users/Angelina/Documents/GitHub/WR-2-3-FFN-CLF/resources/trained
 np.savetxt(file_name, prediction_classes_test2, delimiter=",")
 
 # Load test data
-test_data3 = pd.read_csv("C:/Users/Angelina/Documents/GitHub/WR-2-3-FFN-CLF/resources/test_data/2022-06-30-16-26-28-test_data_2_dump.csv", header = None)
+test_data3 = pd.read_csv("C:/Users/Angelina/Documents/GitHub/WR-2-3-FFN-CLF/resources/test_data/2022-07-05-00-04-55-test_data_2_dump.csv", header = None)
 X_test3 = test_data3.iloc[:,:-1].values
 y_test3 = test_data3.iloc[:,-1:].values
 
 # Predict and classify test data
-predictions_test3 = model.predict(X_test3)
+predictions_test3 = trained_model.predict(X_test3)
 prediction_classes_test3_list = [
     1 if prob > 0.45 else 0 for prob in np.ravel(predictions_test3)
 ]
@@ -195,12 +195,12 @@ file_name = "C:/Users/Angelina/Documents/GitHub/WR-2-3-FFN-CLF/resources/trained
 np.savetxt(file_name, prediction_classes_test3, delimiter=",")
 
 # Load test data
-test_data4 = pd.read_csv("C:/Users/Angelina/Documents/GitHub/WR-2-3-FFN-CLF/resources/test_data/2022-06-30-16-30-42-test_data_3_dump.csv", header = None)
+test_data4 = pd.read_csv("C:/Users/Angelina/Documents/GitHub/WR-2-3-FFN-CLF/resources/test_data/2022-07-05-00-13-40-test_data_3_dump.csv", header = None)
 X_test4 = test_data4.iloc[:,:-1].values
 y_test4 = test_data4.iloc[:,-1:].values
 
 # Predict and classify test data
-predictions_test4 = model.predict(X_test4)
+predictions_test4 = trained_model.predict(X_test4)
 prediction_classes_test4_list = [
     1 if prob > 0.45 else 0 for prob in np.ravel(predictions_test4)
 ]

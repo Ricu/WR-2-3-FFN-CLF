@@ -58,10 +58,9 @@ f = @(vert,y) ones(size(vert));   % Rechte Seite der DGL
 numEdges = length(edgesSD);
 input_cell = cell(numEdges,1);
 label = zeros(numEdges,1);
-for i = 1:numEdges
-    edgeID = edgesSD(i);
-    input_cell{i} = generate_input(edgeID,edgesSD,rhoTriSD,vert__sd,tri__sd);
-    label(i) = generate_label(edgeID,edgesPrimalGlobal,cGamma,edgesSD,cLocalPrimal,cB,cBskal,cInner,cK,TOL);
+for edgeID = 1:numEdges
+    input_cell{edgeID} = generate_input(edgeID,edgesSD,rhoTriSD,vert__sd,tri__sd);
+    label(edgeID) = generate_label(edgeID,edgesPrimalGlobal,cGamma,edgesSD,cLocalPrimal,cB,cBskal,cInner,cK,TOL);
 end
 input_mat = [cell2mat(input_cell),label];
 

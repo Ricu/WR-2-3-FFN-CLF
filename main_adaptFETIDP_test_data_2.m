@@ -8,9 +8,9 @@ fprintf("Lese Testdaten aus %s...",file_name)
 predicted_labels = readmatrix(file_name);
 
 %% Definiere zu vergleichende Verfahren
-method_type = {%'Dirichlet','none';
-               %'Balancing','non-adaptive'
-               %'Balancing','adaptive';
+method_type = {'Dirichlet','none';
+               'Balancing','non-adaptive'
+               'Balancing','adaptive';
                'Balancing','adaptive-improved'
                };       
  numMethods = length(method_type);

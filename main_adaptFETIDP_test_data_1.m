@@ -52,27 +52,6 @@ dirichlet = or(ismember(vert(:,1),xyLim), ismember(vert(:,2),xyLim));
 % Structure fuer grid-Variablen
 grid_struct = struct('vert__sd',{vert__sd},'tri__sd',{tri__sd},'l2g__sd',{l2g__sd},'dirichlet',{dirichlet});
 
-%% Vorbereitung benoetigte Kanten & TG
-% Pruefe ob eines der beteiligten TG einen Dirichletknoten enthaelt.
-% Falls ja ist eins der TG kein floating TG und wird daher nicht
-% beruecksichtigt
-floatingSD = false(numSD,1);
-for sd = 1:numSD
-    floatingSD(sd) = nnz(dirichlet(l2g__sd{sd})) == 0;
-end
-
-edgesSD = [(1:numSD-N)',(N+1:numSD)';...
-           setdiff(1:numSD,N:N:numSD)', setdiff(1:numSD,1:N:numSD)'];
-edgesSD = sortrows(edgesSD);
-floatingEdges = all(floatingSD(edgesSD),2);
-validEdges = find(floatingEdges);
-% Schmeiße alle anderen Kanten raus
-
-numEdges = size(edgesSD,1);
-
-labelVec = zeros(numEdges,1);
-labelVec(floatingEdges) = predicted_labels;
-
 %% Koeffizientenfunktion aufstellen
 % Definiere minimales und maximales rho
 rhoMin = 1;
@@ -110,7 +89,7 @@ for m = 1:numMethods
     pc_param = struct('VK',VK,'constraint_type',constraint_type,'adaptiveTol',TOL);
     
     % Loesen des Systems mit FETI-DP mit entsprechendem VK
-    [cu,u_FETIDP_glob,~,iters{m},kappa_ests{m}] = fetidp(grid_struct,f,pc_param,rho_struct,pcg_param,plot_iteration,labelVec);
+    [cu,u_FETIDP_glob,~,iters{m},kappa_ests{m}] = fetidp(grid_struct,f,pc_param,rho_struct,pcg_param,plot_iteration,predicted_labels);
 end
 
 %% Ergebnistabelle
