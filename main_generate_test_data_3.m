@@ -1,6 +1,6 @@
 clear; clc;
 addpath('libs')
-export = 1;         % Auswahl: Testdaten abspeichern
+export = 0;         % Auswahl: Testdaten abspeichern
 plot_grid = true;   % Auswahl: Plotten der Triangulierung mit Kanal-Koeffizientenfunktion
 
 %% Lade vertTris fuer schnellere Berechnung der coeff-funktion
@@ -61,7 +61,7 @@ markerType = 'verts';  % Die Koeffizientenverteilung ist elementweise definiert
 
 % Definiere Koeffizientenfunktion auf den Elementen (teilgebietsweise);
 % maximalen Koeffizienten pro Knoten (und teilgebietsweise)
-[~,rhoTriSD,maxRhoVert,maxRhoVertSD] = getCoefficientMatrices(coeffFun,markerType,rhoMax,rhoMin,vert,tri,logicalTri__sd,plot_grid,,vertTris);
+[~,rhoTriSD,maxRhoVert,maxRhoVertSD] = getCoefficientMatrices(coeffFun,markerType,rhoMax,rhoMin,vert,tri,logicalTri__sd,plot_grid,vertTris);
 rho_struct = struct('rhoTriSD',{rhoTriSD},'maxRhoVert',{maxRhoVert},'maxRhoVertSD',{maxRhoVertSD});
 
 %% Funktion rechte Seite

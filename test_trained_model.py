@@ -30,8 +30,7 @@ from matplotlib import rcParams
 from sklearn.metrics import confusion_matrix
 
 # Datensatz laden
-train_data1000 = pd.read_csv('C:/Users/Angelina/Documents/GitHub/WR-2-3-FFN-CLF/resources/train_data/2022-06-29-05-12-03-train_data_dump.csv', header = None)
-#train_data1000 = pd.read_csv('C:/Users/Angelina/Documents/GitHub/WR-2-3-FFN-CLF/resources/train_data/training_dataset_ver1.csv', header = None)
+train_data1000 = pd.read_csv('C:/Users/Angelina/Documents/GitHub/WR-2-3-FFN-CLF/resources/train_data/training_dataset_ver1.csv', header = None)
 # train_data1000 = pd.read_csv('C:/Users/Valentin/Documents/10. Semester/WR2/Projekt 3 - FNN CLF/WR-2-3-FFN-CLF/resources/train_data/training_dataset_ver1.csv', header = None)
 train_data = train_data1000.loc[~np.any(train_data1000 == 1000,axis = 1)] 
 X = train_data.iloc[:,:-1].values
@@ -110,30 +109,32 @@ plt.xlabel('Epoch', size=14)
 plt.legend();
 
 # Predict and classify train data
-predictions = model.predict(X_train)
-prediction_classes = [
-    1 if prob > 0.45 else 0 for prob in np.ravel(predictions)
+predictions_train = model.predict(X_train)
+prediction_classes_train_list = [
+    1 if prob > 0.45 else 0 for prob in np.ravel(predictions_train)
 ]
+prediction_classes_train = np.array(prediction_classes_train_list)
 
 # Model evaluation
-print("Train MSE: %.2f", mean_squared_error(y_train, prediction_classes))
-print('Train Accuracy: %0.2f', accuracy_score(y_train, prediction_classes))
-print('Train Confusion Matrix:',confusion_matrix(y_train, prediction_classes))
-print('Train Precision: %0.2f', precision_score(y_train, prediction_classes))
-print('Train Recall: %0.2f', recall_score(y_train, prediction_classes))
+print("Train MSE: %.2f" % mean_squared_error(y_train, prediction_classes_train))
+print('Train Accuracy: %.2f' % accuracy_score(y_train, prediction_classes_train))
+print('Train Confusion Matrix:', confusion_matrix(y_train, prediction_classes_train))
+print('Train Precision: %.2f' % precision_score(y_train, prediction_classes_train))
+print('Train Recall: %.2f' % recall_score(y_train, prediction_classes_train))
 
 # Predict and classify test data
-predictions = model.predict(X_test)
-prediction_classes = [
-    1 if prob > 0.45 else 0 for prob in np.ravel(predictions)
+predictions_test1 = model.predict(X_test)
+prediction_classes_test1_list = [
+    1 if prob > 0.45 else 0 for prob in np.ravel(predictions_test1)
 ]
+prediction_classes_test1 = np.array(prediction_classes_test1_list)
 
 # Model evaluation
-print("Test MSE: %.2f", mean_squared_error(y_test, prediction_classes))
-print('Test Accuracy: %0.2f', accuracy_score(y_test, prediction_classes))
-print('Test Confusion Matrix:',confusion_matrix(y_test, prediction_classes))
-print('Test Precision: %0.2f', precision_score(y_test, prediction_classes))
-print('Test Recall: %0.2f', recall_score(y_test, prediction_classes))
+print("Test MSE: %.2f" % mean_squared_error(y_test, prediction_classes_test1))
+print('Test Accuracy: %.2f' % accuracy_score(y_test, prediction_classes_test1))
+print('Test Confusion Matrix:', confusion_matrix(y_test, prediction_classes_test1))
+print('Test Precision: %.2f' % precision_score(y_test, prediction_classes_test1))
+print('Test Recall: %.2f' % recall_score(y_test, prediction_classes_test1))
 
 
 # Save trained model
@@ -142,29 +143,78 @@ model.save(file_name)
 
 # Load trained model
 file_name = "C:/Users/Angelina/Documents/GitHub/WR-2-3-FFN-CLF/resources/trained_model/trained_model.pkl"
-trained_model = keras.models.load_model(file_name)
+trained_model = tf.keras.models.load_model(file_name)
 
 
 # Load test data
 test_data = pd.read_csv("C:/Users/Angelina/Documents/GitHub/WR-2-3-FFN-CLF/resources/test_data/2022-06-30-16-13-08-test_data_1_dump.csv", header = None)
-X_test = test_data.iloc[:,:-1].values
-y_test = test_data.iloc[:,-1:].values
+X_test2 = test_data.iloc[:,:-1].values
+y_test2 = test_data.iloc[:,-1:].values
 
 # Predict and classify test data
-predictions = model.predict(X_test)
-prediction_classes = [
-    1 if prob > 0.45 else 0 for prob in np.ravel(predictions)
+predictions_test2 = model.predict(X_test2)
+prediction_classes_test2_list = [
+    1 if prob > 0.45 else 0 for prob in np.ravel(predictions_test2)
 ]
+prediction_classes_test2 = np.array(prediction_classes_test2_list)
 
 # Model evaluation
-print("Test MSE: %.2f", mean_squared_error(y_test, prediction_classes))
-print('Test Accuracy: %0.2f', accuracy_score(y_test, prediction_classes))
-print('Test Confusion Matrix:',confusion_matrix(y_test, prediction_classes))
-print('Test Precision: %0.2f', precision_score(y_test, prediction_classes))
-print('Test Recall: %0.2f', recall_score(y_test, prediction_classes))
+print("Test MSE: %.2f" % mean_squared_error(y_test2, prediction_classes_test2))
+print('Test Accuracy: %.2f' %  accuracy_score(y_test2, prediction_classes_test2))
+print('Test Confusion Matrix:', confusion_matrix(y_test2, prediction_classes_test2))
+print('Test Precision: %.2f' % precision_score(y_test2, prediction_classes_test2))
+print('Test Recall: %.2f' % recall_score(y_test2, prediction_classes_test2))
 
 
 # Save predicted labels
 file_name = "C:/Users/Angelina/Documents/GitHub/WR-2-3-FFN-CLF/resources/trained_model/predicted_labels_1.csv"
-np.savetxt(file_name, prediction_classes, delimiter=",")
+np.savetxt(file_name, prediction_classes_test2, delimiter=",")
+
+# Load test data
+test_data3 = pd.read_csv("C:/Users/Angelina/Documents/GitHub/WR-2-3-FFN-CLF/resources/test_data/2022-06-30-16-26-28-test_data_2_dump.csv", header = None)
+X_test3 = test_data3.iloc[:,:-1].values
+y_test3 = test_data3.iloc[:,-1:].values
+
+# Predict and classify test data
+predictions_test3 = model.predict(X_test3)
+prediction_classes_test3_list = [
+    1 if prob > 0.45 else 0 for prob in np.ravel(predictions_test3)
+]
+prediction_classes_test3 = np.array(prediction_classes_test3_list)
+
+# Model evaluation
+print("Test MSE: %.2f" % mean_squared_error(y_test3, prediction_classes_test3))
+print('Test Accuracy: %.2f' %  accuracy_score(y_test3, prediction_classes_test3))
+print('Test Confusion Matrix:', confusion_matrix(y_test3, prediction_classes_test3))
+print('Test Precision: %.2f' % precision_score(y_test3, prediction_classes_test3))
+print('Test Recall: %.2f' % recall_score(y_test3, prediction_classes_test3))
+
+
+# Save predicted labels
+file_name = "C:/Users/Angelina/Documents/GitHub/WR-2-3-FFN-CLF/resources/trained_model/predicted_labels_2.csv"
+np.savetxt(file_name, prediction_classes_test3, delimiter=",")
+
+# Load test data
+test_data4 = pd.read_csv("C:/Users/Angelina/Documents/GitHub/WR-2-3-FFN-CLF/resources/test_data/2022-06-30-16-30-42-test_data_3_dump.csv", header = None)
+X_test4 = test_data4.iloc[:,:-1].values
+y_test4 = test_data4.iloc[:,-1:].values
+
+# Predict and classify test data
+predictions_test4 = model.predict(X_test4)
+prediction_classes_test4_list = [
+    1 if prob > 0.45 else 0 for prob in np.ravel(predictions_test4)
+]
+prediction_classes_test4 = np.array(prediction_classes_test4_list)
+
+# Model evaluation
+print("Test MSE: %.2f" % mean_squared_error(y_test4, prediction_classes_test4))
+print('Test Accuracy: %.2f' %  accuracy_score(y_test4, prediction_classes_test4))
+print('Test Confusion Matrix:', confusion_matrix(y_test4, prediction_classes_test4))
+print('Test Precision: %.2f' % precision_score(y_test4, prediction_classes_test4))
+print('Test Recall: %.2f' % recall_score(y_test4, prediction_classes_test4))
+
+
+# Save predicted labels
+file_name = "C:/Users/Angelina/Documents/GitHub/WR-2-3-FFN-CLF/resources/trained_model/predicted_labels_3.csv"
+np.savetxt(file_name, prediction_classes_test4, delimiter=",")
 
