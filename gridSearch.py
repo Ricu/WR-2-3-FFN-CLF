@@ -28,8 +28,8 @@ tf.config.optimizer.set_jit(True)
 random_state = 1
 
 # Datensatz laden
-# train_data1000 = pd.read_csv('C:/Users/Angelina/Documents/GitHub/WR-2-3-FFN-CLF/resources/train_data/2022-06-28-11-05-08-train_data_dump.csv', header = None)
-train_data1000 = pd.read_csv('C:/Users/Valentin/Documents/10. Semester/WR2/Projekt 3 - FNN CLF/WR-2-3-FFN-CLF/resources/train_data/training_dataset_ver1.csv', header = None)
+train_data1000 = pd.read_csv('C:/Users/Angelina/Documents/GitHub/WR-2-3-FFN-CLF/resources/train_data/training_dataset_ver1.csv', header = None)
+# train_data1000 = pd.read_csv('C:/Users/Valentin/Documents/10. Semester/WR2/Projekt 3 - FNN CLF/WR-2-3-FFN-CLF/resources/train_data/training_dataset_ver1.csv', header = None)
 train_data = train_data1000.loc[~np.any(train_data1000 == 1000,axis = 1)] 
 X = train_data.iloc[:,:-1].values
 y = train_data.iloc[:,-1:].values
@@ -86,13 +86,21 @@ model = KerasClassifier(build_model, verbose = 0)
 # 'data_percentage' : [1/3,1/2,1]
 # init = ['glorot_uniform', 'normal', 'uniform']
 
-activation      = ['sigmoid','relu']
-batch_size      = [8,16,32,64]
-epochs          = [100,200,300]
-learning_rate   = [0.001,0.01,0.1]
-n_hidden_layers = [1,2,3,4]
-layer_size      = [100,200,500]
-dropout_rate    = [0, 0.1, 0.2, 0.5]
+#activation      = ['sigmoid','relu']
+#batch_size      = [8,16,32,64]
+#epochs          = [100,200,300]
+#learning_rate   = [0.001,0.01,0.1]
+#n_hidden_layers = [1,2,3,4]
+#layer_size      = [100,200,500]
+#dropout_rate    = [0, 0.1, 0.2, 0.5]
+
+activation      = ['relu']
+batch_size      = [8]
+epochs          = [100]
+learning_rate   = [0.001]
+n_hidden_layers = [1]
+layer_size      = [500]
+dropout_rate    = [0.2]
 
 parameters = {
     'activation' : activation,  
@@ -147,6 +155,13 @@ result_df = pd.concat([result_df1,result_df2,result_df3])
 result_df = result_df.drop_duplicates(subset = ['param_' + parameter for parameter in parameters.keys()])
 best_estim=randomsearch.best_estimator_
 
+print('Train Accuracy: %0.2f' % randomsearch.score(X_train, y_train))
+print('Test Accuracy: %0.2f' % randomsearch.score(X_test, y_test))
+print('Best Parameters:',randomsearch.best_params_)
+print('Best Estimator:',best_estim)
+print('Best score:',randomsearch.best_score_)
+
+
 
 # Vorhersage
 y_test_pred=best_estim.predict(X_test)
@@ -161,8 +176,7 @@ y_test_pred=best_estim.predict(X_test)
 
 
 
-
-# # Berechne Fehler
+ # Berechne Fehler
 # mse = mean_squared_error(labeltr_pred,y_train)
 
 # print('Best Parameters:',randomsearch.best_params_)
@@ -190,7 +204,8 @@ y_test_pred=best_estim.predict(X_test)
 # plt.show()
 
 # Save trained model
-joblib_file = "C:\Users\Angelina\Documents\GitHub\WR-2-3-FFN-CLF\resources\trained_model\trained_model.pkl"
-joblib.dump(best_estim, joblib_file)
+joblib_file = "C:/Users/Angelina/Documents/GitHub/WR-2-3-FFN-CLF/resources/trained_model/trained_model.pkl"
+#joblib.dump(best_estim, joblib_file)
+best_estim.save(joblib_file)
 
 

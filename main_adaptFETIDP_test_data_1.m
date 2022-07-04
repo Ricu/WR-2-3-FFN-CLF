@@ -68,6 +68,8 @@ floatingEdges = all(floatingSD(edgesSD),2);
 validEdges = find(floatingEdges);
 % Schmeiße alle anderen Kanten raus
 
+numEdges = size(edgesSD,1);
+
 labelVec = zeros(numEdges,1);
 labelVec(floatingEdges) = predicted_labels;
 
@@ -84,11 +86,11 @@ hight = 5;
 
 % Definiere zu testende Koeffizientenverteilung: 1 -  Hufeisen
 coeffFun = @(tri) coeffFun_horseshoe(tri,vert(:,1),vert(:,2),N,n,yStripeLim,position,width,hight);
-markerType = 'verts';  % Die Koeffizientenverteilung ist elementweise definiert
+markerType = 'elements';  % Die Koeffizientenverteilung ist elementweise definiert
 
 % Definiere Koeffizient auf den Elementen (und teilgebietsweise);
 % maximalen Koeffizienten pro Knoten (und teilgebietsweise)
-[rhoTri,rhoTriSD,maxRhoVert,maxRhoVertSD] = getCoefficientMatrices(coeffFun,base,rhoMax,rhoMin,vert,tri,logicalTri__sd,plot_grid);
+[rhoTri,rhoTriSD,maxRhoVert,maxRhoVertSD] = getCoefficientMatrices(coeffFun,markerType,rhoMax,rhoMin,vert,tri,logicalTri__sd,plot_grid);
 
 rho_struct = struct('rhoTriSD',{rhoTriSD},'maxRhoVert',{maxRhoVert},'maxRhoVertSD',{maxRhoVertSD});
 
@@ -97,9 +99,6 @@ rho_struct = struct('rhoTriSD',{rhoTriSD},'maxRhoVert',{maxRhoVert},'maxRhoVertS
 % diffs = cell(numMethods,1);
 iters = cell(numMethods,1);
 kappa_ests = cell(numMethods,1);
-
-fig_method_comp = figure("Name","Loesungen fuer verschiedene Verfahren");
-tiledlayout('flow')
 
 plot_iteration = false; % Auswahl: Plotten der Loesung nach den ersten Iterationen von PCG
 
@@ -117,5 +116,6 @@ end
 %% Ergebnistabelle
 %rowNames = ["Anzahl Iterationen","Konditionszahl","Abweichung von Referenzloesung"];
 rowNames = ["Anzahl Iterationen","Konditionszahl"];
-T_results = cell2table([iters';kappa_ests'],"RowNames",rowNames,"VariableNames",method_type{:,2}');
+variableNames = (method_type(:,2));
+T_results = cell2table([iters';kappa_ests'],"RowNames",rowNames,"VariableNames",variableNames);
 disp(T_results)

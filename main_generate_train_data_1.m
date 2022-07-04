@@ -60,7 +60,7 @@ TOL = 100;  % Toleranz zur Auswahl der Eigenwerte
 rng(42);
 % Durchschnittliche Zeit pro Sample ungefaehr 15s -> 4 pro Minute
 % 4 * 60 * 16
-nRandSamples = 1800;
+nRandSamples = 1;
 coeffFun_cell = cell(nRandSamples*10,1); % Faktor 10 kommt daher, dass ... ?
 coeffFun_counter = 1;
 parameter_cell = cell(nRandSamples*10,4); % Faktor 4 kommt daher, dass ... ?
