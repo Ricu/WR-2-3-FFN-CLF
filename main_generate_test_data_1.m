@@ -1,6 +1,6 @@
 clear; clc;
 addpath('libs')
-export = 0;         % Auswahl: Testdaten abspeichern
+export = 1;         % Auswahl: Testdaten abspeichern
 plot_grid = true;   % Auswahl: Plotten der Triangulierung mit Kanal-Koeffizientenfunktion
 
 %% Lade vertTris fuer schnellere Berechnung der coeff-funktion
@@ -29,22 +29,6 @@ grid_struct = struct('vert__sd',{vert__sd},'tri__sd',{tri__sd},'l2g__sd',{l2g__s
 
 TOL = 100;  % Toleranz zur Auswahl der Eigenwerte
 
-%% Vorbereitung benoetigte Kanten & TG
-% Pruefe ob eines der beteiligten TG einen Dirichletknoten enthaelt.
-% Falls ja ist eins der TG kein floating TG und wird daher nicht
-% beruecksichtigt
-floatingSD = false(numSD,1);
-for sd = 1:numSD
-    floatingSD(sd) = nnz(dirichlet(l2g__sd{sd})) == 0;
-end
-
-edgesSD = [(1:numSD-N)',(N+1:numSD)';...
-           setdiff(1:numSD,N:N:numSD)', setdiff(1:numSD,1:N:numSD)'];
-edgesSD = sortrows(edgesSD);
-floatingEdges = all(floatingSD(edgesSD),2);
-validEdges = find(floatingEdges);
-% Schmeiße alle anderen Kanten raus
-
 %% Koeffizientenfunktion aufstellen
 % Definiere minimales und maximales rho
 rhoMin = 1;
@@ -72,11 +56,11 @@ f = @(vert,y) ones(size(vert));   % Rechte Seite der DGL
 [edgesPrimalGlobal,cGamma,edgesSD,cLocalPrimal,cB,cBskal,cInner,cK,cDirichlet] = setup_matrices(rho_struct,grid_struct,f);
 
 %% Inputgenerierung
-nValidEdges = length(validEdges);
-input_cell = cell(nValidEdges,1);
-label = zeros(nValidEdges,1);
-for i = 1:nValidEdges
-    edgeID = validEdges(i);
+numEdges = length(edgesSD);
+input_cell = cell(numEdges,1);
+label = zeros(numEdges,1);
+for i = 1:numEdges
+    edgeID = edgesSD(i);
     input_cell{i} = generate_input(edgeID,edgesSD,rhoTriSD,vert__sd,tri__sd);
     label(i) = generate_label(edgeID,edgesPrimalGlobal,cGamma,edgesSD,cLocalPrimal,cB,cBskal,cInner,cK,TOL);
 end
