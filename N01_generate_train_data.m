@@ -61,10 +61,10 @@ rng(42);
 
 % Anzahl an Trainingsamples pro Koeffizentenfunktionen 
 nSamplesConstant    = 2;
-nSamplesStrips      = 50;
-nSamplesBlocks      = 1;
-nSamplesRandBlocks  = 1;
-nSamplesRand        = 1;
+nSamplesStrips      = 600;
+nSamplesBlocks      = 4000;
+nSamplesRandBlocks  = 1500;
+nSamplesRand        = 2500;
 nCases = nSamplesConstant+nSamplesStrips+nSamplesBlocks+nSamplesRandBlocks+nSamplesRand;
 coeffFun_cell = cell(nCases,1); % Faktor 10 kommt daher, dass ... ?
 coeffFun_counter = 1;
