@@ -58,14 +58,19 @@ fprintf("Fuer das gegebene Gitter werden %i (%4.1f%%) Kanten uebersprungen\n",su
 %% Koeffizientenfunktion vorbereiten
 TOL = 100;  % Toleranz zur Auswahl der Eigenwerte
 rng(42);
-% Durchschnittliche Zeit pro Sample ungefaehr 15s -> 4 pro Minute
-% 4 * 60 * 16
-nRandSamples = 1;
-coeffFun_cell = cell(nRandSamples*10,1); % Faktor 10 kommt daher, dass ... ?
-coeffFun_counter = 1;
-parameter_cell = cell(nRandSamples*10,4); % Faktor 4 kommt daher, dass ... ?
 
-rhoBound = 10.^[0,3,6]; % enthaelt den minimalen und maximalen Koeffizienten
+% Anzahl an Trainingsamples pro Koeffizentenfunktionen 
+nSamplesConstant    = 3;
+nSamplesStrips      = 50;
+nSamplesBlocks      = 1;
+nSamplesRandBlocks  = 1;
+nSamplesRand        = 1;
+nSamples = nSamplesConstant+nSamplesStrips+nSamplesBlocks+nSamplesRandBlocks+nSamplesRand;
+coeffFun_cell = cell(nSamples*4,1); % Faktor 10 kommt daher, dass ... ?
+coeffFun_counter = 1;
+parameter_cell = cell(nSamples*4,4); % Faktor 4 kommt daher, dass ... ?
+
+rhoBound = 10.^[0,6]; % enthaelt den minimalen und maximalen Koeffizienten
 indexShiftBound = 0:2:20; % Array moeglicher Verschiebungen der Elemente mit hoeherem Koeffizienten in x- oder y-Richtung
 
 %% Konstante Koeffizientenfunktion
@@ -76,8 +81,8 @@ param_names = ["affectedSubdomains","rhoMin","rhoMax","indexShiftx","indexShifty
 fprintf("%s: Insgesamt %i Parameter zur Auswahl.\n","Constant",length(param_names))
 affectedSubdomains = [6,10]; % TG-Wahl fuer hoeherem Koeffizienten decken alle moeglichen Faelle ab
 % Samples hier haendisch erstellen
-parameter_const = {affectedSubdomains; affectedSubdomains; affectedSubdomains};
-parameter_const = [parameter_const, num2cell([rhoBound;circshift(rhoBound,1,2);0,0,0;0,0,0])']';
+parameter_const = {affectedSubdomains; affectedSubdomains};
+parameter_const = [parameter_const, num2cell([rhoBound;circshift(rhoBound,1,2);0,0;0,0])']';
 
 sample_parameters = cell2struct(parameter_const,param_names,1);
 
@@ -102,9 +107,9 @@ heightBound = -2:4;  % Breite der Kanaele, 0 ist dabei eine initiale Breite abha
 nStripsBound = 1:5; % Gibt die Anazhl Kanaele je TG an
 
 % Erstelle die Parameterstruktur
-param_names = ["height","nStrips","rhoMin","rhoMax","indexShifty"];
+param_names = ["rhoMin","rhoMax","height","nStrips","indexShifty"];
 fprintf("%s: Insgesamt %i Parameter zur Auswahl.\n","Strip",length(param_names))
-sample_parameters = generateSampleParameters(nRandSamples,param_names,heightBound,nStripsBound,rhoBound,rhoBound,indexShiftBound);
+sample_parameters = generateSampleParameters(nSamplesStrips,param_names,rhoBound,heightBound,nStripsBound,indexShiftBound);
 % sample_parameters(6) = cell2struct(num2cell([0; 1; 2; 3; 4]),param_names,1);
 
 for sampleID = 1:length(sample_parameters)
@@ -117,7 +122,7 @@ for sampleID = 1:length(sample_parameters)
     coeffFun_cell{coeffFun_counter} = @(vertices) coeffFun_canal(vertices(:,2),N,n,height,nStrips,indexShifty);
     parameter_cell{coeffFun_counter,1} = "Strip";
     parameter_cell{coeffFun_counter,2} = param_names;
-    parameter_cell{coeffFun_counter,3} = [height,nStrips,rhoMin,rhoMax,indexShifty];
+    parameter_cell{coeffFun_counter,3} = [rhoMin,rhoMax,height,nStrips,indexShifty];
     parameter_cell{coeffFun_counter,4}  = sample_parameters(sampleID);
     coeffFun_counter = coeffFun_counter + 1;
 end
@@ -131,9 +136,9 @@ prop2Bound = 0:0.2:1; % Gibt den Anteil an Block in jedem zweiten TG (spaltenwei
 heightBound = 2:2:38; % Hoehe der Bloecke
 
 % Erstelle die Parameterstruktur
-param_names = ["height","rhoMin","rhoMax","dif","prop1","prop2","indexShiftx","indexShifty"];
+param_names = ["rhoMin","rhoMax","height","dif","prop1","prop2","indexShiftx","indexShifty"];
 fprintf("%s: Insgesamt %i Parameter zur Auswahl.\n","Blocks",length(param_names))
-sample_parameters = generateSampleParameters(nRandSamples,param_names,heightBound,rhoBound,rhoBound,difBound,prop1Bound,prop2Bound,indexShiftBound,indexShiftBound);
+sample_parameters = generateSampleParameters(nSamplesBlocks,param_names,rhoBound,heightBound,difBound,prop1Bound,prop2Bound,indexShiftBound,indexShiftBound);
 
 for sampleID = 1:length(sample_parameters)
     height      = sample_parameters(sampleID).height;
@@ -148,7 +153,7 @@ for sampleID = 1:length(sample_parameters)
     coeffFun_cell{coeffFun_counter} = @(vertices) coeffFun_block(vertices(:,1), vertices(:,2), N, n, prop1,prop2,dif,height,indexShiftx,indexShifty);
     parameter_cell{coeffFun_counter,1}  = "Blocks";
     parameter_cell{coeffFun_counter,2}  = param_names;
-    parameter_cell{coeffFun_counter,3}  = [height,rhoMin,rhoMax,dif,prop1,prop2,indexShiftx,indexShifty];
+    parameter_cell{coeffFun_counter,3}  = [rhoMin,rhoMax,height,dif,prop1,prop2,indexShiftx,indexShifty];
     parameter_cell{coeffFun_counter,4}  = sample_parameters(sampleID);
     coeffFun_counter = coeffFun_counter + 1;
 end
@@ -157,13 +162,13 @@ end
 % Test verschiedene parameter fuer die Kanalfunktion
 widthBound      =  2: 1:10; % Breite der Bloecke mit Faktor der Schrittweite
 heightBound     =  2: 1:10; % Hoehe der Bloecke mit Faktor der Schrittweite
-varianceBound   =  0: 1:15;  % positive Varianz in Breite und Hoehe
-nBlocksBound    = 10:10:70; % Anzahl an random erstellten Bloecken
+varianceBound   =  0: 2:16;  % positive Varianz in Breite und Hoehe
+nBlocksBound    = 10:10:90; % Anzahl an random erstellten Bloecken
 
 % Erstelle die Parameterstruktur
-param_names = ["nBlocks","height","heightVariance","width","widthVariance","rhoMin","rhoMax","indexShiftx","indexShifty"];
+param_names = ["rhoMin","rhoMax","nBlocks","height","heightVariance","width","widthVariance","indexShiftx","indexShifty"];
 fprintf("%s: Insgesamt %i Parameter zur Auswahl.\n","Random Blocks",length(param_names))
-sample_parameters = generateSampleParameters(nRandSamples,param_names,nBlocksBound,heightBound,varianceBound,heightBound,varianceBound,rhoBound,rhoBound,indexShiftBound,indexShiftBound);
+sample_parameters = generateSampleParameters(nSamplesRandBlocks,param_names,rhoBound,nBlocksBound,heightBound,varianceBound,heightBound,varianceBound,indexShiftBound,indexShiftBound);
 
 for sampleID = 1:length(sample_parameters)
     nBlocks         = sample_parameters(sampleID).nBlocks;
@@ -179,7 +184,7 @@ for sampleID = 1:length(sample_parameters)
     coeffFun_cell{coeffFun_counter} = @(vertices) coeffFun_randomBlocks(vertices(:,1),vertices(:,2),N,n,nBlocks,width:width+widthVariance,height:height+heightVariance,indexShiftx,indexShifty);
     parameter_cell{coeffFun_counter,1}  = "Random Blocks";
     parameter_cell{coeffFun_counter,2}  = param_names;
-    parameter_cell{coeffFun_counter,3}  = [nBlocks,height,heightVariance,width,widthVariance,rhoMin,rhoMax,indexShiftx,indexShifty];
+    parameter_cell{coeffFun_counter,3}  = [rhoMin,rhoMax,nBlocks,height,heightVariance,width,widthVariance,indexShiftx,indexShifty];
     parameter_cell{coeffFun_counter,4}  = sample_parameters(sampleID);
     coeffFun_counter = coeffFun_counter + 1;
 end
@@ -190,9 +195,9 @@ randomPercentageBound = 0.2:0.05:0.7;
 randomStateBound = 1:10;
 
 % Erstelle die Parameterstruktur
-param_names = ["randomPercentage","randomState","rhoMin","rhoMax","indexShiftx","indexShifty"];
+param_names = ["rhoMin","rhoMax","randomPercentage","randomState","indexShiftx","indexShifty"];
 fprintf("%s: Insgesamt %i Parameter zur Auswahl.\n","Completely Random",length(param_names))
-sample_parameters = generateSampleParameters(nRandSamples,param_names,randomPercentageBound,randomStateBound,rhoBound,rhoBound,indexShiftBound,indexShiftBound);
+sample_parameters = generateSampleParameters(nSamplesRand,param_names,rhoBound,randomPercentageBound,randomStateBound,indexShiftBound,indexShiftBound);
 
 for sampleID = 1:length(sample_parameters)
     randomPercentage    = sample_parameters(sampleID).randomPercentage;
@@ -205,7 +210,7 @@ for sampleID = 1:length(sample_parameters)
     coeffFun_cell{coeffFun_counter} = @(vertices) coeffFun_random(vertices(:,1),vertices(:,2),randomPercentage,randomState,indexShiftx,indexShifty);
     parameter_cell{coeffFun_counter,1}  = "Completely Random";
     parameter_cell{coeffFun_counter,2}  = param_names;
-    parameter_cell{coeffFun_counter,3}  = [randomPercentage,randomState,rhoMin,rhoMax,indexShiftx,indexShifty];
+    parameter_cell{coeffFun_counter,3}  = [rhoMin,rhoMax,randomPercentage,randomState,indexShiftx,indexShifty];
     parameter_cell{coeffFun_counter,4}  = sample_parameters(sampleID);
     coeffFun_counter = coeffFun_counter + 1;
 end
@@ -270,13 +275,19 @@ if export
 end
 
 
-function sample_parameters = generateSampleParameters(nRandSamples,param_names,varargin)
+function sample_parameters = generateSampleParameters(nRandSamples,param_names,rhoBound,varargin)
+rhoMin = min(rhoBound); rhoMax = max(rhoBound);
+
 parameter_cell = cell(numel(varargin),1);
 [parameter_cell{:}] = ndgrid(varargin{:});
 parameter_cell = cellfun(@(X) reshape(X,1,[]),parameter_cell,'UniformOutput',false);
-fprintf("Wahle zufaellig %i aus %8i moeglichen Parameterkombinationen aus.\n",nRandSamples,length(parameter_cell{1}));
+parameter_cell(:,2) = parameter_cell(:,1);
+nVari = length(parameter_cell{1});
+rhoTemp = {repmat(rhoMin,1,nVari), repmat(rhoMax,1,nVari); repmat(rhoMax,1,nVari), repmat(rhoMin,1,nVari)};
+parameter_cell = [rhoTemp; parameter_cell];
+fprintf("Wahle zufaellig %i aus %8i moeglichen Parameterkombinationen aus.\n",nRandSamples,2*length(parameter_cell{1}));
 
-random_permutation = randperm(size(parameter_cell{1},2));
+random_permutation = randperm(2*size(parameter_cell{1},2));
 parameter_mat = cell2mat(parameter_cell);
 parameter_mat = parameter_mat(:,random_permutation(1:nRandSamples));
 % parameter_cell = num2cell(parameter_mat);
