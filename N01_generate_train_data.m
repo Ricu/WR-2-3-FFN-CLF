@@ -60,15 +60,15 @@ TOL = 100;  % Toleranz zur Auswahl der Eigenwerte
 rng(42);
 
 % Anzahl an Trainingsamples pro Koeffizentenfunktionen 
-nSamplesConstant    = 3;
+nSamplesConstant    = 2;
 nSamplesStrips      = 50;
 nSamplesBlocks      = 1;
 nSamplesRandBlocks  = 1;
 nSamplesRand        = 1;
-nSamples = nSamplesConstant+nSamplesStrips+nSamplesBlocks+nSamplesRandBlocks+nSamplesRand;
-coeffFun_cell = cell(nSamples*4,1); % Faktor 10 kommt daher, dass ... ?
+nCases = nSamplesConstant+nSamplesStrips+nSamplesBlocks+nSamplesRandBlocks+nSamplesRand;
+coeffFun_cell = cell(nCases,1); % Faktor 10 kommt daher, dass ... ?
 coeffFun_counter = 1;
-parameter_cell = cell(nSamples*4,4); % Faktor 4 kommt daher, dass ... ?
+parameter_cell = cell(nCases,4); % Faktor 4 kommt daher, dass ... ?
 
 rhoBound = 10.^[0,6]; % enthaelt den minimalen und maximalen Koeffizienten
 indexShiftBound = 0:2:20; % Array moeglicher Verschiebungen der Elemente mit hoeherem Koeffizienten in x- oder y-Richtung
@@ -219,12 +219,12 @@ end
 empty_cells_ind = cellfun('isempty',coeffFun_cell);
 coeffFun_cell = coeffFun_cell(~empty_cells_ind);
 parameter_cell = parameter_cell(~empty_cells_ind,:);
-n_cases = length(coeffFun_cell);
-output_cell = cell(n_cases,1);
+output_cell = cell(nCases,1);
+parameter_output_cell = cell(nCases * length(validEdges),3);
 
 t_casesStart = tic;
-for case_id = 1:n_cases
-    fprintf("#### Starte Fall %5i/%5i: Koeffizientenfunktion %s ####\n",case_id,n_cases,parameter_cell{case_id})
+for case_id = 1:nCases
+    fprintf("#### Starte Fall %5i/%5i: Koeffizientenfunktion %s ####\n",case_id,nCases,parameter_cell{case_id})
     t_coeffFun = tic;
     % Definiere Koeffizient auf den Elementen (und teilgebietsweise);
     % maximalen Koeffizienten pro Knoten (und teilgebietsweise)
@@ -248,6 +248,7 @@ for case_id = 1:n_cases
         edgeID = validEdges(i);
         input{i} = generate_input(edgeID,edgesSD,rhoTriSD,vert__sd,tri__sd);
         label(i) = generate_label(edgeID,edgesPrimalGlobal,cGamma,edgesSD,cLocalPrimal,cB,cBskal,cInner,cK,TOL);
+        parameter_output_cell{(case_id-1)*nValidEdges + i} = parameter_cell(case_id,1:3);
 %         fprintf("Kante %2i bzgl. der TG (%2i,%2i) erhaelt das Label %i\n",edgeID,edgesSD(edgeID,1),edgesSD(edgeID,2),label(i))
         fprintf("   %2i", edgeID)
     end
@@ -256,21 +257,22 @@ for case_id = 1:n_cases
     fprintf("\n")
     % Fuege neue Daten an den Trainingsdatensatz an
     output_cell{case_id} = [cell2mat(input),label];
-    fprintf("Durchschnittliche Zeit pro Fall bisher %fs. Verbleibende Zeit ca: %.2fm\n", toc(t_casesStart)/case_id, (n_cases-case_id)*toc(t_casesStart)/case_id/60)
+    fprintf("Durchschnittliche Zeit pro Fall bisher %fs. Verbleibende Zeit ca: %.2fm\n", toc(t_casesStart)/case_id, (nCases-case_id)*toc(t_casesStart)/case_id/60)
 end
 
 %% Daten exportieren
 if export
     % Input-Label Kombinationen der einzelnen Faelle abspeichern
-    file_name = sprintf("./resources/train_data/%s-train_data_dump.csv",datestr(datetime,'yyyy-mm-dd-HH-MM-SS'));
+    export_time = datestr(datetime,'yyyy-mm-dd-HH-MM-SS');
+    file_name = sprintf("./resources/train_data/%s-train_data_dump.csv",export_time);
     fprintf("Speichere Traininsdaten als %s...",file_name)
     output_mat = cell2mat(output_cell);
     writematrix(output_mat,file_name);
     fprintf("Fertig!\n")
     % Parameter der einzelnen Faelle abspeichern
-    file_name2 = sprintf("./resources/train_data/%s-parameter_dump.csv",datestr(datetime,'yyyy-mm-dd-HH-MM-SS'));
+    file_name2 = sprintf("./resources/train_data/%s-parameter_dump.csv",export_time);
     fprintf("Speichere Parameterdaten als %s...",file_name2)
-    writecell(parameter_cell(:,1:3),file_name2);
+    writecell(parameter_output_cell,file_name2);
     fprintf("Fertig!\n")
 end
 
