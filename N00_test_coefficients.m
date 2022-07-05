@@ -34,7 +34,7 @@ grid_struct = struct('vert__sd',{vert__sd},'tri__sd',{tri__sd},'l2g__sd',{l2g__s
 % affectedSubdomains = [6,10];
 % indexShiftx = 10;
 % indexShifty = 2;
-%
+
 % coeffFun= @(vertices) coeffFun_subdomains(vertices(:,1),vertices(:,2),affectedSubdomains,vert__sd,indexShiftx,indexShifty);
 
 %% Streifen Koeffizientenfunktion
@@ -92,6 +92,6 @@ coeffFun = @(vertices) coeffFun_random(vertices(:,1),vertices(:,2),randomPercent
 %% Plot
 
 rhoMin = 1;
-rhoMax = 1;
+rhoMax = 10^6;
 markerType = 'verts';
 getCoefficientMatrices(coeffFun,markerType,rhoMax,rhoMin,vert,tri,logicalTri__sd,plot_grid);
