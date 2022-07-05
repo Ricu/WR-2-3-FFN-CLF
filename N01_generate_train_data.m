@@ -155,9 +155,9 @@ end
 
 %% Zufalls - Bloecke Koeffizientenfunktion
 % Test verschiedene parameter fuer die Kanalfunktion
-widthBound      =  2:1:10; % Breite der Bloecke mit Faktor der Schrittweite
-heightBound     =  2:1:10; % Hoehe der Bloecke mit Faktor der Schrittweite
-varianceBound   =  0:1:5;  % positive Varianz in Breite und Hoehe
+widthBound      =  2: 1:10; % Breite der Bloecke mit Faktor der Schrittweite
+heightBound     =  2: 1:10; % Hoehe der Bloecke mit Faktor der Schrittweite
+varianceBound   =  0: 1:15;  % positive Varianz in Breite und Hoehe
 nBlocksBound    = 10:10:70; % Anzahl an random erstellten Bloecken
 
 % Erstelle die Parameterstruktur

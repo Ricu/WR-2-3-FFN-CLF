@@ -1,3 +1,7 @@
+% In dieser Datei koennen die verschiedenen Koeffizientenfunktionen
+% ausprobiert und geplottet werden.
+
+clc; clear;
 plot_grid = 1;
 
 %% Funktion rechte Seite
@@ -59,9 +63,9 @@ grid_struct = struct('vert__sd',{vert__sd},'tri__sd',{tri__sd},'l2g__sd',{l2g__s
 % coeffFun = @(vertices) coeffFun_block(vertices(:,1), vertices(:,2), N, n, prop1,prop2,dif,height,indexShiftx,indexShifty);
 
 %% Zufalls - Bloecke Koeffizientenfunktion
-% widthBound      =  2:1:10; 
-% heightBound     =  2:1:10; 
-% varianceBound   =  0:1: 5;
+% widthBound      =  2: 1:10; 
+% heightBound     =  2: 1:10; 
+% varianceBound   =  0: 1:15;
 % nBlocksBound    = 10:10:70;
 
 % nBlocks         = 70;
