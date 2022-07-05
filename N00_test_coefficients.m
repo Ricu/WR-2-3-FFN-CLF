@@ -66,7 +66,7 @@ grid_struct = struct('vert__sd',{vert__sd},'tri__sd',{tri__sd},'l2g__sd',{l2g__s
 % widthBound      =  2: 1:10; 
 % heightBound     =  2: 1:10; 
 % varianceBound   =  0: 1:15;
-% nBlocksBound    = 10:10:70;
+% nBlocksBound    = 10:10:90;
 
 % nBlocks         = 70;
 % height          = 2;
