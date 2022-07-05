@@ -91,6 +91,10 @@ for i = 1:2
     % Extrahiere den rho Wert fuer jeden Knoten entsprechend fuer in
     % welchem Element er liegt.
     input_cell{i} = rhoTriSD{sd}(X_element)';
+
+    % Da wir immer nur rho als 1 oder 10^6 waehlen: normalisiere bereits
+    % hier auf 0 und 1 um Speicherplatz zu sparen
+    input_cell{i}(input_cell{i} == max(rhoTriSD{sd})) = 1;
     
     % Plotbefehle zum ueberpruefen
 %     scatter(X,Y,'filled')
