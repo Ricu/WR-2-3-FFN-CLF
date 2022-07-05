@@ -3,9 +3,15 @@ addpath('libs')
 plot_grid = true;   % Auswahl: Plotten der Triangulierung mit Kanal-Koeffizientenfunktion
 
 %% Daten importieren
+% Predicted Labels des neuronalen Netzes
 file_name = sprintf("./resources/trained_model/predicted_labels_1.csv");
 fprintf("Lese Testdaten aus %s...",file_name)
 predicted_labels = readmatrix(file_name);
+
+% Echte Labels der Trainingsdaten
+file_name = sprintf("./resources/test_data/2022-07-05-00-04-29-test_data_1_dump.csv");
+test_data = readmatrix(file_name);
+true_labels = test_data(:,end);
 
 %% Definiere zu vergleichende Verfahren
 method_type = {'Dirichlet','none';
@@ -72,6 +78,8 @@ markerType = 'elements';  % Die Koeffizientenverteilung ist elementweise definie
 [rhoTri,rhoTriSD,maxRhoVert,maxRhoVertSD] = getCoefficientMatrices(coeffFun,markerType,rhoMax,rhoMin,vert,tri,logicalTri__sd,plot_grid);
 
 rho_struct = struct('rhoTriSD',{rhoTriSD},'maxRhoVert',{maxRhoVert},'maxRhoVertSD',{maxRhoVertSD});
+
+% Plot der klassifizierten Kanten (TP, TN, FP, FN)
 
 %% Loesen des Systems mit FETI-DP fuer versch. Verfahren
 % Referenzloesung auftsllen und vergleichen? 
