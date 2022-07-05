@@ -3,9 +3,22 @@ addpath('libs')
 plot_grid = true;   % Auswahl: Plotten der Triangulierung mit Kanal-Koeffizientenfunktion
 
 %% Daten importieren
-file_name = sprintf("./resources/trained_model/predicted_labels_3.csv");
-fprintf("Lese Testdaten aus %s...",file_name)
-predicted_labels = readmatrix(file_name);
+predicted_labels_loc = "./resources/trained_model/predicted_labels_3.csv";
+fprintf("Lese predicted lables aus %s...",predicted_labels_loc)
+predicted_labels = readmatrix(predicted_labels_loc);
+fprintf("Fertig \n")
+true_labels_loc = "./resources/test_data/2022-07-05-00-13-40-test_data_3_dump.csv";
+fprintf("Lese wahre labels aus %s...",true_labels_loc)
+true_labels = readmatrix(true_labels_loc);
+true_labels = true_labels(:,end);
+fprintf("Fertig \n")
+
+fprintf("Kante    : ")
+fprintf("%2i,", 1:length(true_labels)-1); fprintf("%2i\n",length(true_labels));
+fprintf("predicted: ")
+fprintf("%2i,", predicted_labels(1:end-1)); fprintf("%2i\n",predicted_labels(end));
+fprintf("true     : ")
+fprintf("%2i,", true_labels(1:end-1)); fprintf("%2i\n",true_labels(end));
 
 %% Definiere zu vergleichende Verfahren
 method_type = {'Dirichlet','none';
@@ -70,6 +83,9 @@ markerType = 'verts';  % Die Koeffizientenverteilung ist elementweise definiert
 % maximalen Koeffizienten pro Knoten (und teilgebietsweise)
 [~,rhoTriSD,maxRhoVert,maxRhoVertSD] = getCoefficientMatrices(coeffFun,markerType,rhoMax,rhoMin,vert,tri,logicalTri__sd,plot_grid,vertTris);
 rho_struct = struct('rhoTriSD',{rhoTriSD},'maxRhoVert',{maxRhoVert},'maxRhoVertSD',{maxRhoVertSD});
+
+%% Plot der klassifizierten Kanten
+plot_classified_edges(coeffFun,markerType,rhoMax,rhoMin,vert,tri,predicted_labels,true_labels,vert__sd)
 
 %% Loesen des Systems mit FETI-DP fuer versch. Verfahren
 % Referenzloesung auftsllen und vergleichen? 
