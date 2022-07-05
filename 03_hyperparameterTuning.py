@@ -28,8 +28,8 @@ tf.config.optimizer.set_jit(True)
 random_state = 1
 
 # Datensatz laden
-train_data1000 = pd.read_csv('C:/Users/Angelina/Documents/GitHub/WR-2-3-FFN-CLF/resources/train_data/training_dataset_ver1.csv', header = None)
-# train_data1000 = pd.read_csv('C:/Users/Valentin/Documents/10. Semester/WR2/Projekt 3 - FNN CLF/WR-2-3-FFN-CLF/resources/train_data/training_dataset_ver1.csv', header = None)
+# train_data1000 = pd.read_csv('C:/Users/Angelina/Documents/GitHub/WR-2-3-FFN-CLF/resources/train_data/training_dataset_ver1.csv', header = None)
+train_data1000 = pd.read_csv('C:/Users/Valentin/Documents/10. Semester/WR2/Projekt 3 - FNN CLF/WR-2-3-FFN-CLF/resources/train_data/training_dataset_ver1.csv', header = None)
 train_data = train_data1000.loc[~np.any(train_data1000 == 1000,axis = 1)] 
 X = train_data.iloc[:,:-1].values
 y = train_data.iloc[:,-1:].values
