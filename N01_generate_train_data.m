@@ -61,11 +61,11 @@ TOL = 100;  % Toleranz zur Auswahl der Eigenwerte
 rng(42); % Setze seed fuer random number generator
 
 % Anzahl an Trainingsamples pro Koeffizentenfunktionen 
-nSamplesConstant    = 2;
-nSamplesStrips      = 770;
-nSamplesBlocks      = 0;
+nSamplesConstant    = 0;
+nSamplesStrips      = 0;
+nSamplesBlocks      = 7500;
 nSamplesRandBlocks  = 0;
-nSamplesRand        = 6000;
+nSamplesRand        = 0;
 nCases = nSamplesConstant+nSamplesStrips+nSamplesBlocks+nSamplesRandBlocks+nSamplesRand;
 % Erstelle die Arrays in welchen die Informationen zwischengespeichert
 % werden
@@ -266,15 +266,18 @@ for case_id = 1:nCases
         input = generate_input(edgeID,edgesSD,rhoTriSD,vert__sd,tri__sd);
         label = generate_label(edgeID,edgesPrimalGlobal,cGamma,edgesSD,cLocalPrimal,cB,cBskal,cInner,cK,TOL);
         output_cell{(case_id-1)*nValidEdges + i,:} =  [input,label];
-        parameter_output_cell((case_id-1)*nValidEdges + i) = parameter_cell(case_id,1:3);
+        parameter_output_cell((case_id-1)*nValidEdges + i,:) = parameter_cell(case_id,1:3);
         fprintf("   %2i", edgeID)
     end
     fprintf("\nLabels:")
     fprintf("   %2i",label)
     fprintf("\n")
     % Fuege neue Daten an den Trainingsdatensatz an
-    output_cell{case_id} = [cell2mat(input),label];
-    fprintf("Durchschnittliche Zeit pro Fall bisher %fs. Verbleibende Zeit ca: %.2fm\n", toc(t_casesStart)/case_id, (nCases-case_id)*toc(t_casesStart)/case_id/60)
+%     output_cell{case_id} = [cell2mat(input),label];
+    elapsedTime = toc(t_casesStart);
+    remainingTime = (nCases-case_id)*elapsedTime/case_id;
+    
+    fprintf("Durchschnittliche Zeit pro Fall bisher %fs. Verbleibende Zeit ca: %.2fm (%s)\n", elapsedTime/case_id, remainingTime/60, datestr(datetime + seconds(remainingTime),'dd.mm.yyyy HH:MM:SS'))
 end
 
 %% Daten exportieren
