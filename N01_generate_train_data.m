@@ -61,10 +61,10 @@ rng(42);
 
 % Anzahl an Trainingsamples pro Koeffizentenfunktionen 
 nSamplesConstant    = 2;
-nSamplesStrips      = 600;
-nSamplesBlocks      = 4000;
-nSamplesRandBlocks  = 1500;
-nSamplesRand        = 2500;
+nSamplesStrips      = 770;
+nSamplesBlocks      = 0;
+nSamplesRandBlocks  = 0;
+nSamplesRand        = 6000;
 nCases = nSamplesConstant+nSamplesStrips+nSamplesBlocks+nSamplesRandBlocks+nSamplesRand;
 coeffFun_cell = cell(nCases,1); % Faktor 10 kommt daher, dass ... ?
 coeffFun_counter = 1;
@@ -248,7 +248,7 @@ for case_id = 1:nCases
         edgeID = validEdges(i);
         input{i} = generate_input(edgeID,edgesSD,rhoTriSD,vert__sd,tri__sd);
         label(i) = generate_label(edgeID,edgesPrimalGlobal,cGamma,edgesSD,cLocalPrimal,cB,cBskal,cInner,cK,TOL);
-        parameter_output_cell{(case_id-1)*nValidEdges + i} = parameter_cell(case_id,1:3);
+        parameter_output_cell((case_id-1)*nValidEdges + i) = parameter_cell(case_id,1:3);
 %         fprintf("Kante %2i bzgl. der TG (%2i,%2i) erhaelt das Label %i\n",edgeID,edgesSD(edgeID,1),edgesSD(edgeID,2),label(i))
         fprintf("   %2i", edgeID)
     end

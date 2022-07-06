@@ -94,6 +94,7 @@ for i = 1:2
 
     % Da wir immer nur rho als 1 oder 10^6 waehlen: normalisiere bereits
     % hier auf 0 und 1 um Speicherplatz zu sparen
+    input_cell{i}(input_cell{i} == min(rhoTriSD{sd})) = 0;
     input_cell{i}(input_cell{i} == max(rhoTriSD{sd})) = 1;
     
     % Plotbefehle zum ueberpruefen
