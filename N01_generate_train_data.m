@@ -52,12 +52,13 @@ edgesSD = [(1:numSD-N)',(N+1:numSD)';...
 edgesSD = sortrows(edgesSD);
 floatingEdges = all(floatingSD(edgesSD),2);
 validEdges = find(floatingEdges);
+nValidEdges = length(validEdges);
 fprintf("Fuer das gegebene Gitter werden %i (%4.1f%%) Kanten uebersprungen\n",sum(~floatingEdges),sum(~floatingEdges)/length(floatingEdges)*100)
 % Schmeiße alle anderen Kanten raus
 
 %% Koeffizientenfunktion vorbereiten
 TOL = 100;  % Toleranz zur Auswahl der Eigenwerte
-rng(42);
+rng(42); % Setze seed fuer random number generator
 
 % Anzahl an Trainingsamples pro Koeffizentenfunktionen 
 nSamplesConstant    = 2;
@@ -66,15 +67,18 @@ nSamplesBlocks      = 0;
 nSamplesRandBlocks  = 0;
 nSamplesRand        = 6000;
 nCases = nSamplesConstant+nSamplesStrips+nSamplesBlocks+nSamplesRandBlocks+nSamplesRand;
-coeffFun_cell = cell(nCases,1); % Faktor 10 kommt daher, dass ... ?
+% Erstelle die Arrays in welchen die Informationen zwischengespeichert
+% werden
+coeffFun_cell = cell(nCases,1); 
+parameter_cell = cell(nCases,4); 
 coeffFun_counter = 1;
-parameter_cell = cell(nCases,4); % Faktor 4 kommt daher, dass ... ?
 
+
+% Globale Parametergrenzen
 rhoBound = 10.^[0,6]; % enthaelt den minimalen und maximalen Koeffizienten
 indexShiftBound = 0:2:20; % Array moeglicher Verschiebungen der Elemente mit hoeherem Koeffizienten in x- oder y-Richtung
 
 %% Konstante Koeffizientenfunktion
-% Test verschiedene Parameter fuer die Kanalfunktion
 
 % Erstelle die Parameterstruktur
 param_names = ["affectedSubdomains","rhoMin","rhoMax","indexShiftx","indexShifty"];
@@ -83,9 +87,10 @@ affectedSubdomains = [6,10]; % TG-Wahl fuer hoeherem Koeffizienten decken alle m
 % Samples hier haendisch erstellen
 parameter_const = {affectedSubdomains; affectedSubdomains};
 parameter_const = [parameter_const, num2cell([rhoBound;circshift(rhoBound,1,2);0,0;0,0])']';
-
 sample_parameters = cell2struct(parameter_const,param_names,1);
 
+% Erstelle in einer Schleife die Koeffizientenfunktionen anhand der
+% gewaehlten Parameterkombinationen und speichere diese zwischen.
 for sampleID = 1:length(sample_parameters)
     affectedSubdomains  = sample_parameters(sampleID).affectedSubdomains;
     rhoMin              = sample_parameters(sampleID).rhoMin;
@@ -102,9 +107,9 @@ for sampleID = 1:length(sample_parameters)
 end
 
 %% Streifen Koeffizientenfunktion
-% Test verschiedene Parameter fuer die Kanalfunktion
+% Lege die Parametergrenzen fest
 heightBound = -2:4;  % Breite der Kanaele, 0 ist dabei eine initiale Breite abhaengig von der Anzahl an Kanaelen je TG
-nStripsBound = 1:5; % Gibt die Anazhl Kanaele je TG an
+nStripsBound = 1:5; % Gibt die Anzahl Kanaele je TG an
 
 % Erstelle die Parameterstruktur
 param_names = ["rhoMin","rhoMax","height","nStrips","indexShifty"];
@@ -112,6 +117,8 @@ fprintf("%s: Insgesamt %i Parameter zur Auswahl.\n","Strip",length(param_names))
 sample_parameters = generateSampleParameters(nSamplesStrips,param_names,rhoBound,heightBound,nStripsBound,indexShiftBound);
 % sample_parameters(6) = cell2struct(num2cell([0; 1; 2; 3; 4]),param_names,1);
 
+% Erstelle in einer Schleife die Koeffizientenfunktionen anhand der
+% gewaehlten Parameterkombinationen und speichere diese zwischen.
 for sampleID = 1:length(sample_parameters)
     height      = sample_parameters(sampleID).height;
     nStrips     = sample_parameters(sampleID).nStrips;
@@ -128,9 +135,9 @@ for sampleID = 1:length(sample_parameters)
 end
 
 %% Bloecke Koeffizientenfunktion
-% Teste verschiedene Parameter fuer die Kanalfunktion
-difBound = -20:2:20; % Gibt an, wie weit die Bloecke in jedem zweiten TG (spaltenweise ab 2.Spalte) 
-                     % voneinander versetzt sind. 0 entspricht keiner Versetzung
+% Lege die Parametergrenzen fest
+difBound = -20:2:20;  % Gibt an, wie weit die Bloecke in jedem zweiten TG (spaltenweise ab 2.Spalte) 
+                      % voneinander versetzt sind. 0 entspricht keiner Versetzung
 prop1Bound = 0:0.2:1; % Gibt den Anteil an Block in jedem zweiten TG (spaltenweise ab 1.Spalte) an
 prop2Bound = 0:0.2:1; % Gibt den Anteil an Block in jedem zweiten TG (spaltenweise ab 2.Spalte) an
 heightBound = 2:2:38; % Hoehe der Bloecke
@@ -140,6 +147,8 @@ param_names = ["rhoMin","rhoMax","height","dif","prop1","prop2","indexShiftx","i
 fprintf("%s: Insgesamt %i Parameter zur Auswahl.\n","Blocks",length(param_names))
 sample_parameters = generateSampleParameters(nSamplesBlocks,param_names,rhoBound,heightBound,difBound,prop1Bound,prop2Bound,indexShiftBound,indexShiftBound);
 
+% Erstelle in einer Schleife die Koeffizientenfunktionen anhand der
+% gewaehlten Parameterkombinationen und speichere diese zwischen.
 for sampleID = 1:length(sample_parameters)
     height      = sample_parameters(sampleID).height;
     dif         = sample_parameters(sampleID).dif;
@@ -159,7 +168,7 @@ for sampleID = 1:length(sample_parameters)
 end
 
 %% Zufalls - Bloecke Koeffizientenfunktion
-% Test verschiedene parameter fuer die Kanalfunktion
+% Lege die Parametergrenzen fest
 widthBound      =  2: 1:10; % Breite der Bloecke mit Faktor der Schrittweite
 heightBound     =  2: 1:10; % Hoehe der Bloecke mit Faktor der Schrittweite
 varianceBound   =  0: 2:16;  % positive Varianz in Breite und Hoehe
@@ -170,6 +179,8 @@ param_names = ["rhoMin","rhoMax","nBlocks","height","heightVariance","width","wi
 fprintf("%s: Insgesamt %i Parameter zur Auswahl.\n","Random Blocks",length(param_names))
 sample_parameters = generateSampleParameters(nSamplesRandBlocks,param_names,rhoBound,nBlocksBound,heightBound,varianceBound,heightBound,varianceBound,indexShiftBound,indexShiftBound);
 
+% Erstelle in einer Schleife die Koeffizientenfunktionen anhand der
+% gewaehlten Parameterkombinationen und speichere diese zwischen.
 for sampleID = 1:length(sample_parameters)
     nBlocks         = sample_parameters(sampleID).nBlocks;
     height          = sample_parameters(sampleID).height;
@@ -190,15 +201,17 @@ for sampleID = 1:length(sample_parameters)
 end
 
 %% Zufalls Koeffizientenfunktion
-% Teste verschiedene Parameter fuer die Kanalfunktion
-randomPercentageBound = 0.2:0.05:0.7;
-randomStateBound = 1:10;
+% Lege die Parametergrenzen fest
+randomPercentageBound   = 0.2:0.05: 0.7;
+randomStateBound        = 1  :1   :10  ;
 
 % Erstelle die Parameterstruktur
 param_names = ["rhoMin","rhoMax","randomPercentage","randomState","indexShiftx","indexShifty"];
 fprintf("%s: Insgesamt %i Parameter zur Auswahl.\n","Completely Random",length(param_names))
 sample_parameters = generateSampleParameters(nSamplesRand,param_names,rhoBound,randomPercentageBound,randomStateBound,indexShiftBound,indexShiftBound);
 
+% Erstelle in einer Schleife die Koeffizientenfunktionen anhand der
+% gewaehlten Parameterkombinationen und speichere diese zwischen.
 for sampleID = 1:length(sample_parameters)
     randomPercentage    = sample_parameters(sampleID).randomPercentage;
     randomState         = sample_parameters(sampleID).randomState;
@@ -216,11 +229,15 @@ for sampleID = 1:length(sample_parameters)
 end
 
 %% Faelle 
+% Vergewissern dass keine leeren Eintraege in dem Koeffizientenarray
+% enthalten sind welche spaeter zu Fehlern führen könnten.
 empty_cells_ind = cellfun('isempty',coeffFun_cell);
 coeffFun_cell = coeffFun_cell(~empty_cells_ind);
 parameter_cell = parameter_cell(~empty_cells_ind,:);
-output_cell = cell(nCases,1);
-parameter_output_cell = cell(nCases * length(validEdges),3);
+
+% Erstelle die Arrays welche spaeter gespeichert werden.
+output_cell = cell(nCases * nValidEdges,1);
+parameter_output_cell = cell(nCases * nValidEdges,3);
 
 t_casesStart = tic;
 for case_id = 1:nCases
@@ -231,25 +248,25 @@ for case_id = 1:nCases
     rhoMin = parameter_cell{case_id,4}.rhoMin;
     rhoMax = parameter_cell{case_id,4}.rhoMax;
     markerType = 'verts';
+    % Erstelle die Koeffizientenmatrizen welche in der Berechnung der
+    % FETI-DP Matrizen benoetigt werden.
     [rhoTri,rhoTriSD,maxRhoVert,maxRhoVertSD] = getCoefficientMatrices(coeffFun_cell{case_id},markerType,rhoMax,rhoMin,vert,tri,logicalTri__sd,plot_grid,vertTris);
     fprintf("Benoetigte Zeit: Aufstellen der Koeffizientenmatrizen: %5fs",toc(t_coeffFun))
     rho_struct = struct('rhoTriSD',{rhoTriSD},'maxRhoVert',{maxRhoVert},'maxRhoVertSD',{maxRhoVertSD});
 
     t_matrices = tic;
+    % Erstelle die FETI-DP Matrizen, welche zur Berechnung der Inputs und
+    % der Label benoetigt werden
     [edgesPrimalGlobal,cGamma,edgesSD,cLocalPrimal,cB,cBskal,cInner,cK,cDirichlet] = setup_matrices(rho_struct,grid_struct,f);
     fprintf(", Sprungoperators/Steifigkeitsmatrix: %5fs\n", toc(t_matrices))
-
-    nValidEdges = length(validEdges);
-    input = cell(nValidEdges,1);
-    label = zeros(nValidEdges,1);
 
     fprintf("Kanten:")
     for i = 1:length(validEdges)
         edgeID = validEdges(i);
-        input{i} = generate_input(edgeID,edgesSD,rhoTriSD,vert__sd,tri__sd);
-        label(i) = generate_label(edgeID,edgesPrimalGlobal,cGamma,edgesSD,cLocalPrimal,cB,cBskal,cInner,cK,TOL);
+        input = generate_input(edgeID,edgesSD,rhoTriSD,vert__sd,tri__sd);
+        label = generate_label(edgeID,edgesPrimalGlobal,cGamma,edgesSD,cLocalPrimal,cB,cBskal,cInner,cK,TOL);
+        output_cell{(case_id-1)*nValidEdges + i,:} =  [input,label];
         parameter_output_cell((case_id-1)*nValidEdges + i) = parameter_cell(case_id,1:3);
-%         fprintf("Kante %2i bzgl. der TG (%2i,%2i) erhaelt das Label %i\n",edgeID,edgesSD(edgeID,1),edgesSD(edgeID,2),label(i))
         fprintf("   %2i", edgeID)
     end
     fprintf("\nLabels:")
@@ -278,21 +295,30 @@ end
 
 
 function sample_parameters = generateSampleParameters(nRandSamples,param_names,rhoBound,varargin)
+% Erstelle eine Auswahl aller moeglichen Kombinationen innerhalb der in
+% varargin uebergebenen Parametergrenzen + die Kombinationen aus rhoMax und
+% rhoMin.
 rhoMin = min(rhoBound); rhoMax = max(rhoBound);
 
+% Erstelle alle moeglichen Kombinationen von Parametern in varargin
 parameter_cell = cell(numel(varargin),1);
 [parameter_cell{:}] = ndgrid(varargin{:});
 parameter_cell = cellfun(@(X) reshape(X,1,[]),parameter_cell,'UniformOutput',false);
 parameter_cell(:,2) = parameter_cell(:,1);
+
+% Fuege die rhoMin und rhoMax Parameter hinzu: einmal normal und einmal
+% umgedreht
 nVari = length(parameter_cell{1});
 rhoTemp = {repmat(rhoMin,1,nVari), repmat(rhoMax,1,nVari); repmat(rhoMax,1,nVari), repmat(rhoMin,1,nVari)};
 parameter_cell = [rhoTemp; parameter_cell];
 fprintf("Wahle zufaellig %i aus %8i moeglichen Parameterkombinationen aus.\n",nRandSamples,2*length(parameter_cell{1}));
 
+% Permutiere die Parameterkombinationen und waehle anschliessend
+% nRandSamples aus
 random_permutation = randperm(2*size(parameter_cell{1},2));
 parameter_mat = cell2mat(parameter_cell);
 parameter_mat = parameter_mat(:,random_permutation(1:nRandSamples));
-% parameter_cell = num2cell(parameter_mat);
 
+% Wandle die erstellten samples in eine structure um
 sample_parameters = cell2struct(num2cell(parameter_mat),param_names,1);
 end
