@@ -1,6 +1,6 @@
 % In dieser Datei koennen die verschiedenen Koeffizientenfunktionen
 % ausprobiert und geplottet werden.
-
+addpath('libs')
 clc; clear;
 plot_grid = 1;
 
@@ -65,33 +65,34 @@ grid_struct = struct('vert__sd',{vert__sd},'tri__sd',{tri__sd},'l2g__sd',{l2g__s
 %% Zufalls - Bloecke Koeffizientenfunktion
 % widthBound      =  2: 1:10; 
 % heightBound     =  2: 1:10; 
-% varianceBound   =  0: 1:15;
+% varianceBound   =  0: 2:16;
 % nBlocksBound    = 10:10:90;
 
-% nBlocks         = 70;
-% height          = 2;
-% heightVariance  = 0;
-% width           = 2;
-% widthVariance   = 0;
-% indexShiftx = 0;
-% indexShifty = 0;
-% 
-% coeffFun = @(vertices) coeffFun_randomBlocks(vertices(:,1),vertices(:,2),N,n,nBlocks,width:width+widthVariance,height:height+heightVariance,indexShiftx,indexShifty);
+nBlocks         = 40;
+height          =  4;
+heightVariance  = 10;
+width           =  4;
+widthVariance   = 10;
+indexShiftx = 0;
+indexShifty = 0;
+
+coeffFun = @(vertices) coeffFun_randomBlocks(vertices(:,1),vertices(:,2),N,n,nBlocks,width:width+widthVariance,height:height+heightVariance,indexShiftx,indexShifty);
 
 %% Zufalls Koeffizientenfunktion
 % randomPercentageBound = 0.2:0.05:0.7;
 % randomStateBound = 1:10;
 
-randomPercentage    = 0.7;
-randomState         = 1;
-indexShiftx         = 0;
-indexShifty         = 0;
-
-coeffFun = @(vertices) coeffFun_random(vertices(:,1),vertices(:,2),randomPercentage,randomState,indexShiftx,indexShifty);
+% randomPercentage    = 0.7;
+% randomState         = 1;
+% indexShiftx         = 0;
+% indexShifty         = 0;
+% 
+% coeffFun = @(vertices) coeffFun_random(vertices(:,1),vertices(:,2),randomPercentage,randomState,indexShiftx,indexShifty);
 
 %% Plot
 
 rhoMin = 1;
 rhoMax = 10^6;
 markerType = 'verts';
-getCoefficientMatrices(coeffFun,markerType,rhoMax,rhoMin,vert,tri,logicalTri__sd,plot_grid);
+vertTris = load("./libs/precomputed_vertTris.mat").vertTris;
+getCoefficientMatrices(coeffFun,markerType,rhoMax,rhoMin,vert,tri,logicalTri__sd,plot_grid,vertTris);
