@@ -16,7 +16,6 @@ assert(all(size(x) == size(y)),'Die Vektoren x und y haben unterschiedliche Groe
 numCoord = N*n+1;
 coordVec = linspace(0,1,numCoord)';
 h = 1/(N*n);
-rng(0);
 
 markedVertices = false(size(x)); %initialisiere mit logical false fuer Punkt
 for current_block = 1:n_blocks
