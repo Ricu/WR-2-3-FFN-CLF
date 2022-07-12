@@ -58,12 +58,12 @@ fprintf("Fuer das gegebene Gitter werden %i (%4.1f%%) Kanten uebersprungen\n",su
 
 %% Koeffizientenfunktion vorbereiten
 TOL = 100;  % Toleranz zur Auswahl der Eigenwerte
-rng(42); % Setze seed fuer random number generator
+rng(24); % Setze seed fuer random number generator
 
 % Anzahl an Trainingsamples pro Koeffizentenfunktionen 
 nSamplesConstant    = 0;
 nSamplesStrips      = 0;
-nSamplesBlocks      = 7500;
+nSamplesBlocks      = 1000;
 nSamplesRandBlocks  = 0;
 nSamplesRand        = 0;
 nCases = nSamplesConstant+nSamplesStrips+nSamplesBlocks+nSamplesRandBlocks+nSamplesRand;
@@ -169,10 +169,10 @@ end
 
 %% Zufalls - Bloecke Koeffizientenfunktion
 % Lege die Parametergrenzen fest
-widthBound      =  2: 1:10; % Breite der Bloecke mit Faktor der Schrittweite
-heightBound     =  2: 1:10; % Hoehe der Bloecke mit Faktor der Schrittweite
-varianceBound   =  0: 2:16;  % positive Varianz in Breite und Hoehe
-nBlocksBound    = 10:10:90; % Anzahl an random erstellten Bloecken
+widthBound      =  4:4:16; % Breite der Bloecke mit Faktor der Schrittweite
+heightBound     =  4:4:16; % Hoehe der Bloecke mit Faktor der Schrittweite
+varianceBound   =  0:4:16;  % positive Varianz in Breite und Hoehe
+nBlocksBound    = 10:5:20; % Anzahl an random erstellten Bloecken
 
 % Erstelle die Parameterstruktur
 param_names = ["rhoMin","rhoMax","nBlocks","height","heightVariance","width","widthVariance","indexShiftx","indexShifty"];
