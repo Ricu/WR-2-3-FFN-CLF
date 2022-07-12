@@ -1,7 +1,7 @@
 clear; clc;
 addpath('libs')
-export = 1;
-plot_grid = 0;   % Auswahl: Plotten der Triangulierung mit Kanal-Koeffizientenfunktion
+export = 1;      % Auswahl: Exportieren und Speichern der generierten Daten
+plot_grid = 0;   % Auswahl: Plotten der Triangulierung mit Koeffizientenfunktion
 
 fprintf("############ Erstelle Trainingsdaten Start ############\n")
 fprintf("Startzeit %s\n", datestr(datetime))
@@ -14,13 +14,14 @@ end
 %% Funktion rechte Seite
 f = @(vert,y) ones(size(vert));   % Rechte Seite der DGL
 
-%% Lade vertTris fuer schnellere Berechnung der coeff-funktion
-vertTris = load("./libs/precomputed_vertTris.mat").vertTris;
+%% Toleranz zur Auswahl der Eigenwerte
+TOL = 100;  
+
 %% Erstelle das Gitter
 n = 40;         % 2*n^2 Elemente pro Teilgebiet
 N = 4;          % Partition in NxN quadratische Teilgebiete
-H = 1/N;
-h = 1/(N*n);
+H = 1/N;        % Schrittweite: Teilgebiete
+h = 1/(N*n);    % Schrittweite: Elemente
 fprintf("Das Verhaeltnis H/h betraegt %f\n",H/h);
 numSD = N^2;    % Anzahl Teilgebiete
 xyLim = [0,1];  % Gebiet: Einheitsquadrat
@@ -38,52 +39,63 @@ dirichlet = or(ismember(vert(:,1),xyLim), ismember(vert(:,2),xyLim));
 % Structure fuer grid-Variablen
 grid_struct = struct('vert__sd',{vert__sd},'tri__sd',{tri__sd},'l2g__sd',{l2g__sd},'dirichlet',{dirichlet});
 
+% Lade vertTris fuer schnellere Berechnung der Koeffizientenfunktion
+% Enthaelt fuer jeden Knoten die Nummern der anliegenden Elemente
+vertTris = load("./libs/precomputed_vertTris.mat").vertTris;
+
 %% Vorbereitung benoetigte Kanten & TG
-% Pruefe ob eines der beteiligten TG einen Dirichletknoten enthaelt.
-% Falls ja ist eins der TG kein floating TG und wird daher nicht
-% beruecksichtigt
-floatingSD = false(numSD,1);
+% Pruefe fuer jede Teilgebietskante, ob eines der anliegenden TG einen 
+% Dirichletknoten enthaelt und damit kein floating TG ist.
+% Bei der Erstellung der Trainingsdaten werden nur floating Kanten beruecksichtigt
+
+floatingSD = false(numSD,1); % logischer Vektor
 for sd = 1:numSD
     floatingSD(sd) = nnz(dirichlet(l2g__sd{sd})) == 0;
 end
 
+% Erstelle Kantenliste mit anliegenden TG-Nummern
 edgesSD = [(1:numSD-N)',(N+1:numSD)';...
            setdiff(1:numSD,N:N:numSD)', setdiff(1:numSD,1:N:numSD)'];
 edgesSD = sortrows(edgesSD);
-floatingEdges = all(floatingSD(edgesSD),2);
-validEdges = find(floatingEdges);
-nValidEdges = length(validEdges);
-fprintf("Fuer das gegebene Gitter werden %i (%4.1f%%) Kanten uebersprungen\n",sum(~floatingEdges),sum(~floatingEdges)/length(floatingEdges)*100)
-% Schmeiße alle anderen Kanten raus
 
-%% Koeffizientenfunktion vorbereiten
-TOL = 100;  % Toleranz zur Auswahl der Eigenwerte
+% Extrahiere floating Teilgebietskanten
+floatingEdges = all(floatingSD(edgesSD),2); % logischer Vektor
+validEdges = find(floatingEdges);   % enthaelt Kanteninidzes
+nValidEdges = length(validEdges);   % Anzahl floating Kanten
+fprintf("In dem gegebenen Gitter sind %i (%4.1f%%) Kanten keine floating Kanten und werden uebersprungen.\n", ...
+                                            sum(~floatingEdges),sum(~floatingEdges)/length(floatingEdges)*100)
+
+%% Erstellung der Koeffizientenfunktionverteilung vorbereiten
 rng(24); % Setze seed fuer random number generator
 
-% Anzahl an Trainingsamples pro Koeffizentenfunktionen 
-nSamplesConstant    = 0;
-nSamplesStrips      = 0;
-nSamplesBlocks      = 1000;
-nSamplesRandBlocks  = 0;
-nSamplesRand        = 0;
+% Anzahl an Trainingssamples pro Koeffizentenfunktionen 
+nSamplesConstant    = 2;    % Konstante Koeffizienten auf den Teilgebieten
+nSamplesStrips      = 2;    % Streifen
+nSamplesBlocks      = 2; % Bloecke
+nSamplesRandBlocks  = 2;    % Random Bloecke
+nSamplesRand        = 2;    % Random Elemente
+
+% Anzahl Trainingssamples gesamt
 nCases = nSamplesConstant+nSamplesStrips+nSamplesBlocks+nSamplesRandBlocks+nSamplesRand;
-% Erstelle die Arrays in welchen die Informationen zwischengespeichert
-% werden
+
+% Cell-Arrays, in denen Informationen zwischengespeichert werden
 coeffFun_cell = cell(nCases,1); 
 parameter_cell = cell(nCases,4); 
-coeffFun_counter = 1;
 
+% Setze counter
+coeffFun_counter = 1;
 
 % Globale Parametergrenzen
 rhoBound = 10.^[0,6]; % enthaelt den minimalen und maximalen Koeffizienten
-indexShiftBound = 0:2:20; % Array moeglicher Verschiebungen der Elemente mit hoeherem Koeffizienten in x- oder y-Richtung
+indexShiftBound = 0:2:20; % Array moeglicher Verschiebungen der Elemente 
+                          % mit hoeherem Koeffizienten in x- oder y-Richtung
 
-%% Konstante Koeffizientenfunktion
-
+%% Erstellen der verschiedenen Koeffizientenverteilungen
+%% Konstante Koeffizientenfunktion auf den Teilgebieten
 % Erstelle die Parameterstruktur
 param_names = ["affectedSubdomains","rhoMin","rhoMax","indexShiftx","indexShifty"];
 fprintf("%s: Insgesamt %i Parameter zur Auswahl.\n","Constant",length(param_names))
-affectedSubdomains = [6,10]; % TG-Wahl fuer hoeherem Koeffizienten decken alle moeglichen Faelle ab
+affectedSubdomains = [6,10]; % TG-Wahl fuer hoeheren Koeffizienten; decken alle moeglichen Faelle ab
 % Samples hier haendisch erstellen
 parameter_const = {affectedSubdomains; affectedSubdomains};
 parameter_const = [parameter_const, num2cell([rhoBound;circshift(rhoBound,1,2);0,0;0,0])']';
@@ -108,14 +120,14 @@ end
 
 %% Streifen Koeffizientenfunktion
 % Lege die Parametergrenzen fest
-heightBound = -2:4;  % Breite der Kanaele, 0 ist dabei eine initiale Breite abhaengig von der Anzahl an Kanaelen je TG
-nStripsBound = 1:5; % Gibt die Anzahl Kanaele je TG an
+heightBound = -2:4;  % Breite der Kanaele, 0 ist initiale Breite abhaengig von der Anzahl Kanaele je TG
+nStripsBound = 1:5; % Anzahl Kanaele je TG
 
 % Erstelle die Parameterstruktur
 param_names = ["rhoMin","rhoMax","height","nStrips","indexShifty"];
 fprintf("%s: Insgesamt %i Parameter zur Auswahl.\n","Strip",length(param_names))
+% Samples hier mit Hilfsfunktion erstellen
 sample_parameters = generateSampleParameters(nSamplesStrips,param_names,rhoBound,heightBound,nStripsBound,indexShiftBound);
-% sample_parameters(6) = cell2struct(num2cell([0; 1; 2; 3; 4]),param_names,1);
 
 % Erstelle in einer Schleife die Koeffizientenfunktionen anhand der
 % gewaehlten Parameterkombinationen und speichere diese zwischen.
@@ -145,6 +157,7 @@ heightBound = 2:2:38; % Hoehe der Bloecke
 % Erstelle die Parameterstruktur
 param_names = ["rhoMin","rhoMax","height","dif","prop1","prop2","indexShiftx","indexShifty"];
 fprintf("%s: Insgesamt %i Parameter zur Auswahl.\n","Blocks",length(param_names))
+% Samples hier mit Hilfsfunktion erstellen
 sample_parameters = generateSampleParameters(nSamplesBlocks,param_names,rhoBound,heightBound,difBound,prop1Bound,prop2Bound,indexShiftBound,indexShiftBound);
 
 % Erstelle in einer Schleife die Koeffizientenfunktionen anhand der
@@ -169,14 +182,15 @@ end
 
 %% Zufalls - Bloecke Koeffizientenfunktion
 % Lege die Parametergrenzen fest
-widthBound      =  4:4:16; % Breite der Bloecke mit Faktor der Schrittweite
-heightBound     =  4:4:16; % Hoehe der Bloecke mit Faktor der Schrittweite
+widthBound      =  4:4:16;  % Breite der Bloecke mit Faktor der Schrittweite
+heightBound     =  4:4:16;  % Hoehe der Bloecke mit Faktor der Schrittweite
 varianceBound   =  0:4:16;  % positive Varianz in Breite und Hoehe
-nBlocksBound    = 10:5:20; % Anzahl an random erstellten Bloecken
+nBlocksBound    =  10:5:20; % Anzahl an random erstellten Bloecken
 
 % Erstelle die Parameterstruktur
 param_names = ["rhoMin","rhoMax","nBlocks","height","heightVariance","width","widthVariance","indexShiftx","indexShifty"];
 fprintf("%s: Insgesamt %i Parameter zur Auswahl.\n","Random Blocks",length(param_names))
+% Samples hier mit Hilfsfunktion erstellen
 sample_parameters = generateSampleParameters(nSamplesRandBlocks,param_names,rhoBound,nBlocksBound,heightBound,varianceBound,heightBound,varianceBound,indexShiftBound,indexShiftBound);
 
 % Erstelle in einer Schleife die Koeffizientenfunktionen anhand der
@@ -200,14 +214,15 @@ for sampleID = 1:length(sample_parameters)
     coeffFun_counter = coeffFun_counter + 1;
 end
 
-%% Zufalls Koeffizientenfunktion
+%% Zufalls - Elemente Koeffizientenfunktion
 % Lege die Parametergrenzen fest
-randomPercentageBound   = 0.2:0.05: 0.7;
-randomStateBound        = 1  :1   :10  ;
+randomPercentageBound   = 0.2:0.05:0.7; % Anteil Elemente mit max Koeffizienten
+randomStateBound        = 1:1:10;   % verschiedene random states
 
 % Erstelle die Parameterstruktur
 param_names = ["rhoMin","rhoMax","randomPercentage","randomState","indexShiftx","indexShifty"];
 fprintf("%s: Insgesamt %i Parameter zur Auswahl.\n","Completely Random",length(param_names))
+% Samples hier mit Hilfsfunktion erstellen
 sample_parameters = generateSampleParameters(nSamplesRand,param_names,rhoBound,randomPercentageBound,randomStateBound,indexShiftBound,indexShiftBound);
 
 % Erstelle in einer Schleife die Koeffizientenfunktionen anhand der
@@ -228,14 +243,14 @@ for sampleID = 1:length(sample_parameters)
     coeffFun_counter = coeffFun_counter + 1;
 end
 
-%% Faelle 
-% Vergewissern dass keine leeren Eintraege in dem Koeffizientenarray
-% enthalten sind welche spaeter zu Fehlern führen könnten.
+%% Erstelle Trainingsdaten
+% Ueberpruefe, dass keine leeren Eintraege in dem Koeffizientenarray
+% enthalten sind, welche spaeter zu Fehlern führen koennten.
 empty_cells_ind = cellfun('isempty',coeffFun_cell);
 coeffFun_cell = coeffFun_cell(~empty_cells_ind);
 parameter_cell = parameter_cell(~empty_cells_ind,:);
 
-% Erstelle die Arrays welche spaeter gespeichert werden.
+% Erstelle die Arrays, welche spaeter exportiert und gespeichert werden.
 output_cell = cell(nCases * nValidEdges,1);
 parameter_output_cell = cell(nCases * nValidEdges,3);
 
@@ -243,37 +258,38 @@ t_casesStart = tic;
 for case_id = 1:nCases
     fprintf("#### Starte Fall %5i/%5i: Koeffizientenfunktion %s ####\n",case_id,nCases,parameter_cell{case_id})
     t_coeffFun = tic;
-    % Definiere Koeffizient auf den Elementen (und teilgebietsweise);
-    % maximalen Koeffizienten pro Knoten (und teilgebietsweise)
+    
     rhoMin = parameter_cell{case_id,4}.rhoMin;
     rhoMax = parameter_cell{case_id,4}.rhoMax;
-    markerType = 'verts';
-    % Erstelle die Koeffizientenmatrizen welche in der Berechnung der
-    % FETI-DP Matrizen benoetigt werden.
+    markerType = 'verts'; % Koeffizientenfunktion ist knotenweise definiert
+    
+    % Erstelle die Koeffizientenmatrizen, welche in der Berechnung der
+    % FETI-DP Matrizen benoetigt werden
     [rhoTri,rhoTriSD,maxRhoVert,maxRhoVertSD] = getCoefficientMatrices(coeffFun_cell{case_id},markerType,rhoMax,rhoMin,vert,tri,logicalTri__sd,plot_grid,vertTris);
     fprintf("Benoetigte Zeit: Aufstellen der Koeffizientenmatrizen: %5fs",toc(t_coeffFun))
     rho_struct = struct('rhoTriSD',{rhoTriSD},'maxRhoVert',{maxRhoVert},'maxRhoVertSD',{maxRhoVertSD});
 
     t_matrices = tic;
-    % Erstelle die FETI-DP Matrizen, welche zur Berechnung der Inputs und
-    % der Label benoetigt werden
-    [edgesPrimalGlobal,cGamma,edgesSD,cLocalPrimal,cB,cBskal,cInner,cK,cDirichlet] = setup_matrices(rho_struct,grid_struct,f);
+    % Erstelle die FETI-DP Matrizen, welche zur Berechnung der Label benoetigt werden
+    [edgesPrimalGlobal,cGamma,~,cLocalPrimal,cB,cBskal,cInner,cK,cDirichlet] = setup_matrices(rho_struct,grid_struct,f);
     fprintf(", Sprungoperators/Steifigkeitsmatrix: %5fs\n", toc(t_matrices))
 
     fprintf("Kanten:")
     for i = 1:length(validEdges)
         edgeID = validEdges(i);
+        % Input fuer neuronales Netz: Koeffizientenverteilung elementweise
         input = generate_input(edgeID,edgesSD,rhoTriSD,vert__sd,tri__sd);
+        % Zugehoeriger label: 1 kritische Kante, 0 unktritische Kante
         label = generate_label(edgeID,edgesPrimalGlobal,cGamma,edgesSD,cLocalPrimal,cB,cBskal,cInner,cK,TOL);
+        % Koeffizientenverteilung mit zugehoerigem label als Trainingsdaten
         output_cell{(case_id-1)*nValidEdges + i,:} =  [input,label];
+        % Zugehoerige Parameter zur Nachvollziehbarkeit
         parameter_output_cell((case_id-1)*nValidEdges + i,:) = parameter_cell(case_id,1:3);
         fprintf("   %2i", edgeID)
     end
     fprintf("\nLabels:")
     fprintf("   %2i",label)
     fprintf("\n")
-    % Fuege neue Daten an den Trainingsdatensatz an
-%     output_cell{case_id} = [cell2mat(input),label];
     elapsedTime = toc(t_casesStart);
     remainingTime = (nCases-case_id)*elapsedTime/case_id;
     
@@ -296,11 +312,12 @@ if export
     fprintf("Fertig!\n")
 end
 
-
+%% Hilfsfunktion zur Generierung der sample Parameter
 function sample_parameters = generateSampleParameters(nRandSamples,param_names,rhoBound,varargin)
 % Erstelle eine Auswahl aller moeglichen Kombinationen innerhalb der in
 % varargin uebergebenen Parametergrenzen + die Kombinationen aus rhoMax und
 % rhoMin.
+
 rhoMin = min(rhoBound); rhoMax = max(rhoBound);
 
 % Erstelle alle moeglichen Kombinationen von Parametern in varargin

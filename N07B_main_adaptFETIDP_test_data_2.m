@@ -4,6 +4,8 @@ plot_grid = false;   % Auswahl: Plotten der Triangulierung mit Kanal-Koeffizient
 
 %% Daten importieren
 predicted_labels_loc = "./resources/trained_model/predicted_labels_2.csv";
+
+%% Nuetzliche Ausgaben
 fprintf("Lese predicted lables aus %s...",predicted_labels_loc)
 predicted_labels = readmatrix(predicted_labels_loc);
 fprintf("Fertig \n")
@@ -29,20 +31,20 @@ method_type = {'Dirichlet','none';
  numMethods = length(method_type);
 
 %% Initialisiere Parameter fuer PCG
-x0 = @(dim) zeros(dim,1);    % Startvektor
-tol = 10^(-8);               % Toleranz fuer die Abbruchbedingung
-
-% Residuum fuer die Abbruchbedingung
-resid_type = {'vorkonditioniert'};
+x0 = @(dim) zeros(dim,1);           % Startvektor
+tol = 10^(-8);                      % Toleranz fuer die Abbruchbedingung
+resid_type = {'vorkonditioniert'};  % Residuum fuer die Abbruchbedingung
 
 % Structure fuer PCG-Parameter
 pcg_param = struct('tol', tol, 'x0',x0, 'resid_type',resid_type);
 
+plot_iteration = false; % Auswahl: Plotten der Loesung nach den ersten Iterationen von PCG
+
 %% Funktion rechte Seite
 f = @(vert,y) ones(size(vert));   % Rechte Seite der DGL
 
-%% Lade vertTris fuer schnellere Berechnung der coeff-funktion
-vertTris = load("./libs/precomputed_vertTris.mat").vertTris;
+%% Toleranz zur Auswahl der Eigenwerte bei adaptive 
+TOL = 100; 
 
 %% Erstelle das Gitter
 n = 40;         % 2*n^2 Elemente pro Teilgebiet
@@ -65,11 +67,15 @@ dirichlet = or(ismember(vert(:,1),xyLim), ismember(vert(:,2),xyLim));
 % Structure fuer grid-Variablen
 grid_struct = struct('vert__sd',{vert__sd},'tri__sd',{tri__sd},'l2g__sd',{l2g__sd},'dirichlet',{dirichlet});
 
+% Lade vertTris fuer schnellere Berechnung der Koeffizientenfunktion
+% Enthaelt fuer jeden Knoten die Nummern der anliegenden Elemente
+vertTris = load("./libs/precomputed_vertTris.mat").vertTris;
+
 %% Koeffizientenfunktion aufstellen
 %Bilddatei einlesen 
 pic = imread('./resources/img/rho_coeff_multiple_stripes.png');
-pic_bw = pic(:,:,1)'; %benoetigen nur einen Kanal, da schwarz-weiss Bild
-num_pixel = length(pic_bw); %Anzahl Pixel je Dimension
+pic_bw = pic(:,:,1)'; % Nur ein Kanal, da schwarz-weiss Bild
+num_pixel = length(pic_bw); % Anzahl Pixel je Dimension
 
 % Definiere minimales und maximales rho
 rhoMin = 1;
@@ -79,8 +85,8 @@ rhoMax = 10^6;
 coeffFun = @(vert) coeffFun_image(vert(:,1),vert(:,2),pic_bw,num_pixel);
 markerType = 'verts';  % Die Koeffizientenverteilung ist knotenweise definiert
 
-% Definiere Koeffizientenfunktion auf den Elementen (teilgebietsweise);
-% maximalen Koeffizienten pro Knoten (und teilgebietsweise)
+% Erstelle die Koeffizientenmatrizen, welche in der Berechnung der
+% FETI-DP Matrizen benoetigt werden
 [~,rhoTriSD,maxRhoVert,maxRhoVertSD] = getCoefficientMatrices(coeffFun,markerType,rhoMax,rhoMin,vert,tri,logicalTri__sd,plot_grid,vertTris);
 rho_struct = struct('rhoTriSD',{rhoTriSD},'maxRhoVert',{maxRhoVert},'maxRhoVertSD',{maxRhoVertSD});
 
@@ -88,15 +94,8 @@ rho_struct = struct('rhoTriSD',{rhoTriSD},'maxRhoVert',{maxRhoVert},'maxRhoVertS
 plot_classified_edges(coeffFun,markerType,rhoMax,rhoMin,vert,tri,predicted_labels,true_labels,vert__sd)
 
 %% Loesen des Systems mit FETI-DP fuer versch. Verfahren
-% Referenzloesung auftsllen und vergleichen? 
-% diffs = cell(numMethods,1);
 iters = cell(numMethods,1);
 kappa_ests = cell(numMethods,1);
-
-plot_iteration = false; % Auswahl: Plotten der Loesung nach den ersten Iterationen von PCG
-
-TOL = 100;  % Toleranz zur Auswahl der Eigenwerte bei adaptive 
-
 for m = 1:numMethods
     VK = method_type{m,1};
     constraint_type = method_type{m,2};
@@ -107,7 +106,6 @@ for m = 1:numMethods
 end
 
 %% Ergebnistabelle
-%rowNames = ["Anzahl Iterationen","Konditionszahl","Abweichung von Referenzloesung"];
 rowNames = ["Anzahl Iterationen","Konditionszahl"];
 variableNames = (method_type(:,2));
 T_results = cell2table([iters';kappa_ests'],"RowNames",rowNames,"VariableNames",variableNames);

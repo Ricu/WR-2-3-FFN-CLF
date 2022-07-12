@@ -3,8 +3,11 @@ addpath('libs')
 export = 1;         % Auswahl: Testdaten abspeichern
 plot_grid = true;   % Auswahl: Plotten der Triangulierung mit Kanal-Koeffizientenfunktion
 
-%% Lade vertTris fuer schnellere Berechnung der coeff-funktion
-vertTris = load("./libs/precomputed_vertTris.mat").vertTris;
+if export
+    fprintf("Die Daten werden gespeichert\n")
+else
+    fprintf("Die Daten werden nicht gespeichert\n")
+end
 
 %% Erstelle das Gitter
 n = 40;         % 2*n^2 Elemente pro Teilgebiet
@@ -27,7 +30,9 @@ dirichlet = or(ismember(vert(:,1),xyLim), ismember(vert(:,2),xyLim));
 % Structure fuer grid-Variablen
 grid_struct = struct('vert__sd',{vert__sd},'tri__sd',{tri__sd},'l2g__sd',{l2g__sd},'dirichlet',{dirichlet});
 
-TOL = 100;  % Toleranz zur Auswahl der Eigenwerte
+% Lade vertTris fuer schnellere Berechnung der Koeffizientenfunktion
+% Enthaelt fuer jeden Knoten die Nummern der anliegenden Elemente
+vertTris = load("./libs/precomputed_vertTris.mat").vertTris;
 
 %% Koeffizientenfunktion aufstellen
 %Bilddatei einlesen 
@@ -39,29 +44,35 @@ num_pixel = length(pic_bw); % Anzahl Pixel je Dimension
 rhoMin = 1;
 rhoMax = 10^6;
 
-% Aufstellen der zu testenden Koeffizientenverteilung: 2 -  Streifen
+% Aufstellen der zu testenden Koeffizientenverteilung: 3 -  Kreise
 coeffFun = @(vert) coeffFun_image(vert(:,1),vert(:,2),pic_bw,num_pixel);
-markerType = 'verts';  % Die Koeffizientenverteilung ist elementweise definiert
+markerType = 'verts';  % Die Koeffizientenverteilung ist knotenweise definiert
 
-% Definiere Koeffizientenfunktion auf den Elementen (teilgebietsweise);
-% maximalen Koeffizienten pro Knoten (und teilgebietsweise)
+% Erstelle die Koeffizientenmatrizen, welche in der Berechnung der
+% FETI-DP Matrizen benoetigt werden
 [~,rhoTriSD,maxRhoVert,maxRhoVertSD] = getCoefficientMatrices(coeffFun,markerType,rhoMax,rhoMin,vert,tri,logicalTri__sd,plot_grid,vertTris);
 rho_struct = struct('rhoTriSD',{rhoTriSD},'maxRhoVert',{maxRhoVert},'maxRhoVertSD',{maxRhoVertSD});
 
 %% Funktion rechte Seite
 f = @(vert,y) ones(size(vert));   % Rechte Seite der DGL
 
-%% Benoetigte Matrizen aufstellen
+%% Toleranz zur Auswahl der Eigenwerte
+TOL = 100;  
+
+%% Erstelle Testdaten
+% Erstelle FETI-DP Matrizen, welche zur Berechnung der Label benoetigt werden
 [edgesPrimalGlobal,cGamma,edgesSD,cLocalPrimal,cB,cBskal,cInner,cK,cDirichlet] = setup_matrices(rho_struct,grid_struct,f);
 
-%% Inputgenerierung
 numEdges = length(edgesSD);
 input_cell = cell(numEdges,1);
 label = zeros(numEdges,1);
 for edgeID = 1:numEdges
+    % Input fuer neuronales Netz: Koeffizientenverteilung elementweise
     input_cell{edgeID} = generate_input(edgeID,edgesSD,rhoTriSD,vert__sd,tri__sd);
+    % Zugehoeriger label: 1 kritische Kante, 0 unktritische Kante
     label(edgeID) = generate_label(edgeID,edgesPrimalGlobal,cGamma,edgesSD,cLocalPrimal,cB,cBskal,cInner,cK,TOL);
 end
+% Koeffizientenverteilung mit zugehoerigem label als Testdaten
 input_mat = [cell2mat(input_cell),label];
 
 %% Daten exportieren
