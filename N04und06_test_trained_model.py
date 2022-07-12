@@ -29,8 +29,12 @@ from tensorflow.keras.callbacks import EarlyStopping
 from matplotlib import rcParams
 from sklearn.metrics import confusion_matrix
 
+random_state = 1
+tf.random.set_seed(random_state)
+np.random.seed(random_state)
+
 # Datensatz laden
-train_data1000 = pd.read_csv('C:/Users/Angelina/Documents/GitHub/WR-2-3-FFN-CLF/resources/train_data/training_dataset_ver1.csv', header = None)
+train_data1000 = pd.read_csv('C:/Users/Angelina/Documents/GitHub/WR-2-3-FFN-CLF/resources/train_data/training_dataset_ver5.csv', header = None)
 # train_data1000 = pd.read_csv('C:/Users/Valentin/Documents/10. Semester/WR2/Projekt 3 - FNN CLF/WR-2-3-FFN-CLF/resources/train_data/training_dataset_ver1.csv', header = None)
 train_data = train_data1000.loc[~np.any(train_data1000 == 1000,axis = 1)] 
 X = train_data.iloc[:,:-1].values
@@ -72,11 +76,11 @@ def build_model(learning_rate,n_hidden_layers,layer_size,activation,dropout_rate
 
 
 activation      = 'relu'
-batch_size      = 8
-epochs          = 100
+batch_size      = 64
+epochs          = 150
 learning_rate   = 0.001
-n_hidden_layers = 1
-layer_size      = 500
+n_hidden_layers = 3
+layer_size      = 200
 dropout_rate    = 0.2
 
 model = build_model(learning_rate,n_hidden_layers,layer_size,activation,dropout_rate)

@@ -4,6 +4,8 @@ plot_grid = false;   % Auswahl: Plotten der Triangulierung mit Kanal-Koeffizient
 
 %% Daten importieren
 predicted_labels_loc = "./resources/trained_model/predicted_labels_1.csv";
+
+%% Nuetzliche Ausgaben
 fprintf("Lese predicted lables aus %s...",predicted_labels_loc)
 predicted_labels = readmatrix(predicted_labels_loc);
 fprintf("Fertig \n")
@@ -29,26 +31,26 @@ method_type = {'Dirichlet','none';
  numMethods = length(method_type);
 
 %% Initialisiere Parameter fuer PCG
-x0 = @(dim) zeros(dim,1);    % Startvektor
-tol = 10^(-8);               % Toleranz fuer die Abbruchbedingung
-
-% Residuum fuer die Abbruchbedingung
-resid_type = {'vorkonditioniert'};
+x0 = @(dim) zeros(dim,1);           % Startvektor
+tol = 10^(-8);                      % Toleranz fuer die Abbruchbedingung
+resid_type = {'vorkonditioniert'};  % Residuum fuer die Abbruchbedingung
 
 % Structure fuer PCG-Parameter
 pcg_param = struct('tol', tol, 'x0',x0, 'resid_type',resid_type);
 
+plot_iteration = false; % Auswahl: Plotten der Loesung nach den ersten Iterationen von PCG
+
 %% Funktion rechte Seite
 f = @(vert,y) ones(size(vert));   % Rechte Seite der DGL
 
-%% Lade vertTris fuer schnellere Berechnung der coeff-funktion
-vertTris = load("./libs/precomputed_vertTris.mat").vertTris;
+%% Toleranz zur Auswahl der Eigenwerte bei adaptive 
+TOL = 100;  
 
 %% Erstelle das Gitter
 n = 40;         % 2*n^2 Elemente pro Teilgebiet
 N = 4;          % Partition in NxN quadratische Teilgebiete
-H = 1/N;
-h = 1/(N*n);
+H = 1/N;        % Schrittweite: Teilgebiete
+h = 1/(N*n);    % Schrittweite: Elemente
 numSD = N^2;    % Anzahl Teilgebiete
 xyLim = [0,1];  % Gebiet: Einheitsquadrat
 
@@ -65,12 +67,16 @@ dirichlet = or(ismember(vert(:,1),xyLim), ismember(vert(:,2),xyLim));
 % Structure fuer grid-Variablen
 grid_struct = struct('vert__sd',{vert__sd},'tri__sd',{tri__sd},'l2g__sd',{l2g__sd},'dirichlet',{dirichlet});
 
+% Lade vertTris fuer schnellere Berechnung der Koeffizientenfunktion
+% Enthaelt fuer jeden Knoten die Nummern der anliegenden Elemente
+vertTris = load("./libs/precomputed_vertTris.mat").vertTris;
+
 %% Koeffizientenfunktion aufstellen
 % Definiere minimales und maximales rho
 rhoMin = 1;
 rhoMax = 10^6;
 
-%Parameter fuer Hufeisen/Streifen Triangulierung
+%Parameter fuer die vorgegebene Koeffizientenverteilung
 yStripeLim = [0.1,0.9];
 position = 6;
 width = 3;
@@ -80,25 +86,17 @@ hight = 5;
 coeffFun = @(tri) coeffFun_horseshoe(tri,vert(:,1),vert(:,2),N,n,yStripeLim,position,width,hight);
 markerType = 'elements';  % Die Koeffizientenverteilung ist elementweise definiert
 
-% Definiere Koeffizient auf den Elementen (und teilgebietsweise);
-% maximalen Koeffizienten pro Knoten (und teilgebietsweise)
+% Erstelle die Koeffizientenmatrizen, welche in der Berechnung der
+% FETI-DP Matrizen benoetigt werden
 [rhoTri,rhoTriSD,maxRhoVert,maxRhoVertSD] = getCoefficientMatrices(coeffFun,markerType,rhoMax,rhoMin,vert,tri,logicalTri__sd,plot_grid);
-
 rho_struct = struct('rhoTriSD',{rhoTriSD},'maxRhoVert',{maxRhoVert},'maxRhoVertSD',{maxRhoVertSD});
 
 %% Plot der klassifizierten Kanten
 plot_classified_edges(coeffFun,markerType,rhoMax,rhoMin,vert,tri,predicted_labels,true_labels,vert__sd)
 
 %% Loesen des Systems mit FETI-DP fuer versch. Verfahren
-% Referenzloesung auftsllen und vergleichen? 
-% diffs = cell(numMethods,1);
 iters = cell(numMethods,1);
 kappa_ests = cell(numMethods,1);
-
-plot_iteration = false; % Auswahl: Plotten der Loesung nach den ersten Iterationen von PCG
-
-TOL = 100;  % Toleranz zur Auswahl der Eigenwerte bei adaptive 
-
 for m = 1:numMethods
     VK = method_type{m,1};
     constraint_type = method_type{m,2};
@@ -109,7 +107,6 @@ for m = 1:numMethods
 end
 
 %% Ergebnistabelle
-%rowNames = ["Anzahl Iterationen","Konditionszahl","Abweichung von Referenzloesung"];
 rowNames = ["Anzahl Iterationen","Konditionszahl"];
 variableNames = (method_type(:,2));
 T_results = cell2table([iters';kappa_ests'],"RowNames",rowNames,"VariableNames",variableNames);
