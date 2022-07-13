@@ -1,9 +1,23 @@
 function [edgesPrimalGlobal,cGamma,edgesSD,cLocalPrimal,cB,cBskal,cInner,cK,cDirichlet] = setup_matrices(rho_struct,grid_struct,f)
+% Input: rho_struct: Structure mit allen Koeffizientenkomponenten
+%        Komponenten: rhoTriSD, maxRhoVert, maxRhoVertSD
+% Input: grid_struct: Structure mit allen Gitterkomponenten:
+%        Komponenten: vert__sd,tri__sd,l2g__sd,dirichlet
+% Input: f: rechte Seite der DGL
+
+% Output: edgesPrimalGlobal: Cell-Array: mit primalen Knoten pro TG-Kante (global)
+% Output: cGamma: Cell-Array: Interfaceknoten pro TG
+% Output: edgesSD:  Kantenliste mit angrenzenden Teilgebietsnummern
+% Output: cLocalPrimal: Cell-Array: mit primalen Knoten pro TG-Kante (global)
+% Output: cB: Cell-Array: lokale Sprungoperatoren
+% Output: cBskal: Cell-Array: skalierte Sprungoperatoren
+% Output: cInner: Cell-Array: Innere Knoten pro TG
+% Output: cK: Cell-Array: lokale Steifigkeitsmatrizen
+% Output: cDirichlet: Cell-Array: Dirichlet Knoten pro TG
 
 %% Structures entpacken
-rhoTriSD = rho_struct.rhoTriSD;
-maxRhoVert = rho_struct.maxRhoVert;
-maxRhoVertSD = rho_struct.maxRhoVertSD;
+rhoTriSD = rho_struct.rhoTriSD; % Koeffizienten pro Element teilgebietsweise
+maxRhoVertSD = rho_struct.maxRhoVertSD; % Maximaler Koeffizient pro Knoten teilgebietsweise
 
 vert__sd = grid_struct.vert__sd;
 tri__sd  = grid_struct.tri__sd;
@@ -123,8 +137,6 @@ else
         [cK{i},~,cb{i}] = assemble(tri__sd{i}, vert__sd{i},1,f,rhoTriSD{i},store,storedMatrices{i});
     end
 end
-
-
 
 %% Assembliere globale Steifigkeitsmatrix in primalen Variablen
 K_PiPiTilde = sparse(sum(primal),sum(primal));
