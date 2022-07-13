@@ -1,4 +1,4 @@
-function [markedVertices] = coeffFun_strip(y,N,n,height,n_canals,indexShifty)
+function [markedVertices] = coeffFun_strip(y,N,n,height,n_strip,indexShifty)
 %Input: y   y-Koordinaten aller Knoten
 %Input: N   Anzahl Teilgebiete in einer Richtung
 %Input: n   Feinheit des Gitters
@@ -9,11 +9,11 @@ function [markedVertices] = coeffFun_strip(y,N,n,height,n_canals,indexShifty)
 
 SD_size = 1/N;
 h = 1/(N*n);
-propStripes = SD_size/(2*n_canals+1); %Gibt an in wie viele Teile das TG vom Kanal geteilt wird
+propStripes = SD_size/(2*n_strip+1); %Gibt an in wie viele Teile das TG vom Kanal geteilt wird
 %indx = true(1,numVert);     %Kanal unabh. von x-Koordinate
 markedVertices = false(size(y));    %initialisiere mit logical false fuer y-Koordinate
 for j = 0:N-1 %iteriere ueber die Teilgebiete in y-Richtung
-    for i = 1:n_canals
+    for i = 1:n_strip
         a = (2*i-1)*propStripes + j*SD_size - h * 0.5 * height;
         b = 2*i*propStripes + j*SD_size + h* 0.5 * height;
         markedVertices = markedVertices | (a <= y) & (y <= b); 
