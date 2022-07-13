@@ -1,12 +1,14 @@
 function [rhoTri,rhoTriSD,maxRhoVert,maxRhoVertSD] = getCoefficientMatrices(f_coeff,markerType,rhoMax,rhoMin,vert,tri,logicalTri__sd,plot,vertTris)
-% Input: xCanalLim,yCanalLim: Grenzen des Kanalgebiets in x- und y-Richtung
+% Input: f_coeff: Koeffizientenfunktion
+% Input: markerType: String, ob Koeffizientenfunktion knoten- oder elementweise
+%                    gespeichert ist: 'elements' / 'verts'
 % Input: rhoMax,rhoMin: rho im Kanal und außerhalb des Kanals
 % Input: vert,tri: Knoten- und Elementliste
 % Input: logicalTri__sd: Logischer Vektor, welche Dreiecke in welchem TG enthalten sind
 % Input: plot: Boolean, ob das Gitter mit Kanal geplottet werden soll
+% Input: vertTris: Cell-Array: enthaelt fuer jeden Knoten die anliegenden Elementen
 
 % Output: rhoTri,rhoTriSD: Koeffizient pro Element (und teilgebietsweise)
-% Output: indElementsCanal: Logischer Vektor, welche Elemente im Kanal liegen
 % Output: maxRhoVert,maxRhoVertSD: maximaler Koeffizient pro Knoten (und teilgebietsweise)
 
 if exist("vertTris","var")
@@ -15,22 +17,23 @@ if exist("vertTris","var")
 else
     loadedVertTris = 0;
 end
-numSD = length(logicalTri__sd);
-N = sqrt(numSD);
-numTri = length(tri);
-numVert = length(vert);
+
+numSD = length(logicalTri__sd); % Anzahl Teilgebiete
+N = sqrt(numSD);    % Anzahl Teilgebiete in eine Koordinatenrichtung
+numTri = length(tri);   %Anzahl Elemente
+numVert = length(vert); % Anzahl Knoten
 
  %% Definiere Koeffizientenfunktion auf den Elementen
 if strcmp('verts',markerType)
     markedVertices = find(f_coeff(vert)); % Knotenindizes der markierten Knoten
     
-    % Idee: direkt die markedElements zurueckgeben lassen: die elementliste in
-    % knoten indizes uebersetzen, reshapen. markierung prüfen -> zurueck
-    % reshapen -> mittels any die elemente markieren. In der FKT: bei nargout =
-    % 1 die markierten Knoten, bei nargout = 2 die markierten elemente
+    % Idee: direkt die markedElements zurueckgeben lassen: die Elementliste in
+    % Knotenindizes uebersetzen, reshapen. Markierung prüfen -> zurueck
+    % reshapen -> mittels any die Elemente markieren. In der FKT: bei nargout =
+    % 1 die markierten Knoten, bei nargout = 2 die markierten Elemente
     % zurueckgeben
     
-    % Erstelle Vektor welcher die Koeffizientenfunktion pro Element angibt. Ein
+    % Erstelle Vektor, welcher die Koeffizientenfunktion pro Element angibt. Ein
     % Element gilt als markiert wenn alle zugehörigen Eckknoten markiert sind.
     % Alle markierten Elemente werden auf rhoMax und der Rest auf rhoMin gesetzt.
     rhoTri = rhoMin*ones(numTri,1);
