@@ -7,7 +7,7 @@ predicted_labels_loc = "./resources/trained_model/predicted_labels_3.csv";
 fprintf("Lese predicted lables aus %s...",predicted_labels_loc)
 predicted_labels = readmatrix(predicted_labels_loc);
 fprintf("Fertig \n")
-true_labels_loc = "./resources/test_data/2022-07-05-00-13-40-test_data_3_dump.csv";
+true_labels_loc = "./resources/test_data/test_data_3_dump.csv";
 fprintf("Lese wahre labels aus %s...",true_labels_loc)
 true_labels = readmatrix(true_labels_loc);
 true_labels = true_labels(:,end);

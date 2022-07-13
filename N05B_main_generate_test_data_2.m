@@ -77,7 +77,7 @@ input_mat = [cell2mat(input_cell),label];
 
 %% Daten exportieren
 if export
-    file_name = sprintf("./resources/test_data/%s-test_data_2_dump.csv",datestr(datetime,'yyyy-mm-dd-HH-MM-SS'));
+    file_name = sprintf("./resources/test_data/test_data_2_dump.csv");
     fprintf("Speichere Testdaten als %s...",file_name)
     writematrix(input_mat,file_name);
     fprintf("Fertig!\n")
