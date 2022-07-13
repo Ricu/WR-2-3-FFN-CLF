@@ -316,7 +316,7 @@ for case_id = 1:nCases
     fprintf("Kanten:")
     for i = 1:length(validEdges)
         edgeID = validEdges(i);
-        % Input fuer neuronales Netz: Koeffizientenverteilung elementweise
+        % Input fuer neuronales Netz: Koeffizientenverteilung an Samplepunkten
         input = generate_input(edgeID,edgesSD,rhoTriSD,vert__sd,tri__sd);
         % Zugehoeriger label: 1 kritische Kante, 0 unktritische Kante
         label = generate_label(edgeID,edgesPrimalGlobal,cGamma,edgesSD,cLocalPrimal,cB,cBskal,cInner,cK,TOL);

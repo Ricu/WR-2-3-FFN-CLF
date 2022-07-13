@@ -68,7 +68,7 @@ numEdges = length(edgesSD);
 input_cell = cell(numEdges,1);
 label = zeros(numEdges,1);
 for edgeID = 1:numEdges
-    % Input fuer neuronales Netz: Koeffizientenverteilung elementweise
+    % Input fuer neuronales Netz: Koeffizientenverteilung an Samplepunkten
     input_cell{edgeID} = generate_input(edgeID,edgesSD,rhoTriSD,vert__sd,tri__sd);
     % Zugehoeriger label: 1 kritische Kante, 0 unktritische Kante
     label(edgeID) = generate_label(edgeID,edgesPrimalGlobal,cGamma,edgesSD,cLocalPrimal,cB,cBskal,cInner,cK,TOL);

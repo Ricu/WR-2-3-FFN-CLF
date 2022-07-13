@@ -1,5 +1,5 @@
 function [rhoTri,rhoTriSD,maxRhoVert,maxRhoVertSD] = getCoefficientMatrices(f_coeff,markerType,rhoMax,rhoMin,vert,tri,logicalTri__sd,plot,vertTris)
-% Input: f_coeff: Koeffizientenfunktion
+% Input: f_coeff: Koeffizientenverteilung (element- oder knotenweise)
 % Input: markerType: String, ob Koeffizientenfunktion knoten- oder elementweise
 %                    gespeichert ist: 'elements' / 'verts'
 % Input: rhoMax,rhoMin: rho im Kanal und außerhalb des Kanals
@@ -11,6 +11,7 @@ function [rhoTri,rhoTriSD,maxRhoVert,maxRhoVertSD] = getCoefficientMatrices(f_co
 % Output: rhoTri,rhoTriSD: Koeffizient pro Element (und teilgebietsweise)
 % Output: maxRhoVert,maxRhoVertSD: maximaler Koeffizient pro Knoten (und teilgebietsweise)
 
+% Ueberpruefe, ob vertTris noch berechnet werden muss
 if exist("vertTris","var")
     assert(length(vertTris) == length(vert),'Unpassendes Gitter fuer das geladene vertTris')
     loadedVertTris = 1;
@@ -24,27 +25,21 @@ numTri = length(tri);   %Anzahl Elemente
 numVert = length(vert); % Anzahl Knoten
 
  %% Definiere Koeffizientenfunktion auf den Elementen
-if strcmp('verts',markerType)
+if strcmp('verts',markerType) % Koeffizientenverteilung ist knotenweise definiert
     markedVertices = find(f_coeff(vert)); % Knotenindizes der markierten Knoten
+                                          % der Koeffizientenverteilung
     
-    % Idee: direkt die markedElements zurueckgeben lassen: die Elementliste in
-    % Knotenindizes uebersetzen, reshapen. Markierung prüfen -> zurueck
-    % reshapen -> mittels any die Elemente markieren. In der FKT: bei nargout =
-    % 1 die markierten Knoten, bei nargout = 2 die markierten Elemente
-    % zurueckgeben
-    
-    % Erstelle Vektor, welcher die Koeffizientenfunktion pro Element angibt. Ein
-    % Element gilt als markiert wenn alle zugehörigen Eckknoten markiert sind.
-    % Alle markierten Elemente werden auf rhoMax und der Rest auf rhoMin gesetzt.
-    rhoTri = rhoMin*ones(numTri,1);
+    % Erstelle Koeffizientenverteilung elementweise
+    % Ein Element gilt als markiert, wenn alle zugehörigen Eckknoten markiert sind.
     markedElements = (sum(ismember(tri,markedVertices),2)==3);
-elseif strcmp('elements',markerType)
-    rhoTri = rhoMin*ones(numTri,1);
+elseif strcmp('elements',markerType)    % Koeffizientenfunktion ist bereits elementweise definiert
     markedElements = find(f_coeff(tri));
 else
     error('Ungueltigen Markertyp angegeben.')
 end
-rhoTri(markedElements) = rhoMax;
+% Alle markierten Elemente werden auf rhoMax und der Rest auf rhoMin gesetzt
+rhoTri = rhoMin*ones(numTri,1);
+rhoTri(markedElements) = rhoMax;    
 
 %% Definiere Koeffizientenfunktion auf den Elementen eines TG
 rhoTriSD = cell(numSD,1);
@@ -53,14 +48,15 @@ for i = 1:numSD
 end
 
 %% Definiere maximalen Koeffizienten pro Knoten
-maxRhoVert = zeros(numVert,1);
-if ~loadedVertTris
+if ~loadedVertTris % vertTris muessen noch berechnet werden
     vertTris = cell(numVert,1);
 end
+
+maxRhoVert = zeros(numVert,1);
 maxRhoVertSD = cell(numVert,1);
-% [vertTris2,test] = cellfun(@(x) find(x==tri),num2cell(1:numVert),'UniformOutput',false)';
+
 for i = 1:numVert % Iteriere ueber Knoten
-    if ~loadedVertTris
+    if ~loadedVertTris % vertTris muessen noch berechnet werden
         [vertTris{i},~,~] = find(i == tri);
     end
 

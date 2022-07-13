@@ -4,8 +4,6 @@ plot_grid = false;   % Auswahl: Plotten der Triangulierung mit Kanal-Koeffizient
 
 %% Daten importieren
 predicted_labels_loc = "./resources/trained_model/predicted_labels_2.csv";
-
-%% Nuetzliche Ausgaben
 fprintf("Lese predicted lables aus %s...",predicted_labels_loc)
 predicted_labels = readmatrix(predicted_labels_loc);
 fprintf("Fertig \n")
@@ -15,6 +13,7 @@ true_labels = readmatrix(true_labels_loc);
 true_labels = true_labels(:,end);
 fprintf("Fertig \n")
 
+%% Nuetzliche Ausgaben
 fprintf("Kante    : ")
 fprintf("%2i,", 1:length(true_labels)-1); fprintf("%2i\n",length(true_labels));
 fprintf("predicted: ")
