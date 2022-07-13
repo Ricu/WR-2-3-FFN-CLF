@@ -1,23 +1,16 @@
 function label = generate_label(edgeID,edgesPrimalGlobal,cGamma,edgesSD,cLocalPrimal,cB,cBskal,cInner,cK,adaptiveTOL)
-% Input: grid_struct: Structure mit allen Gitterkomponenten:
-%        Komponenten: vert__sd,tri__sd,l2g__sd,dirichlet
-% Input: f: Function handle fuer rechte Seite der DGL
-% Input: pc_param: Structure mit allen Vorkonditionierer
-%        Komponenten: VK, constraint_type, adaptiveTOL
-%        constraint types: 'none','non-adaptive','adaptive'
-% Input: rho_struct: Structure mit allen Koeffizientenkomponenten
-%        Komponenten: rhoTriSD, maxRhoVert, maxRhoVertSD
-% Input: pcg_param: Structure mit allen PCG-Parametern
-% Input: plot_iteration: Boolean, ob Loesungen in den Iterationen von PCG geplottet werden
-
-% Output: cu: Cell-Array mit Loesungen auf den Teilgebieten
-% Output: u_FETIDP_glob: Globaler Loesungsvektor
-% Output: lambda: Loesungsvektor auf den LM
-% Output: iter: Anzahl Iterationen aus PCG
-% Output: kappa_est: Konditionszahlschaetzung aus PCG
-% Output: residual: Residuum aus PCG
-% Output: preconditioned_system: Explizit aufgestellte Matrix M^(-1)F
-
+% Input: edgeID: Kantenindex
+% Input: edgesPrimalGlobal: Cell-Array: mit primalen Knoten pro TG-Kante (global)
+% Input: cGamma: Cell-Array: Interfaceknoten pro TG
+% Input: edgesSD:  Kantenliste mit angrenzenden Teilgebietsnummern
+% Input: cLocalPrimal: Cell-Array: mit primalen Knoten pro TG-Kante (global)
+% Input: cB: Cell-Array: lokale Sprungoperatoren
+% Input: cBskal: Cell-Array: skalierte Sprungoperatoren
+% Input: cInner: Cell-Array: Innere Knoten pro TG
+% Input: cK: Cell-Array: lokale Steifigkeitsmatrizen
+% Input: adaptiveTOL: Toleranz zur Auswahl der Eigenwerte
+%
+% Output: label: 0 = unkritische, 1 = kritische Kante 
 
 %% Assemblierungmatrix R_ij
 nPrimal = length(edgesPrimalGlobal{edgeID}); % Anzahl primaler Knoten auf der Kante
@@ -55,9 +48,9 @@ for k = 1:2
     B_D{k} = zeros(n_LM,nGamma(k));
 
     % Der folgende Index listet alle lokalen Knotenindizes vom
-    % aktuellen Teilgebiet, welche zum Interface gehoeren aber kein
+    % aktuellen Teilgebiet, welche zum Interface gehoeren, aber kein
     % primaler Knoten auf der betrachteten Kante ist. Die primalen
-    % Knoten auf der Kante sind lediglich Nullspalten welche vorne
+    % Knoten auf der Kante sind lediglich Nullspalten, welche vorne
     % angefuegt werden.
     relevantGamma = setdiff(find(cGamma{sd}),cLocalPrimal{edgeID,k});
     B{k}(:,nPrimal+1:end) = cB{sd}(:,relevantGamma);
@@ -134,6 +127,7 @@ end
 
 end
 
+%% Hilfsfunktion
 function [eigenvalues, eigenvectors] = adaptiveEigenvalues(c, pi, P_D, S,sigma)
 % A = Pi*P_D^T*S*P_D*Pi (Korrektur notwendig?)
 % Fall 1: c ist NICHT im Kern von S:

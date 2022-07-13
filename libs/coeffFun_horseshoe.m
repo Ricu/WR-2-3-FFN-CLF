@@ -67,11 +67,6 @@ for j = 0:N-1   %iteriere ueber TG in x-Richtung
         indHuf = indHuf | ind1 | ind2 | ind3;
     end
 end
-% markedVertices = indSt | indHuf;
-
-% %% Plotten des Gitters mit Kanal
-% figure(2);
-% scatter(vert(markedVertices,1),vert(markedVertices,2),[],"r") % Dirichletknoten markieren
 
 end
 

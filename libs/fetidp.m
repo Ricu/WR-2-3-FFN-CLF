@@ -9,6 +9,7 @@ function [cu,u_FETIDP_glob,lambda,iter,kappa_est,residual,preconditioned_system]
 %        Komponenten: rhoTriSD, maxRhoVert, maxRhoVertSD
 % Input: pcg_param: Structure mit allen PCG-Parametern
 % Input: plot_iteration: Boolean, ob Loesungen in den Iterationen von PCG geplottet werden
+% Input: predicted_labels: Vektor mit vorhergesagten Kantenlabels
 
 % Output: cu: Cell-Array mit Loesungen auf den Teilgebieten
 % Output: u_FETIDP_glob: Globaler Loesungsvektor
@@ -41,7 +42,7 @@ else
 end
 
 numSD = length(vert__sd);       % Anzahl Teilgebiete
-numVert = length(dirichlet);    % Anzahl Knoten Global
+numVert = length(dirichlet);    % Anzahl Knoten global
 
 %% Partition der Knoten in Interfaceknoten und in primale und duale Knoten
 % Zaehle Anzahl Teilgebiete, in denen Knoten enthalten ist
@@ -236,7 +237,7 @@ if strcmp(constraint_type,'adaptive') || strcmp(constraint_type,'non-adaptive') 
     end
 
     %% Definiere Matrix U
-    if strcmp(constraint_type,'non-adaptive')
+    if strcmp(constraint_type,'non-adaptive') % Bestimme U ueber maxRho
         U = zeros(n_LM,numEdges);
         for edgeID = 1:numEdges % Iteriere ueber Kanten
             cnt = 1;
@@ -247,9 +248,11 @@ if strcmp(constraint_type,'adaptive') || strcmp(constraint_type,'non-adaptive') 
         end
     end
     if strcmp(constraint_type,'adaptive') || strcmp(constraint_type,'adaptive-improved')
+        % Bestimme U ueber adaptive Nebenbedingungen
         cU=cell(1,numEdges);
         for edgeID = 1:numEdges
             if strcmp(constraint_type,'adaptive-improved') 
+                % Stelle Eigenwertproblem nur fuer kritische Kanten auf
                 if  predicted_labels(edgeID) == 0 % unkritische Kante
                     cU{edgeID} = zeros(n_LM,0);
                     continue

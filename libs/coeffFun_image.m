@@ -1,7 +1,7 @@
 function [markedVertices] = coeffFun_image(x,y,pic_bw,num_pixel)
 %Input: x   x-Koordinaten aller Knoten
 %Input: y   y-Koordinaten aller Knoten
-%Input: pic_bw     Bildmatrix mit Pixeleintaegen
+%Input: pic_bw     Bildmatrix mit Pixeleintraegen
 %Input: num_pixel    Anzahl Pixel je Dimension
 
 %Output: markedVertices    Gibt an welchen Knoten der maximale Koeffizient zugewiesen wird

@@ -1,14 +1,18 @@
 function plot_classified_edges(f_coeff,markerType,rhoMax,rhoMin,vert,tri,predicted_labels,true_labels,vert__sd)
+% Diese Funktion dient dem Plotten der richtig klassifizierten (black),
+% der false negative(red) und der false positive(yellow) Kanten
 
 N = sqrt(length(vert__sd));
-numSD = N^2;
+numSD = N^2;    % Anzahl Teilgebiete
 
+%% Kanten_info
+% Kantenliste mit Nummern, der angrenzenden TG
 edgesSD = [(1:numSD-N)',(N+1:numSD)';...
            setdiff(1:numSD,N:N:numSD)', setdiff(1:numSD,1:N:numSD)'];
 edgesSD = sortrows(edgesSD);
-nEdges = length(edgesSD);
+nEdges = length(edgesSD);   % Anzahl Kanten
 
-% edge_info
+% Endpunkte der Kanten, zum Zeichnen der Kantenlinien
 edge_ends = cell(length(edgesSD),6);
 for edgeID = 1:nEdges
     common_vert = intersect(vert__sd{edgesSD(edgeID,1)},vert__sd{edgesSD(edgeID,2)},'rows');
@@ -20,6 +24,7 @@ for edgeID = 1:nEdges
     edge_ends{edgeID,2} = yLine;
 end
 
+% Definiere Art der Kantenklassifizierung je nach labels
 TP = predicted_labels == 1 & true_labels == 1;
 TN = predicted_labels == 0 & true_labels == 0;
 FP = predicted_labels == 1 & true_labels == 0;
@@ -36,7 +41,7 @@ else
     error('Ungueltigen Markertyp angegeben.')
 end
 
-%% Plotten des Gitters mit Kanal
+%% Plotten des Gitters mit Koeffizientenfunktion
 figure("Name","Triangulierung des Gebiets mit Koeffizientenfunktion");
 p1 = patch('vertices',vert,'faces',tri,'facecol',[1,1,1],'edgecolor',"#5a5a5a");
 hold on; axis equal tight;

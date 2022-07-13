@@ -3,6 +3,8 @@ function [K,M,b,storedMatrices] = assemble(tri,x,order,f,rhoTri,store,storedMatr
 % Input: order: Ordnung der Elementdiskretisierung
 % Input: f: rechte Seite der DGL
 % Input: rhoTri: Koeffizient pro Element
+% Input: store: Auswahl: Matrizen schon gespeichert oder nicht
+% Input: storedMatrices: schon gespeicherte Elementematrizen K, M, b
 
 % Output: K: Elementsteifigkeitsmatrix
 % Output: M: Massenmatrix
