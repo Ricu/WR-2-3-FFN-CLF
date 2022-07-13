@@ -139,7 +139,7 @@ for sampleID = 1:length(sample_parameters)
     rhoMax      = sample_parameters(sampleID).rhoMax;
     indexShifty = sample_parameters(sampleID).indexShifty;
 
-    coeffFun_cell{coeffFun_counter} = @(vertices) coeffFun_canal(vertices(:,2),N,n,height,nStrips,indexShifty);
+    coeffFun_cell{coeffFun_counter} = @(vertices) coeffFun_strip(vertices(:,2),N,n,height,nStrips,indexShifty);
     parameter_cell{coeffFun_counter,1} = "Strip";
     parameter_cell{coeffFun_counter,2} = param_names;
     parameter_cell{coeffFun_counter,3} = [rhoMin,rhoMax,height,nStrips,indexShifty];

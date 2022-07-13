@@ -1,4 +1,4 @@
-function [markedVertices] = coeffFun_canal(y,N,n,height,n_canals,indexShifty)
+function [markedVertices] = coeffFun_strip(y,N,n,height,n_canals,indexShifty)
 %Input: y   y-Koordinaten aller Knoten
 %Input: N   Anzahl Teilgebiete in einer Richtung
 %Input: n   Feinheit des Gitters
