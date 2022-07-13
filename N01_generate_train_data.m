@@ -69,14 +69,15 @@ fprintf("In dem gegebenen Gitter sind %i (%4.1f%%) Kanten keine floating Kanten 
 rng(24); % Setze seed fuer random number generator
 
 % Anzahl an Trainingssamples pro Koeffizentenfunktionen 
-nSamplesConstant    = 2;    % Konstante Koeffizienten auf den Teilgebieten
-nSamplesStrips      = 2;    % Streifen
-nSamplesBlocks      = 2; % Bloecke
-nSamplesRandBlocks  = 2;    % Random Bloecke
-nSamplesRand        = 2;    % Random Elemente
+nSamplesConstant        = 0;    % Konstante Koeffizienten auf den Teilgebieten (maximal 2)
+nSamplesStrips          = 5;    % Streifen
+nSamplesBlocks          = 5;    % Bloecke
+nSamplesRandBlocks      = 5;    % Random Bloecke
+nSamplesStripRandBlocks = 5;    % Strip - Random Bloecke
+nSamplesRand            = 5;    % Random Elemente
 
 % Anzahl Trainingssamples gesamt
-nCases = nSamplesConstant+nSamplesStrips+nSamplesBlocks+nSamplesRandBlocks+nSamplesRand;
+nCases = nSamplesConstant+nSamplesStrips+nSamplesBlocks+nSamplesRandBlocks+nSamplesStripRandBlocks+nSamplesRand;
 
 % Cell-Arrays, in denen Informationen zwischengespeichert werden
 coeffFun_cell = cell(nCases,1); 
@@ -120,8 +121,8 @@ end
 
 %% Streifen Koeffizientenfunktion
 % Lege die Parametergrenzen fest
-heightBound = -2:4;  % Breite der Kanaele, 0 ist initiale Breite abhaengig von der Anzahl Kanaele je TG
-nStripsBound = 1:5; % Anzahl Kanaele je TG
+heightBound = -2:4;  % Breite der Streifen, 0 ist initiale Breite abhaengig von der Anzahl Streifen je TG
+nStripsBound = 1:5; % Anzahl Streifen je TG
 
 % Erstelle die Parameterstruktur
 param_names = ["rhoMin","rhoMax","height","nStrips","indexShifty"];
@@ -191,7 +192,7 @@ nBlocksBound    =  10:5:20; % Anzahl an random erstellten Bloecken
 param_names = ["rhoMin","rhoMax","nBlocks","height","heightVariance","width","widthVariance","indexShiftx","indexShifty"];
 fprintf("%s: Insgesamt %i Parameter zur Auswahl.\n","Random Blocks",length(param_names))
 % Samples hier mit Hilfsfunktion erstellen
-sample_parameters = generateSampleParameters(nSamplesRandBlocks,param_names,rhoBound,nBlocksBound,heightBound,varianceBound,heightBound,varianceBound,indexShiftBound,indexShiftBound);
+sample_parameters = generateSampleParameters(nSamplesRandBlocks,param_names,rhoBound,nBlocksBound,heightBound,varianceBound,widthBound,varianceBound,indexShiftBound,indexShiftBound);
 
 % Erstelle in einer Schleife die Koeffizientenfunktionen anhand der
 % gewaehlten Parameterkombinationen und speichere diese zwischen.
@@ -214,6 +215,45 @@ for sampleID = 1:length(sample_parameters)
     coeffFun_counter = coeffFun_counter + 1;
 end
 
+%% Streifen + Zufalls - Bloecke Koeffizientenfunktion
+% Lege die Parametergrenzen fest fuer die Random-Bloecke
+widthBound      =  1:1:3; % Breite der Bloecke mit Faktor der Schrittweite
+heightBound     =  2:1:4; % Hoehe der Bloecke mit Faktor der Schrittweite
+varianceBound   =  0:1:2;  % positive Varianz in Breite und Hoehe
+nBlocksBound    = 10:10:50; % Anzahl an random erstellten Bloecken
+
+% Lege die Parametergrenzen fest fuer die Streifen
+heightBoundS = -2:2;  % Breite der Streifen, 0 ist dabei eine initiale Breite abhaengig von der Anzahl an Streifen je TG
+nStripBound = 1:4; % Gibt die Anzahl Streifen je TG an
+
+% Erstelle die Parameterstruktur
+param_names = ["rhoMin","rhoMax","nBlocks","height","heightVariance","width","widthVariance","heightBoundS","nStripBound","indexShifty"];
+fprintf("%s: Insgesamt %i Parameter zur Auswahl.\n","StripesNBlocks",length(param_names))
+% Samples hier mit Hilfsfunktion erstellen
+sample_parameters = generateSampleParameters(nSamplesStripRandBlocks,param_names,rhoBound,nBlocksBound,heightBound,varianceBound,widthBound,varianceBound,heightBoundS,nStripBound,indexShiftBound);
+
+% Erstelle in einer Schleife die Koeffizientenfunktionen anhand der
+% gewaehlten Parameterkombinationen und speichere diese zwischen.
+for sampleID = 1:length(sample_parameters)
+    nBlocks         = sample_parameters(sampleID).nBlocks;
+    height          = sample_parameters(sampleID).height;
+    heightVariance  = sample_parameters(sampleID).heightVariance;
+    width           = sample_parameters(sampleID).width;
+    widthVariance   = sample_parameters(sampleID).widthVariance;
+    heightBoundS    = sample_parameters(sampleID).heightBoundS;
+    nStripBound     = sample_parameters(sampleID).nStripBound;
+    rhoMin          = sample_parameters(sampleID).rhoMin;
+    rhoMax          = sample_parameters(sampleID).rhoMax;
+    indexShifty     = sample_parameters(sampleID).indexShifty;
+
+    coeffFun_cell{coeffFun_counter} = @(vertices) coeffFun_stripRandomBlocks(vertices(:,1),vertices(:,2),N,n,heightBoundS,nStripBound,nBlocks,width:width+widthVariance,height:height+heightVariance,indexShifty);
+    parameter_cell{coeffFun_counter,1}  = "StripesNBlocks";
+    parameter_cell{coeffFun_counter,2}  = param_names;
+    parameter_cell{coeffFun_counter,3}  = [rhoMin,rhoMax,heightBoundS,nStripBound,nBlocks,height,heightVariance,width,widthVariance,indexShifty];
+    parameter_cell{coeffFun_counter,4}  = sample_parameters(sampleID);
+    coeffFun_counter = coeffFun_counter + 1;
+end
+
 %% Zufalls - Elemente Koeffizientenfunktion
 % Lege die Parametergrenzen fest
 randomPercentageBound   = 0.2:0.05:0.7; % Anteil Elemente mit max Koeffizienten
@@ -232,7 +272,6 @@ for sampleID = 1:length(sample_parameters)
     randomState         = sample_parameters(sampleID).randomState;
     rhoMin              = sample_parameters(sampleID).rhoMin;
     rhoMax              = sample_parameters(sampleID).rhoMax;
-    indexShiftx         = sample_parameters(sampleID).indexShiftx;
     indexShifty         = sample_parameters(sampleID).indexShifty;
 
     coeffFun_cell{coeffFun_counter} = @(vertices) coeffFun_random(vertices(:,1),vertices(:,2),randomPercentage,randomState,indexShiftx,indexShifty);
