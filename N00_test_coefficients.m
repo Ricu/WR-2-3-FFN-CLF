@@ -126,7 +126,6 @@ if coeff_random == true
 end
 
 %% Plot
-
 rhoMin = 1;
 rhoMax = 10^6;
 markerType = 'verts';
