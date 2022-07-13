@@ -2,7 +2,8 @@ function [markedVertices] = coeffFun_strip(y,N,n,height,n_strip,indexShifty)
 %Input: y   y-Koordinaten aller Knoten
 %Input: N   Anzahl Teilgebiete in einer Richtung
 %Input: n   Feinheit des Gitters
-%Input: canal_width    Breite des Kanals, Wert von 0 entspricht der initialen Breite und ist abhaengig von der Anzahl an Kanaelen
+%Input: height   Hoehe der Streifen, Wert von 0 entspricht der initialen Hoehe und ist abhaengig von der Anzahl an Streifen
+%Input: n_strip    Anzahl der Streifen
 %Input: indexShifty    Verschiebt die Kaneale in y-Richtung
 
 %Output: markedVertices    Gibt an welchen Knoten der maximale Koeffizient zugewiesen wird

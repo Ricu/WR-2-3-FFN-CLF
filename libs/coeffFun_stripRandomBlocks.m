@@ -1,9 +1,10 @@
 function [markedVertices] = coeffFun_stripRandomBlocks(x,y,N,n,height,n_strip,n_blocks,widthBound,heightBound,indexShifty)
+%Input: x   x-Koordinaten aller Knoten
 %Input: y   y-Koordinaten aller Knoten
 %Input: N   Anzahl Teilgebiete in einer Richtung
 %Input: n   Feinheit des Gitters
-%Input: height  Hoehe des Kanals, Wert von 0 entspricht der initialen Breite und ist abhaengig von der Anzahl an Kanaelen  
-%Input: n_canals    Anzahl an Kanaelen je Teilgebiet
+%Input: height  Hoehe der Streifen, Wert von 0 entspricht der initialen Breite und ist abhaengig von der Anzahl an Streifen 
+%Input: n_strip    Anzahl an Streifen je Teilgebiet
 %Input: n_blocks   Anzahl an random erstellten Bloecken
 %Input: widthbound    Array mit moeglichen Breiten der Bloecke
 %Input: hightbound    Array mit moeglichen Hoehen der Bloecke
@@ -61,4 +62,3 @@ markedMatrix = reshape(markedVertices,sqrt(length(y)),sqrt(length(y)));
 markedMatrix= circshift(markedMatrix,indexShifty,1);
 markedVertices = markedMatrix(:);
 end
-
