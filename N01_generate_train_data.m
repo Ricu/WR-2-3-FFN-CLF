@@ -1,6 +1,6 @@
 clear; clc;
 addpath('libs')
-export = 1;      % Auswahl: Exportieren und Speichern der generierten Daten
+export = 0;      % Auswahl: Exportieren und Speichern der generierten Daten
 plot_grid = 0;   % Auswahl: Plotten der Triangulierung mit Koeffizientenfunktion
 
 fprintf("############ Erstelle Trainingsdaten Start ############\n")
@@ -70,11 +70,11 @@ rng(24); % Setze seed fuer random number generator
 
 % Anzahl an Trainingssamples pro Koeffizentenfunktionen 
 nSamplesConstant        = 2;    % Konstante Koeffizienten auf den Teilgebieten (maximal 2)
-nSamplesStrips          = 5;    % Streifen
-nSamplesBlocks          = 5;    % Bloecke
-nSamplesRandBlocks      = 5;    % Random Bloecke
-nSamplesStripRandBlocks = 5;    % Strip - Random Bloecke
-nSamplesRand            = 5;    % Random Elemente
+nSamplesStrips          = 2;    % Streifen
+nSamplesBlocks          = 2;    % Bloecke
+nSamplesRandBlocks      = 2;    % Random Bloecke
+nSamplesStripRandBlocks = 2;    % Strip - Random Bloecke
+nSamplesRand            = 2;    % Random Elemente
 
 % Anzahl Trainingssamples gesamt
 nCases = nSamplesConstant+nSamplesStrips+nSamplesBlocks+nSamplesRandBlocks+nSamplesStripRandBlocks+nSamplesRand;

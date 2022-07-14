@@ -5,11 +5,12 @@ clc; clear;
 plot_grid = 1;
 
 %% Waehle die gewünschte Koeffizientenfunktion
+%(setze genau eine Variable auf true)
 coeff_subdomain = false;
 coeff_strip = false;
 coeff_block = false;
-coeff_randomBlocks = false;
-coeff_stripRandomBlocks = true;
+coeff_randomBlocks = true;
+coeff_stripRandomBlocks = false;
 coeff_random = false;
 
 %% Funktion rechte Seite

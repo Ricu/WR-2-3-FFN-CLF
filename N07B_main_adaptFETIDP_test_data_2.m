@@ -3,7 +3,7 @@ addpath('libs')
 plot_grid = false;   % Auswahl: Plotten der Triangulierung mit Kanal-Koeffizientenfunktion
 
 %% Daten importieren
-predicted_labels_loc = "./resources/trained_model/predicted_labels_2.csv";
+predicted_labels_loc = "./resources/test_data/predicted_labels_2.csv";
 fprintf("Lese predicted lables aus %s...",predicted_labels_loc)
 predicted_labels = readmatrix(predicted_labels_loc);
 fprintf("Fertig \n")
